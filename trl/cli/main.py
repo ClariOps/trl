@@ -34,6 +34,7 @@ def main():
         bus = ServiceBus(seq_before=[DeploymentEngine()])
         print(bus.__dict__) 
         bus.run(ctx)
+        print("after run contet is: ",ctx.__dict__)
 
 if __name__ == "__main__":
     main()
