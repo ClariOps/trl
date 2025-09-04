@@ -1,6 +1,11 @@
 import argparse
-from trl.modules.deployment.parser import DeploymentIR, HelmIR
+
 from trl.core.context import RunContext
+
+from trl.modules.deployment.parser import DeploymentIR, HelmIR
+from trl.modules.deployment.engine import DeploymentEngine
+from trl.core.bus import ServiceBus
+
 def main():
     p = argparse.ArgumentParser("trl")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -25,6 +30,10 @@ def main():
             irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
         #print("irs dict: ", irs[0].__repr__)    
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
-        print("Artifacts:", ctx.artifacts)   
+        print("Artifacts:", ctx.artifacts) 
+        bus = ServiceBus(seq_before=[DeploymentEngine()])
+        print(bus.__dict__) 
+        bus.run(ctx)
+
 if __name__ == "__main__":
     main()
