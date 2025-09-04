@@ -42,6 +42,10 @@ def main():
         print(bus.__dict__) 
         bus.run(ctx)
         print("after run contet is: ",ctx.__dict__)
-        
+
+        if ctx.report.errors or ctx.report.warnings:
+            print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
+
+
 if __name__ == "__main__":
     main()
