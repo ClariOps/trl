@@ -25,3 +25,6 @@ class Report:
         self.warnings: List[str] = []
         self.infos: List[str] = []
 
+class RemoteModuleClient(Module, ABC):
+    """Drop-in replacement for Module in registry without changing callers."""
+    pass

@@ -8,6 +8,7 @@ from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
 from trl.modules.cloud.engine import CloudEngine
 from trl.modules.validator.engine import ValidatorEngine
+from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
 
 def main():
@@ -35,7 +36,10 @@ def main():
         #print("irs dict: ", irs[0].__repr__)    
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
         print("Artifacts:", ctx.artifacts) 
-        bus = ServiceBus(seq_before=[DeploymentEngine(), OptimizerEngine()],
+        bus = ServiceBus(seq_before=[
+                        #HTTPModuleClient("floyd", "http:/io.com"), 
+                        DeploymentEngine(), 
+                        OptimizerEngine()],
                         parallel_checks = [ValidatorEngine() ,SecurityEngine()],
                         seq_after = [CloudEngine()]
                         )
