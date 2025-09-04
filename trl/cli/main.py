@@ -7,7 +7,7 @@ from trl.modules.deployment.engine import DeploymentEngine
 from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
 from trl.modules.cloud.engine import CloudEngine
-
+from trl.modules.validator.engine import ValidatorEngine
 from trl.core.bus import ServiceBus
 
 def main():
@@ -36,12 +36,12 @@ def main():
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
         print("Artifacts:", ctx.artifacts) 
         bus = ServiceBus(seq_before=[DeploymentEngine(), OptimizerEngine()],
-                        parallel_checks = [SecurityEngine()],
+                        parallel_checks = [ValidatorEngine() ,SecurityEngine()],
                         seq_after = [CloudEngine()]
                         )
         print(bus.__dict__) 
         bus.run(ctx)
-        print("after run contet is: ",ctx.__dict__)
+        print("after run context is: ",ctx.__dict__)
 
         if ctx.report.errors or ctx.report.warnings:
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
