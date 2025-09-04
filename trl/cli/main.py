@@ -4,6 +4,10 @@ from trl.core.context import RunContext
 
 from trl.modules.deployment.parser import DeploymentIR, HelmIR
 from trl.modules.deployment.engine import DeploymentEngine
+from trl.modules.optimizer.engine import OptimizerEngine
+from trl.modules.security.engine import SecurityEngine
+from trl.modules.cloud.engine import CloudEngine
+
 from trl.core.bus import ServiceBus
 
 def main():
@@ -31,10 +35,13 @@ def main():
         #print("irs dict: ", irs[0].__repr__)    
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
         print("Artifacts:", ctx.artifacts) 
-        bus = ServiceBus(seq_before=[DeploymentEngine()])
+        bus = ServiceBus(seq_before=[DeploymentEngine(), OptimizerEngine()],
+                        parallel_checks = [SecurityEngine()],
+                        seq_after = [CloudEngine()]
+                        )
         print(bus.__dict__) 
         bus.run(ctx)
         print("after run contet is: ",ctx.__dict__)
-
+        
 if __name__ == "__main__":
     main()
