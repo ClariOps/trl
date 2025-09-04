@@ -1,5 +1,5 @@
 import argparse
-
+from trl.modules.deployment.parser import DeploymentIR, HelmIR
 def main():
     p = argparse.ArgumentParser("trl")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -14,7 +14,15 @@ def main():
     args = p.parse_args()
     print("args response is:", args)
 
-
-
+    if args.cmd == "deploy":
+        irs = []
+        if args.helm:
+            irs.append(HelmIR(args.helm))
+        else:
+            if not all([args.name, args.cpu, args.memory, args.image]):
+                raise SystemExit("Missing required flags: --name --cpu --memory --image or use --helm")
+            irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
+        print("irs dict: ", irs[0].__repr__)    
+ 
 if __name__ == "__main__":
     main()
