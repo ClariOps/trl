@@ -1,6 +1,7 @@
 import argparse
 
 from trl.core.context import RunContext
+from trl.app_pipelines.loader import load_user_irs
 
 from trl.modules.deployment.parser import DeploymentIR, HelmIR
 from trl.modules.deployment.engine import DeploymentEngine
@@ -21,6 +22,11 @@ def main():
     d.add_argument("--memory")
     d.add_argument("--image")
     d.add_argument("--helm")
+
+    r = sub.add_parser("run")
+    r.add_argument("file")
+    r.add_argument("--helm")
+
 
     args = p.parse_args()
     print("args response is:", args)
@@ -49,7 +55,11 @@ def main():
 
         if ctx.report.errors or ctx.report.warnings:
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
-
+    elif args.cmd == "run":
+        irs = load_user_irs(args.file)
+        print("dsl irs is: ", irs)
+        
+    
 
 if __name__ == "__main__":
     main()
