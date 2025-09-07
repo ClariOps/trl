@@ -72,7 +72,7 @@ def main():
                         )
         print(bus.__dict__) 
         bus.run(ctx)
-        print("after run context is: ",ctx.__dict__)
+        print("after run context is : ",ctx.__dict__)
     
 
 if __name__ == "__main__":
