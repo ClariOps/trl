@@ -14,7 +14,7 @@ class DeploymentIR(IR):
         self.ports = ports or []
         self.labels = labels or {"app": name}
     def __repr__(self):
-        return f"DeploymentIR(name={self.name}, replicas={self.replicas}, image={self.image})"
+        return f"DeploymentIR(name={self.name}, replicas={self.replicas}, cpu={self.cpu}, memory={self.memory}, image={self.image})"
 class ServiceIR(IR):
     kind = "ServiceIR"
     def __init__(self, name: str, selector: Dict[str,str], port: int, type: str = "ClusterIP"):
