@@ -57,8 +57,18 @@ def main():
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
     elif args.cmd == "run":
         irs = load_user_irs(args.file)
-        print("dsl irs is: ", irs)
-        
+        ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
+        print("Artifacts:", ctx.artifacts) 
+        bus = ServiceBus(seq_before=[
+                        #HTTPModuleClient("floyd", "http:/io.com"), 
+                        DeploymentEngine(), 
+                        OptimizerEngine()],
+                        parallel_checks = [ValidatorEngine() ,SecurityEngine()],
+                        seq_after = [CloudEngine()]
+                        )
+        print(bus.__dict__) 
+        bus.run(ctx)
+        print("after run context is: ",ctx.__dict__)
     
 
 if __name__ == "__main__":
