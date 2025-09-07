@@ -9,6 +9,7 @@ from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
 from trl.modules.cloud.engine import CloudEngine
 from trl.modules.validator.engine import ValidatorEngine
+from trl.modules.renderer.engine import RendererEngine
 from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
 
@@ -65,8 +66,9 @@ def main():
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
                         OptimizerEngine()],
-                        parallel_checks = [ValidatorEngine() ,SecurityEngine()],
-                        seq_after = [CloudEngine()]
+                        parallel_checks = [],
+                        #ValidatorEngine() ,SecurityEngine()],
+                        seq_after = [RendererEngine(),CloudEngine()]
                         )
         print(bus.__dict__) 
         bus.run(ctx)

@@ -18,3 +18,7 @@ def service(name: str, *, selector: Dict[str,str], port: int, type: str = "Clust
 def helm_chart(path: str) -> HelmIR:
     return _emit(HelmIR(chart_path=path))
 
+
+def optimize(ir):
+    ir.optimize= True
+    return ir

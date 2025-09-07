@@ -1,20 +1,21 @@
 from trl.core.base import Module
 from trl.core.context import RunContext
+from trl.modules.deployment.parser import DeploymentIR 
 
 class OptimizerEngine(Module):
     name = "optimizer-engine"
 
     def process(self, ctx: RunContext) -> None:
-        for m in ctx.manifests:
-            if m["kind"] != "Deployment":
-                continue
-            c = m["spec"]["template"]["spec"]["containers"][0]
-            req = c["resources"]["requests"]
+        print("Processing optimizition........\n")
+        for ir in ctx.irs:
+            if getattr(ir, "optimize", False):
+               if isinstance(ir, DeploymentIR):
+                    # Direct IR mutation
+                    cpu_val = int(ir.cpu.replace("mi", ""))
+                    mem_val = int(ir.memory.replace("Mi", ""))
 
-            if req["cpu"].endswith("mi") and int(req["cpu"][:-2]) < 50:
-                req["cpu"] = "50mi"
-                c["resources"]["limits"]["cpu"] = "50mi"
-
-            if req["memory"].endswith("Mi") and int(req["memory"][:-2]) < 64:
-                req["memory"] = "64Mi"
-                c["resources"]["limits"]["memory"] = "64Mi"
+                    if cpu_val < 200:
+                        ir.cpu = "100mi"
+                    if mem_val < 128:
+                        ir.memory = "64Mi"
+        
