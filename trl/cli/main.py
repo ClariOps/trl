@@ -1,4 +1,4 @@
-import argparse
+import argparse, yaml
 
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
@@ -28,6 +28,8 @@ def main():
     r.add_argument("file")
     r.add_argument("--helm")
 
+    o = sub.add_parser("optimize")
+    o.add_argument("file")
 
     args = p.parse_args()
     print("args response is:", args)
@@ -66,14 +68,39 @@ def main():
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
                         OptimizerEngine()],
-                        parallel_checks = [],
-                        #ValidatorEngine() ,SecurityEngine()],
+                        parallel_checks = [
+                        ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine(),CloudEngine()]
                         )
         print(bus.__dict__) 
         bus.run(ctx)
         print("after run context is: ",ctx.__dict__)
-    
+
+        if ctx.report.errors or ctx.report.warnings:
+            print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})    
+
+    elif args.cmd == "optimize":
+        irs = []
+        data = {}
+        with open(args.file, "r") as f:
+            data = yaml.safe_load(f)
+        
+        print(data)
+        irs = []
+        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
+        ctx = RunContext(irs=irs)
+        bus = ServiceBus(seq_before=[
+                        #HTTPModuleClient("floyd", "http:/io.com"), 
+                        OptimizerEngine()],
+                        parallel_checks = [],
+                        #[ValidatorEngine() ,SecurityEngine()],
+                        seq_after = [RendererEngine()]
+                        )
+        print(bus.__dict__) 
+        bus.run(ctx)
+        print("after run context is: ",ctx.__dict__)
+
+
 
 if __name__ == "__main__":
     main()

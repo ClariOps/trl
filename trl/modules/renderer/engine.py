@@ -8,9 +8,13 @@ class RendererEngine(Module):
     def process(self, ctx: RunContext) -> None:
         print("inside renderer....\n")
         manifests = []
-        for ir in ctx.irs:
-            m = ir.to_manifest()
-            if m:  # HelmIR returns {}
-                manifests.append(m)
         
+        for ir in ctx.irs:
+            if not ir.manifests:   
+                m = ir.to_manifest()
+                if m:  
+                    manifests.append(m)
+            else:
+                print("in pre manifest")
+                manifests = ir.manifests
         ctx.manifests = manifests

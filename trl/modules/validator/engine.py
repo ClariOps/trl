@@ -5,7 +5,8 @@ class ValidatorEngine(Module):
     name = "validator-engine"
 
     def process(self, ctx: RunContext) -> None:
-        for m in ctx.manifests:
+        print("inside validator")
+        for m in ctx.manifests:            
             if m["kind"] != "Deployment":
                 continue
             c = m["spec"]["template"]["spec"]["containers"][0]

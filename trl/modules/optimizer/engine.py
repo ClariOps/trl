@@ -8,6 +8,7 @@ class OptimizerEngine(Module):
     def process(self, ctx: RunContext) -> None:
         print("Processing optimizition........\n")
         for ir in ctx.irs:
+            print("in optimize ir: ", ir.__dict__)
             if getattr(ir, "optimize", False):
                if isinstance(ir, DeploymentIR):
                     # Direct IR mutation
@@ -18,4 +19,8 @@ class OptimizerEngine(Module):
                         ir.cpu = "100mi"
                     if mem_val < 128:
                         ir.memory = "64Mi"
+            else:
+                print("in pre manifest")
+                print(ir.__dict__)
+                   
         

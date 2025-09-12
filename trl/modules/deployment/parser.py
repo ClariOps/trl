@@ -5,7 +5,8 @@ class DeploymentIR(IR):
     kind = "DeploymentIR"
     def __init__(self, name: str, image: str, cpu: str, memory: str,
                  replicas: int = 1, ports: Optional[List[int]] = None,
-                 labels: Optional[Dict[str,str]] = None):
+                 labels: Optional[Dict[str,str]] = None,
+                 manifests: List[Dict[str, Any]] = None):
         self.name = name
         self.image = image
         self.cpu = cpu
@@ -13,6 +14,7 @@ class DeploymentIR(IR):
         self.replicas = replicas
         self.ports = ports or []
         self.labels = labels or {"app": name}    
+        self.manifests = manifests or []
     def __repr__(self):
         return f"DeploymentIR(name={self.name}, replicas={self.replicas}, cpu={self.cpu}, memory={self.memory}, image={self.image})"
     def to_manifest(self) -> Dict[str, Any]:
@@ -51,3 +53,4 @@ class HelmIR(IR):
     kind = "HelmIR"
     def __init__(self, chart_path: str):
         self.chart_path = chart_path
+

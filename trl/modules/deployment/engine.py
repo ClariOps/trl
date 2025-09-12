@@ -8,6 +8,7 @@ class DeploymentEngine(Module):
     def process(self, ctx: RunContext) -> None:
         for ir in ctx.irs:
             if isinstance(ir, DeploymentIR):
+                ir.kind = "deployment"
                 pass
             elif isinstance(ir, ServiceIR):
                 ctx.manifests.append({
