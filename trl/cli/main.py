@@ -30,9 +30,11 @@ def main():
 
     o = sub.add_parser("optimize")
     o.add_argument("file")
+    o.add_argument("--local",action="store_true", help="Deploy in local environment")
 
     args = p.parse_args()
     print("args response is:", args)
+
 
     if args.cmd == "deploy":
         irs = []
@@ -86,8 +88,9 @@ def main():
             data = yaml.safe_load(f)
         
         print(data)
+        
         irs = []
-        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
+        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", local= args.local, manifests=data))
         ctx = RunContext(irs=irs)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

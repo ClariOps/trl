@@ -19,7 +19,7 @@ class OptimizerEngine(Module):
                         ir.cpu = "100mi"
                     if mem_val < 128:
                         ir.memory = "64Mi"
-            else:
+            else:   # bypassing ir with user yaml manifest
                 print("in pre manifest")
                 print(ir.__dict__)
                    

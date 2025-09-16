@@ -6,8 +6,10 @@ class DeploymentIR(IR):
     def __init__(self, name: str, image: str, cpu: str, memory: str,
                  replicas: int = 1, ports: Optional[List[int]] = None,
                  labels: Optional[Dict[str,str]] = None,
+                 local: Optional[bool] =None,
                  manifests: List[Dict[str, Any]] = None):
         self.name = name
+        self.local = local or []
         self.image = image
         self.cpu = cpu
         self.memory = memory
