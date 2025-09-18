@@ -3,7 +3,6 @@ from trl.core.base import Module
 from trl.core.context import RunContext
 
 from pykube import Deployment, HTTPClient, KubeConfig
-import yaml
 
 class RendererEngine(Module):
     name = "renderer-engine"
