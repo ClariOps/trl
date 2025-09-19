@@ -30,8 +30,7 @@ def main():
 
     o = sub.add_parser("optimize")
     o.add_argument("file")
-    o.add_argument("--local",action="store_true", help="Deploy in local environment")
-    o.add_argument("--cloud",choices=["aks"], help="Deploy to cloud")
+    o.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     o.add_argument("--context",help="Set Context to deploy")
     args = p.parse_args()
     print("args response is:", args)
@@ -92,14 +91,14 @@ def main():
         print(data)
 
         irs = []
-        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", local= args.local, manifests=data))
+        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
         opts = {}
-        if args.local:
-            opts["deploy_target"] = "local"
-        elif args.cloud:
-            opts["deploy_target"] = args.cloud
-            opts["cloud"] = args.cloud
-            opts["context"] = args.context
+        if args.target:
+            opts["target"] = args.target
+
+        if args.target != "local" and args.context:
+            opts["context"] = args.context            
+        
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

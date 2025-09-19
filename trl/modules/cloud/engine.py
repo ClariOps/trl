@@ -8,16 +8,19 @@ logger = logging.getLogger(__name__)
 class CloudEngine(Module):
     name = "cloud-engine"
     def process(self, ctx: RunContext) -> None:
-        cloud = ctx.opts.get("cloud")
-        if not cloud:
+
+        target = ctx.opts.get("target")
+
+        if not target:        
             print("inside cloud exit1")
             return
         
+
         logger.info(f"Deploying to AKS...")
         try:
-            kube_client = self._get_aks_client(ctx)
+            kube_client = self._get_aks_client(ctx, target)
             
-            self._deploy_manifest(kube_client, ctx.manifests)
+            self._deploy_manifest(kube_client, ctx.manifests, target)
             
             logger.info("Successfully deployed all manifests to AKS")
         
@@ -28,27 +31,42 @@ class CloudEngine(Module):
 
                 
 
-    def _get_aks_client(self, ctx: RunContext):
+    def _get_aks_client(self, ctx: RunContext, target: str):
         config = KubeConfig.from_file()
-        target_context = ctx.opts.get("context")
-
-        if not target_context:
-            available_contexts = list(config.contexts.keys())
-            raise Exception(f"Context '{target_context}' not found. Available contexts: {available_contexts}")
-        config.set_current_context(target_context)
-        logger.info(f"Using context: {target_context}")
+        if target == "local":
+            if "minikube" in config.contexts:
+                config.set_current_context("minikube")
+                logger.info("Using hardcoded minikube context for local deployment")
+            else:
+                available_contexts = list(config.contexts.keys())
+                raise Exception(f"minikube context not found. Available contexts: {available_contexts}")
+        
+        # Cloud targets use explicit context (required)
+        elif target in ["aks", "gke", "eks"]:
+            target_context = ctx.opts.get("context")
+            if not target_context:
+                raise Exception(f"Context is required for {target.upper()} deployment. Use --context <context-name>")
             
+            if target_context not in config.contexts:
+                available_contexts = list(config.contexts.keys())
+                raise Exception(f"Context '{target_context}' not found. Available contexts: {available_contexts}")
+            
+            config.set_current_context(target_context)
+            logger.info(f"Using {target.upper()} context: {target_context}")
+        
+
         return HTTPClient(config)       
         
-    def _deploy_manifest(self, kube_client, manifest):
+    def _deploy_manifest(self, kube_client, manifest, target: str):
         kind = manifest.get("kind")
         name = manifest["metadata"]["name"]
+        
         if kind == "Deployment":
+            if target == "aks":
             # for time being cloud value can be set here 
                 # will replace by independent engine for cloud optimization         
             
-            #manifest["spec"]["template"]["spec"].setdefault("nodeSelector", {})["kubernetes.io/arch"] = "arm64"
-            
+                manifest["spec"]["template"]["spec"].setdefault("nodeSelector", {})["kubernetes.io/arch"] = "amd64"
             #         
             deployment = Deployment(kube_client, manifest)
             deployment.create()
