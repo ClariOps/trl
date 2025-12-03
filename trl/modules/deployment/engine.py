@@ -11,15 +11,7 @@ class DeploymentEngine(Module):
                 ir.kind = "deployment"
                 pass
             elif isinstance(ir, ServiceIR):
-                ctx.manifests.append({
-                    "apiVersion": "v1",
-                    "kind": "Service",
-                    "metadata": {"name": ir.name},
-                    "spec": {
-                        "type": ir.type,
-                        "selector": ir.selector,
-                        "ports": [{"port": ir.port, "targetPort": ir.port}],
-                    }
-                })
+                pass
+            
             elif isinstance(ir, HelmIR):
                 pass

@@ -3,7 +3,7 @@ import argparse, yaml
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
 
-from trl.modules.deployment.parser import DeploymentIR, HelmIR
+from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR
 from trl.modules.deployment.engine import DeploymentEngine
 from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
@@ -91,7 +91,9 @@ def main():
         print(data)
 
         irs = []
-        irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
+        #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
+        irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
+        
         opts = {}
         if args.target:
             opts["target"] = args.target
@@ -108,7 +110,6 @@ def main():
                         seq_after = [RendererEngine(), CloudEngine()]
                         )
         bus.run(ctx)
-
 
 
 if __name__ == "__main__":

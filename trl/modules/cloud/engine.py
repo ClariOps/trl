@@ -1,5 +1,5 @@
 
-from pykube import HTTPClient, KubeConfig, Deployment
+from pykube import HTTPClient, KubeConfig, Deployment, Service
 from trl.core.base import Module
 from trl.core.context import RunContext
 import logging
@@ -10,7 +10,6 @@ class CloudEngine(Module):
     def process(self, ctx: RunContext) -> None:
 
         target = ctx.opts.get("target")
-
         if not target:        
             print("inside cloud exit1")
             return
@@ -71,3 +70,9 @@ class CloudEngine(Module):
             deployment = Deployment(kube_client, manifest)
             deployment.create()
             logger.info(f"Deployed Deployment: {name}")
+        
+        elif kind == "Service":
+            # Add Service deployment logic
+            service = Service(kube_client, manifest)
+            service.create()
+            logger.info(f"Deployed Service: {name}")
