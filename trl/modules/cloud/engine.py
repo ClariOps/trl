@@ -1,5 +1,5 @@
 
-from pykube import HTTPClient, KubeConfig, Deployment, Service
+from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress
 from trl.core.base import Module
 from trl.core.context import RunContext
 import logging
@@ -76,3 +76,9 @@ class CloudEngine(Module):
             service = Service(kube_client, manifest)
             service.create()
             logger.info(f"Deployed Service: {name}")
+
+        elif kind =="Ingress":
+            ingress = Ingress(kube_client, manifest)
+            ingress.create()
+            logger.info(f"Deployed Ingress: {name}")
+
