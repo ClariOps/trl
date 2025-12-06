@@ -1,6 +1,6 @@
 from trl.core.base import Module
 from trl.core.context import RunContext
-from .parser import DeploymentIR, ServiceIR, HelmIR, IngressIR
+from .parser import DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR
 
 class DeploymentEngine(Module):
     name = "deployment-engine"
@@ -15,6 +15,7 @@ class DeploymentEngine(Module):
             
             elif isinstance(ir, IngressIR):
                 pass
-
+            elif isinstance(ir, ConfigMapIR):
+                pass
             elif isinstance(ir, HelmIR):
                 pass

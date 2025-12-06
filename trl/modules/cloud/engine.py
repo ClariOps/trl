@@ -1,5 +1,5 @@
 
-from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress
+from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress, ConfigMap
 from trl.core.base import Module
 from trl.core.context import RunContext
 import logging
@@ -82,3 +82,8 @@ class CloudEngine(Module):
             ingress.create()
             logger.info(f"Deployed Ingress: {name}")
 
+        elif kind =="ConfigMap":
+            configmap = ConfigMap(kube_client, manifest)
+            configmap.create()
+            logger.info(f"Deployed ConfigMap: {name}")
+           
