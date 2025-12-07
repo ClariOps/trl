@@ -1,5 +1,5 @@
 
-from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress, ConfigMap
+from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress, ConfigMap, Secret, PersistentVolumeClaim
 from trl.core.base import Module
 from trl.core.context import RunContext
 import logging
@@ -86,4 +86,14 @@ class CloudEngine(Module):
             configmap = ConfigMap(kube_client, manifest)
             configmap.create()
             logger.info(f"Deployed ConfigMap: {name}")
-           
+
+        elif kind =="Secret":
+            secret = Secret(kube_client, manifest)
+            secret.create()
+            logger.info(f"Deployed Secret: {name}")
+        
+        elif kind == "PersistentVolumeClaim":
+            pvc = PersistentVolumeClaim(kube_client, manifest)
+            pvc.create()
+            logger.info(f"Deployed persistent volume: {name}")
+            

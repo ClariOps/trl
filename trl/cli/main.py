@@ -3,7 +3,7 @@ import argparse, yaml
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
 
-from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR
+from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR
 from trl.modules.deployment.engine import DeploymentEngine
 from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
@@ -94,8 +94,10 @@ def main():
         #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
         #irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
         #irs.append(IngressIR(name="XX", rules="XX", annotations="XX", manifests=data))
-        irs.append(ConfigMapIR(name="XX",data="XX", manifests=data))
-        
+        #irs.append(ConfigMapIR(name="XX",data="XX", manifests=data))
+        #irs.append(SecretIR(name="XX",data="XX", manifests=data))
+        irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
+    
         opts = {}
         if args.target:
             opts["target"] = args.target

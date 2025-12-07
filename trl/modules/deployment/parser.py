@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional,Any
 from trl.core.base import IR
+import base64
 
 class DeploymentIR(IR):
     kind = "DeploymentIR"
@@ -141,6 +142,83 @@ class ConfigMapIR(IR):
             "data": self.data
         }
 
+class SecretIR(IR):
+    kind = "SecretIR"
+
+    def __init__(
+        self,
+        name: str,
+        data: dict,                 # plaintext key-value (DSL mode)
+        secret_type: str = "Opaque",
+        manifests: dict = None,
+        from_user_yaml: bool = False,
+    ):
+        self.name = name
+        self.data = data                    # plaintext in DSL mode
+        self.secret_type = secret_type
+        self.manifests = manifests or {}
+
+    def __repr__(self):
+        return f"SecretIR(name={self.name}, type={self.secret_type}, keys={list(self.data.keys())})"
+
+    def to_manifest(self) -> dict:
+        encoded_data = {
+            k: base64.b64encode(v.encode()).decode()
+            for k, v in self.data.items()
+        }
+
+        return {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": self.name
+            },
+            "type": self.secret_type,
+            "data": encoded_data
+        }
+    
+class PVCIR(IR):
+    kind = "PVCIR"
+
+    def __init__(
+        self,
+        name: str,
+        size: str,                         # "1Gi", "5Gi"
+        access_modes: list = None,         # ["ReadWriteOnce"]
+        storage_class: str = None,         # "standard"
+        manifests: dict = None
+    ):
+        self.name = name
+        self.size = size
+        self.access_modes = access_modes or ["ReadWriteOnce"]
+        self.storage_class = storage_class
+        self.manifests = manifests or {}
+
+    def __repr__(self):
+        return f"PVCIR(name={self.name}, size={self.size}, access={self.access_modes})"
+   
+    def to_manifest(self) -> dict:
+        manifest = {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": self.name
+            },
+            "spec": {
+                "accessModes": self.access_modes,
+                "resources": {
+                    "requests": {
+                        "storage": self.size
+                    }
+                }
+            }
+        }
+
+        if self.storage_class:
+            manifest["spec"]["storageClassName"] = self.storage_class
+
+        return manifest   
+    
 class HelmIR(IR):
     kind = "HelmIR"
     def __init__(self, chart_path: str):
