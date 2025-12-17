@@ -2,6 +2,8 @@ from trl.core.base import Module
 from trl.core.context import RunContext
 from .parser import DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR
 
+#This is exactly Layer-0 → Layer-1 transformation
+
 class DeploymentEngine(Module):
     name = "deployment-engine"
 

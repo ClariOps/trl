@@ -26,6 +26,8 @@ def main():
 
     r = sub.add_parser("run")
     r.add_argument("file")
+    r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
+
     r.add_argument("--helm")
 
     o = sub.add_parser("optimize")
@@ -35,7 +37,8 @@ def main():
     args = p.parse_args()
     print("args response is:", args)
 
-
+    #cli based
+    
     if args.cmd == "deploy":
         irs = []
         if args.helm:
@@ -61,11 +64,21 @@ def main():
 
         if ctx.report.errors or ctx.report.warnings:
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
+    
+    # DSL based
+    
     elif args.cmd == "run":
         irs = load_user_irs(args.file)
         print("dsl irs are:", irs )
 
-        ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
+        opts = {}
+        if args.target:
+            opts["target"] = args.target
+
+        if args.target != "local" and args.context:
+            opts["context"] = args.context            
+   
+        ctx = RunContext(irs=irs, opts= opts)
         print("\nArtifacts:", ctx.artifacts) 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
@@ -82,6 +95,8 @@ def main():
         if ctx.report.errors or ctx.report.warnings:
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})    
 
+    # yaml based
+    
     elif args.cmd == "optimize":
         irs = []
         data = {}
@@ -96,7 +111,8 @@ def main():
         #irs.append(IngressIR(name="XX", rules="XX", annotations="XX", manifests=data))
         #irs.append(ConfigMapIR(name="XX",data="XX", manifests=data))
         #irs.append(SecretIR(name="XX",data="XX", manifests=data))
-        irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
+        #irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
+        irs.append(PVCIR(manifest=data))
     
         opts = {}
         if args.target:

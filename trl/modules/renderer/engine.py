@@ -7,16 +7,7 @@ class RendererEngine(Module):
 
     def process(self, ctx: RunContext) -> None:
         print("inside renderer....\n")
-        manifests = []
-        for ir in ctx.irs:
-            if not ir.manifests:   
-                m = ir.to_manifest()
-                if m:  
-                    manifests.append(m)
-            else:   # bypassing optimizer
-                print("in pre manifest")
-                manifests = ir.manifests                  
-        ctx.manifests = manifests
+        ctx.manifests = [ir.to_manifest() for ir in ctx.irs]
 
 
 

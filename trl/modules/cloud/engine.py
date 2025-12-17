@@ -13,13 +13,12 @@ class CloudEngine(Module):
         if not target:        
             print("inside cloud exit1")
             return
-        
 
         logger.info(f"Deploying to AKS...")
         try:
             kube_client = self._get_aks_client(ctx, target)
-            
-            self._deploy_manifest(kube_client, ctx.manifests, target)
+            for manifest in ctx.manifests:
+                self._deploy_manifest(kube_client, manifest, target)
             
             logger.info("Successfully deployed all manifests to AKS")
         

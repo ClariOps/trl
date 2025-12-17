@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongo-backend-pvc
+  name: mongo-backend-optimize-pvc
 spec:
   accessModes:
   - ReadWriteOnce

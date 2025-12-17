@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR
+from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR, PVCIR
 
 __DSL_IRS__: List[object] = []
 
@@ -15,10 +15,24 @@ def deployment(name: str, *, cpu: str, memory: str, image: str, replicas: int = 
 def service(name: str, *, selector: Dict[str,str], port: int, type: str = "ClusterIP") -> ServiceIR:
     return _emit(ServiceIR(name=name, selector=selector, port=port, type=type))
 
+def pvc(
+    name: str,
+    *,
+    storage: str,
+    access_modes: Optional[list[str]] = None,
+    storage_class: Optional[str] = None
+) -> PVCIR:
+    return _emit(
+        PVCIR(
+            name=name,
+            storage=storage,
+            access_modes=access_modes,
+            storage_class=storage_class
+        )
+    )
+
+
 def helm_chart(path: str) -> HelmIR:
     return _emit(HelmIR(chart_path=path))
 
 
-def optimize(ir):
-    ir.optimize= True
-    return ir
