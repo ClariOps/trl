@@ -1,6 +1,6 @@
 from trl.core.base import Module
 from trl.core.context import RunContext
-from trl.modules.deployment.parser import DeploymentIR, ServiceIR, PVCIR
+from trl.core.ir import DeploymentIR, ServiceIR, PVCIR
 
 class OptimizerEngine(Module):
     name = "optimizer-engine"

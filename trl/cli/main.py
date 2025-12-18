@@ -3,7 +3,7 @@ import argparse, yaml
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
 
-from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR
+from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR)
 from trl.modules.deployment.engine import DeploymentEngine
 from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
@@ -96,7 +96,7 @@ def main():
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})    
 
     # yaml based
-    
+
     elif args.cmd == "optimize":
         irs = []
         data = {}
@@ -112,6 +112,7 @@ def main():
         #irs.append(ConfigMapIR(name="XX",data="XX", manifests=data))
         #irs.append(SecretIR(name="XX",data="XX", manifests=data))
         #irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
+        
         irs.append(PVCIR(manifest=data))
     
         opts = {}

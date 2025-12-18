@@ -1,5 +1,5 @@
 from typing import Dict, List, Optional
-from trl.modules.deployment.parser import DeploymentIR, ServiceIR, HelmIR, PVCIR
+from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, PVCIR)
 
 __DSL_IRS__: List[object] = []
 
