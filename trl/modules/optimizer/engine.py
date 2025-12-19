@@ -21,10 +21,12 @@ class OptimizerEngine(Module):
             
             elif isinstance(ir, ServiceIR):
                 print("inside serviceIR")
-                if not ir.ports:
-                    ir.ports = [{"port": 8010, "targetPort": 80}]
-                if ir.service_type not in ["ClusterIP", "NodePort", "LoadBalancer"]:
-                    ir.service_type = "ClusterIP"
+    
+                for p in ir.ports:
+                    if p["port"] == 80:
+                        p["port"] = 8020
+                        p["targetPort"] = 8020
+                        ir.name = "nginx-v2-service"
 
             elif isinstance(ir, IngressIR):
                 pass            
