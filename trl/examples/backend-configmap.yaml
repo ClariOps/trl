@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: app-v1-config
 data:
   APP_ENV: "production"
   APP_DEBUG: "false"

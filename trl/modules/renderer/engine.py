@@ -8,7 +8,7 @@ class RendererEngine(Module):
     def process(self, ctx: RunContext) -> None:
         print("inside renderer....\n")
         ctx.manifests = [ir.to_manifest() for ir in ctx.irs]
-
+        
 
 
 

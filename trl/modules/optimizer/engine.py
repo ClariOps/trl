@@ -1,6 +1,6 @@
 from trl.core.base import Module
 from trl.core.context import RunContext
-from trl.core.ir import DeploymentIR, ServiceIR, PVCIR
+from trl.core.ir import DeploymentIR, ServiceIR, PVCIR, SecretIR, ConfigMapIR, IngressIR
 
 class OptimizerEngine(Module):
     name = "optimizer-engine"
@@ -25,7 +25,14 @@ class OptimizerEngine(Module):
                     ir.ports = [{"port": 8010, "targetPort": 80}]
                 if ir.service_type not in ["ClusterIP", "NodePort", "LoadBalancer"]:
                     ir.service_type = "ClusterIP"
-            
+
+            elif isinstance(ir, IngressIR):
+                pass            
+            elif isinstance(ir, ConfigMapIR):
+                pass
+            elif isinstance(ir, SecretIR):
+                pass
+
             elif isinstance(ir, PVCIR):
                 # Default access mode
                 if not ir.access_modes:

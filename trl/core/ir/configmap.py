@@ -6,17 +6,25 @@ class ConfigMapIR(IR):
 
     def __init__(
         self,
-        name: str,
-        data: dict,
-        manifests: dict = None,
+        *,
+        name: str = None,
+        data: dict = None,
+        manifest: dict = None,
     ):
-        self.name = name
-        self.data = data                  # key-value pairs
-        self.manifests = manifests or {}
+        if manifest:
+            self._from_manifest(manifest)
+        else:        
+            self.name = name
+            self.data = data                  # key-value pairs
+    
         
     def __repr__(self):
         return f"ConfigMapIR(name={self.name}, keys={list(self.data.keys())})"
 
+    def _from_manifest(self, m: dict):
+        self.name = m["metadata"]["name"]
+        self.data = m.get("data")
+       
     def to_manifest(self) -> dict:
         return {
             "apiVersion": "v1",
