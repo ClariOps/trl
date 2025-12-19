@@ -8,15 +8,12 @@ class OptimizerEngine(Module):
     def process(self, ctx: RunContext) -> None:
         print("Processing optimizition........\n")
         for ir in ctx.irs:
-            print("in optimize ir: ", ir.__dict__)
+   
             if isinstance(ir, DeploymentIR):
-                # Direct IR mutation
-                cpu_val = int(ir.cpu.replace("mi", ""))
-                mem_val = int(ir.memory.replace("Mi", ""))
 
-                if cpu_val < 200:
-                    ir.cpu = "100mi"
-                if mem_val < 128:
+                if ir.cpu is None:
+                    ir.cpu = "100m"
+                if ir.memory is None:
                     ir.memory = "64Mi"
             
             elif isinstance(ir, ServiceIR):
@@ -41,3 +38,4 @@ class OptimizerEngine(Module):
                     ir.access_modes = ["ReadWriteOnce"]
                 # Default storage size
                 ir.storage = "1Gi"
+            print("in optimize ir: ", ir.__dict__)

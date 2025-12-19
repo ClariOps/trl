@@ -113,8 +113,8 @@ def main():
         #irs.append(SecretIR(name="XX",data="XX", manifests=data))
         #irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
         
-        #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
-        irs.append(ServiceIR(manifest=data))
+        irs.append(DeploymentIR(manifest=data))
+        #irs.append(ServiceIR(manifest=data))
         
         #irs.append(IngressIR(manifest=data))
         #irs.append(ConfigMapIR(manifest=data))
