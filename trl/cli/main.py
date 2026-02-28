@@ -1,4 +1,4 @@
-import argparse, yaml
+import argparse, yaml, logging
 
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
@@ -12,6 +12,9 @@ from trl.modules.validator.engine import ValidatorEngine
 from trl.modules.renderer.engine import RendererEngine
 from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
+from trl.core.reporting.renderer import render_report
+from trl.core.logconfig.config import setup_logging
+
 
 def main():
     p = argparse.ArgumentParser("trl")
@@ -34,11 +37,15 @@ def main():
     o.add_argument("file")
     o.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     o.add_argument("--context",help="Set Context to deploy")
+    o.add_argument("--verbose", help="Detailed Reporting")
     args = p.parse_args()
     print("args response is:", args)
 
     #cli based
-    
+    setup_logging(verbose=args.verbose)
+    logger = logging.getLogger(__name__)
+
+
     if args.cmd == "deploy":
         irs = []
         if args.helm:
@@ -47,10 +54,9 @@ def main():
             if not all([args.name, args.cpu, args.memory, args.image]):
                 raise SystemExit("Missing required flags: --name --cpu --memory --image or use --helm")
             irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
-        #print("irs dict: ", irs[0].__repr__)    
-        print("error: optimizer not set in args(e.g --optimize)")
+    
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
-        print("Artifacts:", ctx.artifacts) 
+        logger.info("Enter main module:", ctx.artifacts) 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
@@ -62,9 +68,7 @@ def main():
         bus.run(ctx)
         print("after run context is: ",ctx.__dict__)
 
-        if ctx.report.errors or ctx.report.warnings:
-            print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})
-    
+        render_report(ctx.report)    
     # DSL based
     
     elif args.cmd == "run":
@@ -103,8 +107,7 @@ def main():
         with open(args.file, "r") as f:
             data = yaml.safe_load(f)
         
-        print(data)
-
+        logger.info("Enter main module, Yaml data")
         irs = []
         #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
         #irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
@@ -138,6 +141,7 @@ def main():
                         )
         bus.run(ctx)
 
+        render_report(ctx.report, args.verbose)
 
 if __name__ == "__main__":
     main()

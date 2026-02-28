@@ -23,7 +23,7 @@ class Report:
     def __init__(self):
         self.errors: List[str] = []
         self.warnings: List[str] = []
-        self.infos: List[str] = []
+        self.optimizations: List[str] = []
 
 class RemoteModuleClient(Module, ABC):
     """Drop-in replacement for Module in registry without changing callers."""
