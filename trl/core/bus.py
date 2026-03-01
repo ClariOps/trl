@@ -10,7 +10,6 @@ class ServiceBus:
         self.seq_after = seq_after
 
     def run(self, ctx: RunContext) -> RunContext:
-        print("inside bus1")
         for m in self.seq_before:
             m.process(ctx)
 

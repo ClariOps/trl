@@ -39,7 +39,7 @@ def main():
     o.add_argument("--context",help="Set Context to deploy")
     o.add_argument("--verbose", help="Detailed Reporting")
     args = p.parse_args()
-    print("args response is:", args)
+    #print("args response is:", args)
 
     #cli based
     setup_logging(verbose=args.verbose)
@@ -56,7 +56,7 @@ def main():
             irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
     
         ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
-        logger.info("Enter main module:", ctx.artifacts) 
+        logger.info(f"Enter main module: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
@@ -64,16 +64,16 @@ def main():
                         parallel_checks = [ValidatorEngine() ,SecurityEngine()],
                         seq_after = [CloudEngine()]
                         )
-        print(bus.__dict__) 
+        logger.info("Bus Dict: {bus.__dict__}") 
         bus.run(ctx)
-        print("after run context is: ",ctx.__dict__)
+        logger.info(f"after run context is: {ctx.__dict__}")
 
         render_report(ctx.report)    
     # DSL based
     
     elif args.cmd == "run":
         irs = load_user_irs(args.file)
-        print("dsl irs are:", irs )
+        logger.info(f"dsl irs are:{irs}")
 
         opts = {}
         if args.target:
@@ -83,7 +83,7 @@ def main():
             opts["context"] = args.context            
    
         ctx = RunContext(irs=irs, opts= opts)
-        print("\nArtifacts:", ctx.artifacts) 
+        logger.info(f"Artifacts: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
@@ -92,9 +92,9 @@ def main():
                         ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine(),CloudEngine()]
                         )
-        print(bus.__dict__) 
+        logger.info(f"Bus DIct: {bus.__dict__}") 
         bus.run(ctx)
-        print("after run context is: ",ctx.__dict__)
+        logger.info(f"After run context is: {ctx.__dict__}")
 
         if ctx.report.errors or ctx.report.warnings:
             print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})    
@@ -107,7 +107,7 @@ def main():
         with open(args.file, "r") as f:
             data = yaml.safe_load(f)
         
-        logger.info("Enter main module, Yaml data")
+        logger.info(f"yaml data: {data}")
         irs = []
         #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
         #irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
@@ -131,6 +131,7 @@ def main():
         if args.target != "local" and args.context:
             opts["context"] = args.context            
         
+        logger.info(f"check arg target: {args.target}")
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

@@ -11,7 +11,7 @@ class CloudEngine(Module):
 
         target = ctx.opts.get("target")
         if not target:        
-            print("inside cloud exit1")
+            logger.warning("No deployment target, exit 1")
             return
 
         logger.info(f"Deploying to AKS...")

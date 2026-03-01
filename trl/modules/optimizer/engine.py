@@ -1,12 +1,14 @@
 from trl.core.base import Module
 from trl.core.context import RunContext
 from trl.core.ir import DeploymentIR, ServiceIR, PVCIR, SecretIR, ConfigMapIR, IngressIR
+import logging
+logger = logging.getLogger(__name__)
 
 class OptimizerEngine(Module):
     name = "optimizer-engine"
 
     def process(self, ctx: RunContext) -> None:
-        print("Processing optimizition........\n")
+        logger.info("Processing optimizition........\n")
         for ir in ctx.irs:
    
             if isinstance(ir, DeploymentIR):
@@ -41,4 +43,4 @@ class OptimizerEngine(Module):
                     ir.access_modes = ["ReadWriteOnce"]
                 # Default storage size
                 ir.storage = "1Gi"
-            print("in optimize ir: ", ir.__dict__)
+            logger.debug(f"Optimize IR Data: {ir.__dict__}")
