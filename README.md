@@ -21,4 +21,4 @@ Deploy applications directly via command line arguments:
 
 ---
 
-**Powered by [MicroFoxr Intellisense]
+**Powered by [MicroFoxr Intellisense]**
