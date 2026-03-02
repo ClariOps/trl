@@ -1,9 +1,9 @@
 # reporting/renderer.py
 
 def render_report(report, verbose=True):
-    _render_summary(report)
     if verbose:
         _render_details(report)
+    _render_summary(report)
 
 def _render_summary(report):
     total_errors = len(report.errors)

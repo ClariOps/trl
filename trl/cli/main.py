@@ -27,10 +27,13 @@ def main():
     d.add_argument("--image")
     d.add_argument("--helm")
 
+    d.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
+    d.add_argument("--verbose", help="Detailed Reporting")
+
     r = sub.add_parser("run")
     r.add_argument("file")
     r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
-
+    r.add_argument("--verbose", help="Detailed Reporting")
     r.add_argument("--helm")
 
     o = sub.add_parser("optimize")
@@ -48,27 +51,34 @@ def main():
 
     if args.cmd == "deploy":
         irs = []
-        if args.helm:
-            irs.append(HelmIR(args.helm))
-        else:
-            if not all([args.name, args.cpu, args.memory, args.image]):
-                raise SystemExit("Missing required flags: --name --cpu --memory --image or use --helm")
-            irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
-    
-        ctx = RunContext(irs=irs, opts= {"helm": args.helm, "out_dir":"dist"})
+        # if args.helm:
+        #     irs.append(HelmIR(args.helm))
+        # else:
+        if not all([args.name, args.cpu, args.memory, args.image]):
+            raise SystemExit("Missing required flags: --name --cpu --memory --image or use --helm")
+        irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
+        
+        opts = {}
+        if args.target:
+            opts["target"] = args.target
+
+        if args.target != "local" and args.context:
+            opts["context"] = args.context    
+        
+        ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Enter main module: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         DeploymentEngine(), 
                         OptimizerEngine()],
                         parallel_checks = [ValidatorEngine() ,SecurityEngine()],
-                        seq_after = [CloudEngine()]
+                        seq_after = [RendererEngine(),CloudEngine()]
                         )
         logger.info("Bus Dict: {bus.__dict__}") 
         bus.run(ctx)
         logger.info(f"after run context is: {ctx.__dict__}")
 
-        render_report(ctx.report)    
+        render_report(ctx.report, args.verbose)    
     # DSL based
     
     elif args.cmd == "run":
@@ -89,16 +99,15 @@ def main():
                         DeploymentEngine(), 
                         OptimizerEngine()],
                         parallel_checks = [
-                        ValidatorEngine() ,SecurityEngine()],
+                        ValidatorEngine() ,SecurityEngine()
+                        ],
                         seq_after = [RendererEngine(),CloudEngine()]
                         )
         logger.info(f"Bus DIct: {bus.__dict__}") 
         bus.run(ctx)
         logger.info(f"After run context is: {ctx.__dict__}")
 
-        if ctx.report.errors or ctx.report.warnings:
-            print("Report:", {"errors": ctx.report.errors, "warnings": ctx.report.warnings})    
-
+        render_report(ctx.report, args.verbose)
     # yaml based
 
     elif args.cmd == "optimize":
