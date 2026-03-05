@@ -13,14 +13,21 @@ class OptimizerEngine(Module):
    
             if isinstance(ir, DeploymentIR):
 
-                if ir.cpu is None:
 
-                    ir.cpu = "100m"
-                    ctx.report.optimizations.append(f"{ir.name}: cpu defaulted to {ir.cpu}" )
-                if ir.memory is None:
-                    ir.memory = "64Mi"
-                    ctx.report.optimizations.append(f"{ir.name}: memory defaulted to {ir.memory}" )
+                req = ir.resources["requests"]
 
+                if not req.get("cpu"):
+                    req["cpu"] = "100m"
+                    ir.resources["limits"]["cpu"] = "100m"
+
+                    ctx.report.optimizations.append(f"[default-resource] {ir.name}: cpu defaulted to 100m")
+                if not req.get("memory"):
+                    req["memory"] = "64Mi"
+                    ir.resources["limits"]["memory"] = "64Mi"
+
+                    ctx.report.optimizations.append(f"[default-resource] {ir.name}: memory defaulted to 100m")
+                        
+                
             elif isinstance(ir, ServiceIR):
                 print("inside serviceIR")
     
