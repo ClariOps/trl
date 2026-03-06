@@ -48,11 +48,11 @@ class DeploymentIR(IR):
 
         if cpu:
             self.resources["requests"]["cpu"] = cpu
-            self.resources["limits"]["cpu"] = cpu
+    #        self.resources["limits"]["cpu"] = cpu
 
         if memory:
             self.resources["requests"]["memory"] = memory
-            self.resources["limits"]["memory"] = memory
+     #       self.resources["limits"]["memory"] = memory
 
     def _from_manifest(self, m: Dict[str, Any]) -> None:
         metadata = m.get("metadata", {})

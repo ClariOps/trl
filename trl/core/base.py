@@ -18,7 +18,23 @@ class Module(ABC):
 
     async def process_async(self, ctx: "RunContext") -> None:
         return self.process(ctx)
-    
+
+class OptimizationRule:
+    name = "rule"
+    category = "generic"
+    capability = None
+
+    def match(self, ir):
+        if self.capability and ir.capability != self.capability:
+            return False
+        return True
+
+    def condition(self, ir):
+        return False
+
+    def action(self, ir, ctx):
+        pass    
+
 class Report:
     def __init__(self):
         self.errors: List[str] = []
