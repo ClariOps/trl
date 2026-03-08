@@ -11,7 +11,7 @@ class DeploymentIR(IR):
             image: str = None, 
             cpu: str = None, 
             memory: str = None,
-            replicas: int = 1, 
+            replicas: int = None, 
             ports: Optional[List[int]] = None,
             labels: Optional[Dict[str,str]] = None,
             manifest: List[Dict[str, Any]] = None):
@@ -69,7 +69,7 @@ class DeploymentIR(IR):
         self.labels = template.get("metadata", {}).get(
             "labels", metadata.get("labels", {})
         )
-        self.replicas = spec.get("replicas", 1)
+        self.replicas = spec.get("replicas")
         self.image = container.get("image")
 
         self.ports = [

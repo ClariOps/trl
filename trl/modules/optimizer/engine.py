@@ -5,6 +5,12 @@ from trl.modules.optimizer.rules.generic.cpuMinRule import CpuMinimumRule
 from trl.modules.optimizer.rules.generic.cpuDefRule import CpuDefaultRule
 from trl.modules.optimizer.rules.generic.memMinRule import MemoryMinimumRule
 from trl.modules.optimizer.rules.generic.memDefRule import MemoryDefaultRule
+from trl.modules.optimizer.rules.generic.limCpuDefRule import CpuLimitRule
+from trl.modules.optimizer.rules.generic.limMemDefRule import MemoryLimitRule
+from trl.modules.optimizer.rules.generic.replicaDefRule import ReplicaDefRule
+from trl.modules.optimizer.rules.generic.replicaSugRule import ReplicaSuggestionRule
+from trl.modules.optimizer.rules.generic.cpuRatioRule import CpuLimitRatioRule
+
 
 
 import logging
@@ -17,7 +23,12 @@ class OptimizerEngine(Module):
             CpuMinimumRule(),
             CpuDefaultRule(),
             MemoryMinimumRule(),
-            MemoryDefaultRule()
+            MemoryDefaultRule(),
+            CpuLimitRule(),
+            MemoryLimitRule(),
+            ReplicaDefRule(),
+            ReplicaSuggestionRule(),
+            CpuLimitRatioRule()
         ]
 
     def process(self, ctx: RunContext) -> None:
