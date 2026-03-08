@@ -145,7 +145,7 @@ def main():
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         OptimizerEngine()],
-                        parallel_checks = [],
+                        parallel_checks = [ValidatorEngine()],
                         #[ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine(), CloudEngine()]
                         )

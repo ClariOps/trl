@@ -35,6 +35,17 @@ class OptimizationRule:
     def action(self, ir, ctx):
         pass    
 
+class ValidationRule:
+
+    name = "base-validation"
+
+    def match(self, ir):
+        return True
+
+    def validate(self, ir, ctx):
+        pass
+
+
 class Report:
     def __init__(self):
         self.errors: List[str] = []
