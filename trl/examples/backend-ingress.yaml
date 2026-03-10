@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nginx-v3-ingress
+  name: nginx-v1-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
@@ -13,6 +13,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nginx-service
+                name: nginx-v1-service
                 port:
-                  number: 8090
+                  number: 4000

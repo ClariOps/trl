@@ -1,4 +1,4 @@
-import argparse, yaml, logging
+import argparse, yaml, logging, glob, os
 
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
@@ -99,7 +99,7 @@ def main():
                         DeploymentEngine(), 
                         OptimizerEngine()],
                         parallel_checks = [
-                        ValidatorEngine() ,SecurityEngine()
+                        ValidatorEngine() 
                         ],
                         seq_after = [RendererEngine(),CloudEngine()]
                         )
@@ -112,12 +112,45 @@ def main():
 
     elif args.cmd == "optimize":
         irs = []
-        data = {}
-        with open(args.file, "r") as f:
-            data = yaml.safe_load(f)
-        
+        user_path = args.file 
+
+        # 2. Check if the user gave a directory or a specific file
+        if os.path.isdir(user_path):
+        # If it's a folder, look for all .yaml and .yml files inside
+            search_pattern = os.path.join(user_path, "*.y*ml")
+        else:
+        # If it's a specific file, just use that
+            search_pattern = user_path
+
+        IR_MAPPING = {
+            "Deployment": DeploymentIR,
+            "Service": ServiceIR,
+            "Ingress": IngressIR,
+            "ConfigMap": ConfigMapIR,
+            "Secret": SecretIR,
+            "PersistentVolumeClaim": PVCIR,
+        }
+
+        for filepath in glob.glob(search_pattern):
+            with open(filepath, "r") as f:
+            # 3. Use safe_load_all to handle multi-document YAML files
+                documents = yaml.safe_load_all(f)
+            
+                for data in documents:
+                    if not data or "kind" not in data:
+                        continue
+                
+                # 4. Dispatch to the correct IR class based on 'kind'
+                    kind = data.get("kind")
+                    ir_class = IR_MAPPING.get(kind)
+                
+                    if ir_class:
+                        irs.append(ir_class(manifest=data))
+                    else:
+                        print(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
+    
         logger.info(f"yaml data: {data}")
-        irs = []
+        
         #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
         #irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
         #irs.append(IngressIR(name="XX", rules="XX", annotations="XX", manifests=data))
@@ -125,7 +158,7 @@ def main():
         #irs.append(SecretIR(name="XX",data="XX", manifests=data))
         #irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
         
-        irs.append(DeploymentIR(manifest=data))
+        #irs.append(DeploymentIR(manifest=data))
         #irs.append(ServiceIR(manifest=data))
         
         #irs.append(IngressIR(manifest=data))

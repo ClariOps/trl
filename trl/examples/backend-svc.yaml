@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: nginx-v1-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
-    app: nginx
+    app: backend
+  
   ports:
-    - port: 8090
-      targetPort: 8090
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30030
