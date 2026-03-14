@@ -25,6 +25,6 @@ class MemoryLimitRule(OptimizationRule):
 
         ir.resources["limits"]["memory"] = self.DEFAULT_MEMORY_LIMIT
 
-        ctx.report.optimizations.append(
-            f"[{self.name}] Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
+        ctx.report.add_optimization(
+            f"[{self.name}] {ir.name}: Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
         )

@@ -51,6 +51,22 @@ class Report:
         self.errors: List[str] = []
         self.warnings: List[str] = []
         self.optimizations: List[str] = []
+        self.suggestions: List[str] = []
+    
+    def add_error(self, msg):
+        self.errors.append(msg)
+
+    def add_warning(self, msg):
+        self.warnings.append(msg)
+
+    def add_optimization(self, msg):
+        self.optimizations.append(msg)
+    
+    def add_suggestion(self, msg):
+        self.suggestions.append(msg)
+
+    def has_errors(self):
+        return len(self.errors) > 0
 
 class RemoteModuleClient(Module, ABC):
     """Drop-in replacement for Module in registry without changing callers."""

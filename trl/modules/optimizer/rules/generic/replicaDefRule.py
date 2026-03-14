@@ -21,6 +21,6 @@ class ReplicaDefRule(OptimizationRule):
 
         ir.replicas = self.DEFAULT_REPLICAS
 
-        ctx.report.optimizations.append(
-            f"[{self.name}] Replica count injected {old}  → {self.DEFAULT_REPLICAS}"
+        ctx.report.add_optimization(
+            f"[{self.name}] {ir.name}: Replica count injected {old}  → {self.DEFAULT_REPLICAS}"
         )

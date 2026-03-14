@@ -18,7 +18,7 @@ def _render_summary(report):
     print(f"Warnings      : {total_warnings}")
     print(f"Errors        : {total_errors}")
 
-    if total_errors > 0:
+    if report.has_errors():
         print("\nStatus: FAILED")
     else:
         print("\nStatus: SUCCESS")
@@ -30,6 +30,7 @@ def _render_details(report):
         "Optimizations": report.optimizations,
         "Warnings": report.warnings,
         "Errors": report.errors,
+        "Suggestions": report.suggestions,
     }
 
     active = {k: v for k, v in sections.items() if v}

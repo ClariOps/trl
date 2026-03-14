@@ -29,19 +29,30 @@ def main():
 
     d.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     d.add_argument("--verbose", help="Detailed Reporting")
+    d.add_argument("--dry-run")
 
     r = sub.add_parser("run")
     r.add_argument("file")
     r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     r.add_argument("--verbose", help="Detailed Reporting")
     r.add_argument("--helm")
+    r.add_argument("--dry-run")
 
     o = sub.add_parser("optimize")
     o.add_argument("file")
     o.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     o.add_argument("--context",help="Set Context to deploy")
     o.add_argument("--verbose", help="Detailed Reporting")
+    o.add_argument("--dry-run")  
+
+
+    e = sub.add_parser("explain")
+    e.add_argument("file")
+    e.add_argument("--verbose", help="Detailed Reporting")
+
     args = p.parse_args()
+
+
     #print("args response is:", args)
 
     #cli based
@@ -65,6 +76,9 @@ def main():
         if args.target != "local" and args.context:
             opts["context"] = args.context    
         
+        if args.dry_run:
+            opts["dry_run"] = args.dry_run
+
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Enter main module: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
@@ -91,7 +105,10 @@ def main():
 
         if args.target != "local" and args.context:
             opts["context"] = args.context            
-   
+        
+        if args.dry_run:
+            opts["dry_run"] = args.dry_run
+        
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Artifacts: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
@@ -109,6 +126,65 @@ def main():
 
         render_report(ctx.report, args.verbose)
     # yaml based
+    
+    elif args.cmd == "explain":
+        irs = []
+        user_path = args.file 
+
+        # 2. Check if the user gave a directory or a specific file
+        if os.path.isdir(user_path):
+        # If it's a folder, look for all .yaml and .yml files inside
+            search_pattern = os.path.join(user_path, "*.y*ml")
+        else:
+        # If it's a specific file, just use that
+            search_pattern = user_path
+
+        IR_MAPPING = {
+            "Deployment": DeploymentIR,
+            "Service": ServiceIR,
+            "Ingress": IngressIR,
+            "ConfigMap": ConfigMapIR,
+            "Secret": SecretIR,
+            "PersistentVolumeClaim": PVCIR,
+        }
+
+        for filepath in glob.glob(search_pattern):
+            with open(filepath, "r") as f:
+            # 3. Use safe_load_all to handle multi-document YAML files
+                documents = yaml.safe_load_all(f)
+            
+                for data in documents:
+                    if not data or "kind" not in data:
+                        continue
+                
+                # 4. Dispatch to the correct IR class based on 'kind'
+                    kind = data.get("kind")
+                    ir_class = IR_MAPPING.get(kind)
+                
+                    if ir_class:
+                        irs.append(ir_class(manifest=data))
+                    else:
+                        logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
+    
+        logger.info(f"yaml data: {data}")
+        
+       
+        opts = {}
+
+        ctx = RunContext(irs=irs, opts=opts)
+        bus = ServiceBus(seq_before=[
+                        OptimizerEngine()],
+                        parallel_checks = [ValidatorEngine()],
+                        #[ValidatorEngine() ,SecurityEngine()],
+                        seq_after = [RendererEngine()]
+                        )
+              
+        bus.run(ctx)
+
+
+
+        render_report(ctx.report, args.verbose)
+
 
     elif args.cmd == "optimize":
         irs = []
@@ -150,30 +226,21 @@ def main():
                         print(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
     
         logger.info(f"yaml data: {data}")
-        
-        #irs.append(DeploymentIR(name="XX", image="XX", cpu="XX", memory="XX", manifests=data))
-        #irs.append(ServiceIR(name="XX", selector="XX", ports="XX", service_type="XX", manifests=data))
-        #irs.append(IngressIR(name="XX", rules="XX", annotations="XX", manifests=data))
-        #irs.append(ConfigMapIR(name="XX",data="XX", manifests=data))
-        #irs.append(SecretIR(name="XX",data="XX", manifests=data))
-        #irs.append(PVCIR(name="XX", size="XX", access_modes="XX", storage_class="XX", manifests=data))
-        
-        #irs.append(DeploymentIR(manifest=data))
-        #irs.append(ServiceIR(manifest=data))
-        
-        #irs.append(IngressIR(manifest=data))
-        #irs.append(ConfigMapIR(manifest=data))
-        #irs.append(SecretIR(manifest=data)) 
-        #irs.append(PVCIR(manifest=data))
-    
+
         opts = {}
         if args.target:
             opts["target"] = args.target
 
         if args.target != "local" and args.context:
-            opts["context"] = args.context            
-        
+            opts["context"] = args.context  
+
+
         logger.info(f"check arg target: {args.target}")
+
+        if args.dry_run:
+            opts["dry_run"]= args.dry_run
+            
+
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

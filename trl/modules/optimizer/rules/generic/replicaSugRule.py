@@ -25,6 +25,6 @@ class ReplicaSuggestionRule(OptimizationRule):
 
     def action(self, ir, ctx):
 
-        ctx.report.optimizations.append(
-            f"[{self.name}] Replica scaling suggested (1 → 2)"
+        ctx.report.add_optimization(
+            f"[{self.name}] {ir.name}: Replica scaling suggested (1 → 2)"
         )

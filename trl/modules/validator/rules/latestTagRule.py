@@ -13,6 +13,9 @@ class LatestTagRule(ValidationRule):
 
         if ir.image.endswith(":latest"):
 
-            ctx.report.warnings.append(
+            ctx.report.add_warning(
                 f"[{self.name}] {ir.name} uses 'latest' tag"
+            )
+            ctx.report.add_suggestion(
+                f"[{self.name}] {ir.name}: Use Tag  versioning system v1.0, v1.1 .."   
             )

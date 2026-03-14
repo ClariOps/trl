@@ -25,6 +25,6 @@ class CpuLimitRule(OptimizationRule):
 
         ir.resources["limits"]["cpu"] = self.DEFAULT_CPU_LIMIT
 
-        ctx.report.optimizations.append(
-            f"[{self.name}] CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
+        ctx.report.add_optimization(
+            f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
         )

@@ -9,8 +9,13 @@ class CloudEngine(Module):
     name = "cloud-engine"
     def process(self, ctx: RunContext) -> None:
 
+        if ctx.opts.get("dry_run"):
+            logger.info("Dry-run enabled, skipping deployment")
+            return
+
         target = ctx.opts.get("target")
-        if not target:        
+        if not target:
+            ctx.report.add_warning("No deployment target, exit 1")        
             logger.warning("No deployment target, exit 1")
             return
 
@@ -25,7 +30,7 @@ class CloudEngine(Module):
         except Exception as e:
             error_msg = f"Failed to deploy to AKS: {e}"
             logger.error(error_msg)
-            ctx.report.errors.append(error_msg)
+            ctx.report.add_error(error_msg)
 
                 
 
