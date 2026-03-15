@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 from trl.modules.optimizer.utils.resources import cpu_to_millicores
 
 class ReplicaDefRule(OptimizationRule):
@@ -22,5 +22,11 @@ class ReplicaDefRule(OptimizationRule):
         ir.replicas = self.DEFAULT_REPLICAS
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: Replica count injected {old}  → {self.DEFAULT_REPLICAS}"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Replica count injected {old} → {self.DEFAULT_REPLICAS}"
+                        )           
         )
+       #     f"[{self.name}] {ir.name}: Replica count injected {old}  → {self.DEFAULT_REPLICAS}"
+       
+        

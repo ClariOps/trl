@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 
 
 class MemoryLimitRule(OptimizationRule):
@@ -26,5 +26,10 @@ class MemoryLimitRule(OptimizationRule):
         ir.resources["limits"]["memory"] = self.DEFAULT_MEMORY_LIMIT
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
-        )
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
+                        )            
+        )    
+        #    f"[{self.name}] {ir.name}: Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
+        

@@ -1,6 +1,6 @@
 from trl.core.base import OptimizationRule
 from trl.modules.optimizer.utils.resources import cpu_to_millicores
-
+from trl.core.base import ReportEvent
 class CpuMinimumRule(OptimizationRule):
 
     name = "cpu-minimum"
@@ -28,7 +28,11 @@ class CpuMinimumRule(OptimizationRule):
         ir.resources["requests"]["cpu"] = f"{self.MIN_CPU}m"
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: CPU increased {old} → {self.MIN_CPU}m"
-        )
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"CPU increased {old} → {self.MIN_CPU}"
+                        ))
+          #  f"[{self.name}] {ir.name}: CPU increased {old} → {self.MIN_CPU}m"
+        
 
         

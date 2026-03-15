@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 from trl.modules.optimizer.utils.resources import cpu_to_millicores
 
 
@@ -37,5 +37,11 @@ class CpuLimitRatioRule(OptimizationRule):
         ir.resources["limits"]["cpu"] = f"{new_limit}m"
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: CPU limit adjusted {old} → {new_limit}m"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"CPU limit adjusted {old} → {new_limit}m"
+                        )            
         )
+
+        #    f"[{self.name}] {ir.name}: CPU limit adjusted {old} → {new_limit}m"
+         

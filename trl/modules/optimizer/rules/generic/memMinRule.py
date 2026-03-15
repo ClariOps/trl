@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 from trl.modules.optimizer.utils.resources import memory_to_mi
 
 class MemoryMinimumRule(OptimizationRule):
@@ -28,5 +28,11 @@ class MemoryMinimumRule(OptimizationRule):
         ir.resources["requests"]["memory"] = f"{self.MIN_MEMORY}Mi"
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: Memory increased {old} → {self.MIN_MEMORY}Mi"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Memory increased {old} → {self.MIN_MEMORY}Mi"
+                        )           
         )
+        
+        #    f"[{self.name}] {ir.name}: Memory increased {old} → {self.MIN_MEMORY}Mi"
+        #)

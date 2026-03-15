@@ -1,5 +1,5 @@
 
-from trl.core.base import ValidationRule
+from trl.core.base import ValidationRule, ReportEvent
 
 
 class LatestTagRule(ValidationRule):
@@ -14,8 +14,14 @@ class LatestTagRule(ValidationRule):
         if ir.image.endswith(":latest"):
 
             ctx.report.add_warning(
-                f"[{self.name}] {ir.name} uses 'latest' tag"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Uses Image tag as 'latest' "
+                        )    
             )
             ctx.report.add_suggestion(
-                f"[{self.name}] {ir.name}: Use Tag  versioning system v1.0, v1.1 .."   
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Change tag  ('latest' → v1)"
+                        )                    
             )

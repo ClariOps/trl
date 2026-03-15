@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 
 class CpuDefaultRule(OptimizationRule):
 
@@ -21,5 +21,9 @@ class CpuDefaultRule(OptimizationRule):
         ir.resources["requests"]["cpu"] = self.DEFAULT_CPU
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: CPU default injected → {self.DEFAULT_CPU}"
-        )
+           ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"CPU default injected → {self.DEFAULT_CPU}"
+                        ))
+
+#        f"[{self.name}] {ir.name}: CPU default injected → {self.DEFAULT_CPU}"

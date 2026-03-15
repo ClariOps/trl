@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 from trl.modules.optimizer.utils.resources import cpu_to_millicores
 
 
@@ -26,5 +26,10 @@ class ReplicaSuggestionRule(OptimizationRule):
     def action(self, ir, ctx):
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: Replica scaling suggested (1 → 2)"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Replica scaling suggested (1 → 2)"
+                        )           
         )
+        #    f"[{self.name}] {ir.name}: Replica scaling suggested (1 → 2)"
+        

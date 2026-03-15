@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 
 class MemoryDefaultRule(OptimizationRule):
 
@@ -21,5 +21,10 @@ class MemoryDefaultRule(OptimizationRule):
         ir.resources["requests"]["memory"] = self.DEFAULT_MEMORY
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: Memory default injected → {self.DEFAULT_MEMORY}"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"Memory default injected → {self.DEFAULT_MEMORY}"
+                        )        
         )
+        #    f"[{self.name}] {ir.name}: Memory default injected → {self.DEFAULT_MEMORY}"
+        

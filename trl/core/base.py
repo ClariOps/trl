@@ -45,6 +45,13 @@ class ValidationRule:
     def validate(self, ir, ctx):
         pass
 
+class ReportEvent:
+    def __init__(self, rule, resource, message):
+        self.rule = rule
+        self.resource = resource
+        self.message = message
+    def __str__(self):
+        return f"[{self.rule}] {self.resource}: {self.message}"
 
 class Report:
     def __init__(self):
@@ -53,17 +60,17 @@ class Report:
         self.optimizations: List[str] = []
         self.suggestions: List[str] = []
     
-    def add_error(self, msg):
-        self.errors.append(msg)
+    def add_error(self, event):
+        self.errors.append(event)
 
-    def add_warning(self, msg):
-        self.warnings.append(msg)
+    def add_warning(self, event):
+        self.warnings.append(event)
 
-    def add_optimization(self, msg):
-        self.optimizations.append(msg)
+    def add_optimization(self, event):
+        self.optimizations.append(event)
     
-    def add_suggestion(self, msg):
-        self.suggestions.append(msg)
+    def add_suggestion(self, event):
+        self.suggestions.append(event)
 
     def has_errors(self):
         return len(self.errors) > 0

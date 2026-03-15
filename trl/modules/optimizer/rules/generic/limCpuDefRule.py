@@ -1,4 +1,4 @@
-from trl.core.base import OptimizationRule
+from trl.core.base import OptimizationRule, ReportEvent
 
 
 class CpuLimitRule(OptimizationRule):
@@ -26,5 +26,10 @@ class CpuLimitRule(OptimizationRule):
         ir.resources["limits"]["cpu"] = self.DEFAULT_CPU_LIMIT
 
         ctx.report.add_optimization(
-            f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
+            ReportEvent(rule= self.name,
+                        resource=ir.name,
+                        message= f"CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
+                        )          
         )
+            #f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
+        

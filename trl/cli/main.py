@@ -230,7 +230,8 @@ def main():
                         irs.append(ir_class(manifest=data))
                     else:
                         print(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
-    
+
+        
         logger.info(f"yaml data: {data}")
 
         opts = {}
