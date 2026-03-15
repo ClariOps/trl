@@ -32,9 +32,9 @@ class OptimizerEngine(Module):
         ]
 
     def process(self, ctx: RunContext) -> None:
-        logger.info("Processing optimizition........\n")
+        logger.info("Initializing optimizer ........")
+        logger.info(f"{len(ctx.irs)} resources loaded")
 
-        
         for ir in ctx.irs:
             for rule in self.rules:
                 if not rule.match(ir):
@@ -43,20 +43,8 @@ class OptimizerEngine(Module):
                     continue
                 rule.action(ir, ctx)
                 logger.debug(f"Optimizer Current Rules are: {rule}")
-                
-            
-#           req = ir.resources["requests"]
 
-            # if not req.get("cpu"):
-            #     req["cpu"] = "100m"
-            #     ir.resources["limits"]["cpu"] = "100m"
-
-            #     ctx.report.optimizations.append(f"[default-resource] {ir.name}: cpu defaulted to 100m")
-            # if not req.get("memory"):
-            #     req["memory"] = "64Mi"
-            #     ir.resources["limits"]["memory"] = "64Mi"
-
-            #     ctx.report.optimizations.append(f"[default-resource] {ir.name}: memory defaulted to 100m")
-                        
- 
             logger.debug(f"Optimize IR Data: {ir.__dict__}")
+                        
+        logger.info("Optimizer completed") 
+            

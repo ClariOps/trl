@@ -165,9 +165,15 @@ def main():
                         irs.append(ir_class(manifest=data))
                     else:
                         logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
-    
-        logger.info(f"yaml data: {data}")
-        
+
+        if args.verbose:
+            logger.setLevel("DEBUG")
+        else:
+            logger.setLevel("INFO")
+
+        logger.info("Analyzing kubernetes resources ...") 
+        logger.debug(f"yaml data: {data}")
+
        
         opts = {}
 
@@ -183,7 +189,7 @@ def main():
 
 
 
-        render_report(ctx.report, args.verbose)
+        render_report(ctx.report, True)
 
 
     elif args.cmd == "optimize":
