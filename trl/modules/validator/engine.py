@@ -17,8 +17,7 @@ class ValidatorEngine(Module):
         logger.info(f"Initializing Validator ...")
         for ir in ctx.irs:
             for rule in self.rules:
-                if rule.match(ir):
-                    rule.validate(ir, ctx)        
+                rule.execute(ir, ctx)
             # if m["kind"] != "Deployment":
             #     continue
             # c = m["spec"]["template"]["spec"]["containers"][0]

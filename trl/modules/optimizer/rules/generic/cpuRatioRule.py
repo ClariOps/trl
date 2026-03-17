@@ -36,12 +36,12 @@ class CpuLimitRatioRule(OptimizationRule):
 
         ir.resources["limits"]["cpu"] = f"{new_limit}m"
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"CPU limit adjusted {old} → {new_limit}m"
-                        )            
-        )
+        ctx.report.optimization(
+            rule= self.name,
+            resource=ir.name,
+            message= f"CPU limit adjusted {old} → {new_limit}m"
+        )            
+        
 
         #    f"[{self.name}] {ir.name}: CPU limit adjusted {old} → {new_limit}m"
          

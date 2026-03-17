@@ -25,11 +25,10 @@ class CpuLimitRule(OptimizationRule):
 
         ir.resources["limits"]["cpu"] = self.DEFAULT_CPU_LIMIT
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
-                        )          
+        ctx.report.optimization(
+            rule= self.name,
+            resource=ir.name,
+            message= f"CPU limit injected → {self.DEFAULT_CPU_LIMIT}"                           
         )
             #f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
         

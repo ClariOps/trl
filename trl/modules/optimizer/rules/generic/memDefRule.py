@@ -20,11 +20,11 @@ class MemoryDefaultRule(OptimizationRule):
 
         ir.resources["requests"]["memory"] = self.DEFAULT_MEMORY
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"Memory default injected → {self.DEFAULT_MEMORY}"
-                        )        
+        ctx.report.optimization(
+            rule= self.name,
+            resource=ir.name,
+            message= f"Memory default injected → {self.DEFAULT_MEMORY}"
+                               
         )
         #    f"[{self.name}] {ir.name}: Memory default injected → {self.DEFAULT_MEMORY}"
         

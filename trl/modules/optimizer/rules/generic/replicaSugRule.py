@@ -25,11 +25,10 @@ class ReplicaSuggestionRule(OptimizationRule):
 
     def action(self, ir, ctx):
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"Replica scaling suggested (1 → 2)"
-                        )           
+        ctx.report.optimization(
+            rule= self.name,
+            esource=ir.name,
+            message= f"Replica scaling suggested (1 → 2)"                            
         )
         #    f"[{self.name}] {ir.name}: Replica scaling suggested (1 → 2)"
         

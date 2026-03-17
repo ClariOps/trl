@@ -27,11 +27,11 @@ class CpuMinimumRule(OptimizationRule):
 
         ir.resources["requests"]["cpu"] = f"{self.MIN_CPU}m"
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"CPU increased {old} → {self.MIN_CPU}"
-                        ))
+        ctx.report.optimization(
+                rule= self.name,
+                resource=ir.name,
+                message= f"CPU increased {old} → {self.MIN_CPU}",
+        )
           #  f"[{self.name}] {ir.name}: CPU increased {old} → {self.MIN_CPU}m"
         
 

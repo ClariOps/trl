@@ -27,11 +27,11 @@ class MemoryMinimumRule(OptimizationRule):
 
         ir.resources["requests"]["memory"] = f"{self.MIN_MEMORY}Mi"
 
-        ctx.report.add_optimization(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"Memory increased {old} → {self.MIN_MEMORY}Mi"
-                        )           
+        ctx.report.optimization(
+            rule= self.name,
+            resource=ir.name,
+            message= f"Memory increased {old} → {self.MIN_MEMORY}Mi"
+                                   
         )
         
         #    f"[{self.name}] {ir.name}: Memory increased {old} → {self.MIN_MEMORY}Mi"

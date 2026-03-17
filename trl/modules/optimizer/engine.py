@@ -37,12 +37,9 @@ class OptimizerEngine(Module):
 
         for ir in ctx.irs:
             for rule in self.rules:
-                if not rule.match(ir):
-                    continue
-                if not rule.condition(ir):
-                    continue
-                rule.action(ir, ctx)
-                logger.debug(f"Optimizer Current Rules are: {rule}")
+                rule.execute(ir, ctx)
+               
+                logger.debug(f"Rules matched : {rule.name}")
 
             logger.debug(f"Optimize IR Data: {ir.__dict__}")
                         

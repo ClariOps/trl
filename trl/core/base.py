@@ -33,7 +33,18 @@ class OptimizationRule:
         return False
 
     def action(self, ir, ctx):
-        pass    
+        pass
+
+    def execute(self, ir, ctx):
+
+        if not self.match(ir):
+            return False
+
+        if not self.condition(ir):
+            return False
+
+        self.action(ir, ctx)
+        return True    
 
 class ValidationRule:
 
@@ -45,36 +56,65 @@ class ValidationRule:
     def validate(self, ir, ctx):
         pass
 
+    def execute(self, ir, ctx):
+
+        if not self.match(ir):
+            return False
+
+        self.validate(ir, ctx)
+        return True  
 class ReportEvent:
-    def __init__(self, rule, resource, message):
+    def __init__(self, rule, resource, message, level):
         self.rule = rule
         self.resource = resource
         self.message = message
+        self.level = level
     def __str__(self):
         return f"[{self.rule}] {self.resource}: {self.message}"
 
 class Report:
     def __init__(self):
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
-        self.optimizations: List[str] = []
-        self.suggestions: List[str] = []
+        self.events = []
     
-    def add_error(self, event):
-        self.errors.append(event)
+    def _add(self, level, rule, resource, message):
+        event = ReportEvent(
+            level=level,
+            rule=rule,
+            resource=resource,
+            message=message
+        )
+        self.events.append(event)
 
-    def add_warning(self, event):
-        self.warnings.append(event)
+    def optimization(self, rule, resource, message):
+        self._add("optimization", rule, resource, message)
 
-    def add_optimization(self, event):
-        self.optimizations.append(event)
+    def warning(self, rule, resource, message):
+        self._add("warning", rule, resource, message)
+
+    def error(self, rule, resource, message):
+        self._add("error", rule, resource, message)
+
+    def suggestion(self, rule, resource, message):
+        self._add("suggestion", rule, resource, message)
+
+    @property
+    def errors(self):
+        return [e for e in self.events if e.level == "error"]
     
-    def add_suggestion(self, event):
-        self.suggestions.append(event)
+    @property
+    def warnings(self):
+        return [e for e in self.events if e.level == "warning"]
 
+    @property
+    def optimizations(self):
+        return [e for e in self.events if e.level == "optimization"]
+
+    @property
+    def suggestions(self):
+        return [e for e in self.events if e.level == "suggestion"]
+    
     def has_errors(self):
-        return len(self.errors) > 0
-
+        return any(e.level == "error" for e in self.events)
 class RemoteModuleClient(Module, ABC):
     """Drop-in replacement for Module in registry without changing callers."""
     pass

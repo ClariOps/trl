@@ -13,15 +13,14 @@ class LatestTagRule(ValidationRule):
 
         if ir.image.endswith(":latest"):
 
-            ctx.report.add_warning(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"Uses Image tag as 'latest' "
-                        )    
+            ctx.report.warning(
+                rule= self.name,
+                resource=ir.name,
+                message= f"Uses Image tag as 'latest' "
             )
-            ctx.report.add_suggestion(
-            ReportEvent(rule= self.name,
-                        resource=ir.name,
-                        message= f"Change tag  ('latest' → v1)"
-                        )                    
-            )
+            ctx.report.suggestion(
+                rule= self.name,
+                resource=ir.name,
+                message= f"Change tag  ('latest' → v1)"
+            )                    
+            
