@@ -16,7 +16,7 @@ Run the optimization engine for your application:
 
 #### Command Line Interface (CLI)
 Deploy applications directly via command line arguments:
-> `trl deploy --name="nginx-app" --cpu="120m" --memory="64Mi" --image="nginx:latest" --target=local --verbose=True`
+> `trl deploy --name="nginx-app" --cpu="120m" --memory="64Mi" --image="nginx:latest" --target=local --verbose=True --dry-run=True`
 
 
 ---
