@@ -30,6 +30,8 @@ def main():
     d.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     d.add_argument("--verbose", help="Detailed Reporting")
     d.add_argument("--dry-run")
+    d.add_argument("--skip-rules")  
+    d.add_argument("--allow-rules")  
 
     r = sub.add_parser("run")
     r.add_argument("file")
@@ -37,6 +39,9 @@ def main():
     r.add_argument("--verbose", help="Detailed Reporting")
     r.add_argument("--helm")
     r.add_argument("--dry-run")
+    r.add_argument("--skip-rules")  
+    r.add_argument("--allow-rules")  
+
 
     o = sub.add_parser("optimize")
     o.add_argument("file")
@@ -44,6 +49,8 @@ def main():
     o.add_argument("--context",help="Set Context to deploy")
     o.add_argument("--verbose", help="Detailed Reporting")
     o.add_argument("--dry-run")  
+    o.add_argument("--skip-rules")  
+    o.add_argument("--allow-rules")  
 
 
     e = sub.add_parser("explain")
@@ -79,6 +86,16 @@ def main():
         if args.dry_run:
             opts["dry_run"] = args.dry_run
 
+        if args.skip_rules:
+            opts["skip_rules"]= args.skip_rules
+            logger.info(f"Skip: rule is {opts} ")
+
+    
+        if args.allow_rules:
+            opts["allow_rules"]= args.allow_rules
+            logger.info(f"Allowed Only: rule is {opts} ")
+
+       
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Enter main module: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
@@ -108,7 +125,17 @@ def main():
         
         if args.dry_run:
             opts["dry_run"] = args.dry_run
-        
+
+        if args.skip_rules:
+            opts["skip_rules"]= args.skip_rules
+            logger.info(f"Skip: rule is {opts} ")
+
+    
+        if args.allow_rules:
+            opts["allow_rules"]= args.allow_rules
+            logger.info(f"Allowed Only: rule is {opts} ")
+
+       
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Artifacts: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
@@ -246,8 +273,17 @@ def main():
 
         if args.dry_run:
             opts["dry_run"]= args.dry_run
-            
+        if args.skip_rules:
+            opts["skip_rules"]= args.skip_rules
+            logger.info(f"Skip: rule is {opts} ")
 
+    
+        if args.allow_rules:
+            opts["allow_rules"]= args.allow_rules
+            logger.info(f"Allowed Only: rule is {opts} ")
+
+
+   
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

@@ -3,6 +3,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
+import logging
+logger = logging.getLogger(__name__)
 
 class IR(ABC):
     """Marker base for all IRs emitted by the DSL (DeploymentIR, ServiceIR, HelmIR...)."""
@@ -37,12 +39,23 @@ class OptimizationRule:
 
     def execute(self, ir, ctx):
 
+        if hasattr(ctx, "opts"):
+            if ctx.opts.get("skip_rules"):
+                if self.name in ctx.opts["skip_rules"]:
+                    logger.warning(f"Initiate skip rules {self.name}")
+                    return False
+
+            if ctx.opts.get("allow_rules"):
+                if self.name not in ctx.opts["allow_rules"]:
+                    return False
+
         if not self.match(ir):
             return False
 
         if not self.condition(ir):
             return False
 
+                        
         self.action(ir, ctx)
         return True    
 
