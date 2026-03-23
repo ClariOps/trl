@@ -65,7 +65,10 @@ class ValidationRule:
 
     def match(self, ir):
         return True
-
+    
+    def condition(self, ir):
+        return False
+    
     def validate(self, ir, ctx):
         pass
 
@@ -73,6 +76,9 @@ class ValidationRule:
 
         if not self.match(ir):
             return False
+        
+        if not self.condition(ir):
+            return False        
 
         self.validate(ir, ctx)
         return True  
