@@ -2,7 +2,7 @@ import logging
 from trl.core.base import Module
 from trl.core.context import RunContext
 
-from trl.modules.validator.rules.latestTagRule import LatestTagRule
+from trl.modules.validator.rules.replicaScalingRule import ReplicaScalingSuggestionRule
 logger = logging.getLogger(__name__)
 
 
@@ -11,16 +11,12 @@ class ValidatorEngine(Module):
     logger.info("Initializing Validator ... ")
 
     def __init__(self):
-        self.rules = [LatestTagRule()]
+        self.rules = [ReplicaScalingSuggestionRule()]
 
     def process(self, ctx: RunContext) -> None:
         logger.info(f"Initializing Validator ...")
         for ir in ctx.irs:
             for rule in self.rules:
                 rule.execute(ir, ctx)
-            # if m["kind"] != "Deployment":
-            #     continue
-            # c = m["spec"]["template"]["spec"]["containers"][0]
-            # if "readinessProbe" not in c:
-            #     ctx.report.warnings.append(f"{m['metadata']['name']}: readinessProbe missing")
-        logger.info(f"Validator completed")
+
+        logger.info(f"Validator completed\n")

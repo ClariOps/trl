@@ -43,6 +43,6 @@ def _render_details(report):
     for title, items in active.items():
         print(f"\n{title}:")
         for item in items:
-            print(f"  - [{item.rule}] {item.resource}: {item.message}")
+            print(f"  - [{item.engine}]: [{item.category}] : {item.message}")
 
             

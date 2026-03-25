@@ -11,7 +11,7 @@ class RendererEngine(Module):
         logger.info("Initializing Renderer ...")
         ctx.manifests = [ir.to_manifest() for ir in ctx.irs]
         logger.debug(f"Manifest in renderer {ctx.manifests}")       
-        logger.info("Renderer completed")
+        logger.info("Renderer completed\n")
         
 
 

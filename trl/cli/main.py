@@ -256,7 +256,7 @@ def main():
                     if ir_class:
                         irs.append(ir_class(manifest=data))
                     else:
-                        print(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
+                        logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
 
         
         logger.info(f"yaml data: {data}")
@@ -288,8 +288,8 @@ def main():
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         OptimizerEngine()],
-                        parallel_checks = [ValidatorEngine()],
-                        #[ValidatorEngine() ,SecurityEngine()],
+                        parallel_checks = 
+                        [ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine(), CloudEngine()]
                         )
         bus.run(ctx)

@@ -1,13 +1,13 @@
-from trl.core.base import OptimizationRule, ReportEvent
+from trl.core.base import OptimizationRule, ReportEvent, RuleCategory
 from trl.modules.optimizer.utils.resources import cpu_to_millicores
 
 
 class CpuLimitRatioRule(OptimizationRule):
 
     name = "cpu-limit-ratio"
-    category = "resources"
 
-    LIMIT_RATIO = 2
+
+    LIMIT_RATIO = 100
 
     def match(self, ir):
         return hasattr(ir, "resources")
@@ -37,6 +37,7 @@ class CpuLimitRatioRule(OptimizationRule):
         ir.resources["limits"]["cpu"] = f"{new_limit}m"
 
         ctx.report.optimization(
+            category = RuleCategory.SCALING.value,
             rule= self.name,
             resource=ir.name,
             message= f"CPU limit adjusted {old} → {new_limit}m"

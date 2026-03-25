@@ -1,11 +1,10 @@
 
-from trl.core.base import ValidationRule, ReportEvent
+from trl.core.base import SecurityRule, ReportEvent
 
 
-class LatestTagRule(ValidationRule):
+class LatestTagRule(SecurityRule):
 
     name = "latest-tag"
-
     def match(self, ir):
         return hasattr(ir, "image")
     
@@ -23,17 +22,18 @@ class LatestTagRule(ValidationRule):
 
         return False
 
-    def validate(self, ir, ctx):
-
-       
-
+    def action(self, ir, ctx):      
         ctx.report.warning(
             rule= self.name,
+            category = self.category,
+            engine = self.engine,
             resource=ir.name,
             message= f"Uses Image tag as 'latest' "
         )
         ctx.report.suggestion(
             rule= self.name,
+            category = self.category,
+            engine = self.engine,
             resource=ir.name,
             message= f"Change tag  ('latest' → v1)"
         )                    

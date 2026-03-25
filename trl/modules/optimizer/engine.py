@@ -8,7 +8,6 @@ from trl.modules.optimizer.rules.generic.memDefRule import MemoryDefaultRule
 from trl.modules.optimizer.rules.generic.limCpuDefRule import CpuLimitRule
 from trl.modules.optimizer.rules.generic.limMemDefRule import MemoryLimitRule
 from trl.modules.optimizer.rules.generic.replicaDefRule import ReplicaDefRule
-from trl.modules.optimizer.rules.generic.replicaSugRule import ReplicaSuggestionRule
 from trl.modules.optimizer.rules.generic.cpuRatioRule import CpuLimitRatioRule
 
 
@@ -27,7 +26,6 @@ class OptimizerEngine(Module):
             CpuLimitRule(),
             MemoryLimitRule(),
             ReplicaDefRule(),
-            ReplicaSuggestionRule(),
             CpuLimitRatioRule()
         ]
 
@@ -38,10 +36,8 @@ class OptimizerEngine(Module):
         for ir in ctx.irs:
             for rule in self.rules:
                 rule.execute(ir, ctx)
-               
-                logger.debug(f"Rules matched : {rule.name}")
-
-            logger.debug(f"Optimize IR Data: {ir.__dict__}")
+            
+            logger.debug(f"Processed {ir.kind} IR : {ir.__dict__}")
                         
-        logger.info("Optimizer completed") 
+        logger.info("Optimizer completed\n") 
             
