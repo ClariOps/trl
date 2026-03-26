@@ -21,6 +21,7 @@ class CpuDefaultRule(OptimizationRule):
         ir.resources["requests"]["cpu"] = self.DEFAULT_CPU
 
         ctx.report.optimization(rule= self.name,
+                        engine = self.engine,
                         resource=ir.name,
                         message= f"CPU default injected → {self.DEFAULT_CPU}"
                         )

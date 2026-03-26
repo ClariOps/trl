@@ -5,7 +5,6 @@ class CpuMinimumRule(OptimizationRule):
 
     name = "cpu-minimum"
     category = "generic"
-
     MIN_CPU = 100
 
     def match(self, ir):
@@ -29,6 +28,7 @@ class CpuMinimumRule(OptimizationRule):
 
         ctx.report.optimization(
                 rule= self.name,
+                engine = self.engine,
                 resource=ir.name,
                 message= f"CPU increased {old} → {self.MIN_CPU}",
         )

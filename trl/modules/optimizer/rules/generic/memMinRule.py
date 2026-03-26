@@ -29,6 +29,7 @@ class MemoryMinimumRule(OptimizationRule):
 
         ctx.report.optimization(
             rule= self.name,
+            engine= self.engine,
             resource=ir.name,
             message= f"Memory increased {old} → {self.MIN_MEMORY}Mi"
                                    

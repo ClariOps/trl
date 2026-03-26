@@ -25,14 +25,12 @@ class LatestTagRule(SecurityRule):
     def action(self, ir, ctx):      
         ctx.report.warning(
             rule= self.name,
-            category = self.category,
             engine = self.engine,
             resource=ir.name,
             message= f"Uses Image tag as 'latest' "
         )
         ctx.report.suggestion(
             rule= self.name,
-            category = self.category,
             engine = self.engine,
             resource=ir.name,
             message= f"Change tag  ('latest' → v1)"

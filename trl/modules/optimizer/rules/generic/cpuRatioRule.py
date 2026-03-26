@@ -38,6 +38,7 @@ class CpuLimitRatioRule(OptimizationRule):
 
         ctx.report.optimization(
             category = RuleCategory.SCALING.value,
+            engine = self.engine,
             rule= self.name,
             resource=ir.name,
             message= f"CPU limit adjusted {old} → {new_limit}m"

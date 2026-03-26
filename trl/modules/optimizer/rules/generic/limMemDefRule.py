@@ -27,6 +27,7 @@ class MemoryLimitRule(OptimizationRule):
 
         ctx.report.optimization(
             rule= self.name,
+            engine= self.engine,
             resource=ir.name,
             message= f"Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
                                     

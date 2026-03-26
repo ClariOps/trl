@@ -27,6 +27,7 @@ class CpuLimitRule(OptimizationRule):
 
         ctx.report.optimization(
             rule= self.name,
+            engine = self.engine,
             resource=ir.name,
             message= f"CPU limit injected → {self.DEFAULT_CPU_LIMIT}"                           
         )

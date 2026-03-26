@@ -22,6 +22,7 @@ class MemoryDefaultRule(OptimizationRule):
 
         ctx.report.optimization(
             rule= self.name,
+            engine=self.engine,
             resource=ir.name,
             message= f"Memory default injected → {self.DEFAULT_MEMORY}"
                                

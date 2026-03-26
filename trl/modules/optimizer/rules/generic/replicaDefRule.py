@@ -23,6 +23,7 @@ class ReplicaDefRule(OptimizationRule):
 
         ctx.report.optimization(
             rule= self.name,
+            engine = self.engine,
             resource=ir.name,
             message= f"Replica count injected {old} → {self.DEFAULT_REPLICAS}"
                                   

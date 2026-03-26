@@ -145,15 +145,15 @@ class Report:
         )
         self.events.append(event)
 
-    def optimization(self, rule, resource, message, engine = "optimizer", category="generic"):
+    def optimization(self, rule, engine, resource, message, category="generic"):
         self._add("optimization", engine, category,  rule, resource, message)
 
-    def warning(self, rule, engine, category, resource, message):
+    def warning(self, rule, engine, resource, message, category= "generic"):
         self._add("warning", engine, category, rule, resource, message)
-    def error(self, rule, engine, category, resource, message):
+    def error(self, rule, engine, resource, message, category= "generic"):
         self._add("error", engine, category, rule, resource, message)
 
-    def suggestion(self, rule, engine, category, resource, message):
+    def suggestion(self, rule, engine, resource, message, category= "generic"):
         self._add("suggestion", engine, category, rule, resource, message)
 
     @property
