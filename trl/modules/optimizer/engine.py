@@ -26,7 +26,7 @@ class OptimizerEngine(Module):
             CpuLimitRule(),
             MemoryLimitRule(),
             ReplicaDefRule(),
-            CpuLimitRatioRule()
+        #    CpuLimitRatioRule()
         ]
 
     def process(self, ctx: RunContext) -> None:

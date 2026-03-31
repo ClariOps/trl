@@ -6,7 +6,7 @@ class CpuLimitRule(OptimizationRule):
     name = "cpu-limit-default"
     category = "generic"
 
-    DEFAULT_CPU_LIMIT = "50m"
+    DEFAULT_CPU_LIMIT = "100m"
 
     def match(self, ir):
         return hasattr(ir, "resources")

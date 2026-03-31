@@ -3,6 +3,10 @@ from trl.core.base import Module
 from trl.core.context import RunContext
 
 from trl.modules.validator.rules.replicaScalingRule import ReplicaScalingSuggestionRule
+from trl.modules.validator.rules.overProvisioningRule import OverProvisioningRule
+from trl.modules.validator.rules.underProvisioningRule import UnderProvisioningRule
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -11,7 +15,11 @@ class ValidatorEngine(Module):
     logger.info("Initializing Validator ... ")
 
     def __init__(self):
-        self.rules = [ReplicaScalingSuggestionRule()]
+        self.rules = [
+            ReplicaScalingSuggestionRule(), 
+            OverProvisioningRule(),
+            UnderProvisioningRule()
+        ]
 
     def process(self, ctx: RunContext) -> None:
         logger.info(f"Initializing Validator ...")

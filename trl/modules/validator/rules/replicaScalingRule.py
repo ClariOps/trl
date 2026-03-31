@@ -6,7 +6,8 @@ class ReplicaScalingSuggestionRule(ValidationRule):
 
     name = "replica-scaling"
     CPU_THRESHOLD = 500  # millicores
-
+    category = RuleCategory.SCALING.value
+    
     def match(self, ir):
         return hasattr(ir, "resources")
 
@@ -33,7 +34,7 @@ class ReplicaScalingSuggestionRule(ValidationRule):
 
         ctx.report.suggestion(
             engine=self.engine,
-            category=RuleCategory.SCALING.value,
+            category=self.category,
             rule=self.name,
             resource=ir.name,
             message="Increase replicas to 2+ for better load distribution"

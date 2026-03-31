@@ -7,7 +7,7 @@ class CpuLimitRatioRule(OptimizationRule):
     name = "cpu-limit-ratio"
 
 
-    LIMIT_RATIO = 100
+    LIMIT_RATIO = 10
 
     def match(self, ir):
         return hasattr(ir, "resources")

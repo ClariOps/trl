@@ -79,13 +79,25 @@ class ValidationRule:
 
     def execute(self, ir, ctx):
 
+                        
         if not self.match(ir):
             return False
 
         if not self.condition(ir):
             logger.debug(f"Rules not matched: {self.name}")
             return False
-        
+
+        if hasattr(ctx, "opts"):
+            if ctx.opts.get("skip_rules"):
+                if self.name in ctx.opts["skip_rules"]:
+                    logger.debug(f"Initiate skip rules {self.name}")
+                    return False
+
+            if ctx.opts.get("allow_rules"):
+                if self.name not in ctx.opts["allow_rules"]:
+                    logger.debug(f"Initiate allow rules {self.name}")
+                    return False
+                        
         logger.debug(f"Rules executing : {self.name}")
         self.validate(ir, ctx)
         logger.debug(f"Rules executed : {self.name}")        
@@ -114,6 +126,16 @@ class SecurityRule:
             logger.debug(f"Rules not matched: {self.name}")
             return False
         
+        if hasattr(ctx, "opts"):
+            if ctx.opts.get("skip_rules"):
+                if self.name in ctx.opts["skip_rules"]:
+                    logger.debug(f"Initiate skip rules {self.name}")
+                    return False
+
+            if ctx.opts.get("allow_rules"):
+                if self.name not in ctx.opts["allow_rules"]:
+                    logger.debug(f"Initiate allow rules {self.name}")
+                    return False     
         logger.debug(f"Rules executing : {self.name}")
         self.action(ir, ctx)
         logger.debug(f"Rules executed : {self.name}")        

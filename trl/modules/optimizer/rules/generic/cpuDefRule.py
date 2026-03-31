@@ -5,7 +5,7 @@ class CpuDefaultRule(OptimizationRule):
     name = "cpu-default"
     category = "generic"
 
-    DEFAULT_CPU = "600m"
+    DEFAULT_CPU = "100m"
 
     def match(self, ir):
         return hasattr(ir, "resources")
