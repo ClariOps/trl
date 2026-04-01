@@ -205,6 +205,7 @@ class RuleCategory(Enum):
     SECURITY = "security"
     COST = "cost"
     RELIABILITY = "reliability"
+    NETWORK = "network"
 
 
 class RuleSeverity(Enum):

@@ -5,6 +5,9 @@ from trl.core.context import RunContext
 from trl.modules.validator.rules.replicaScalingRule import ReplicaScalingSuggestionRule
 from trl.modules.validator.rules.overProvisioningRule import OverProvisioningRule
 from trl.modules.validator.rules.underProvisioningRule import UnderProvisioningRule
+from trl.modules.validator.rules.noReadinessProbe import ReadinessProbeMissingRule
+from trl.modules.validator.rules.noLivenessProbe import NoLivenessProbeRule
+from trl.modules.validator.rules.nodePortWarning import NodePortExposureRule
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +21,10 @@ class ValidatorEngine(Module):
         self.rules = [
             ReplicaScalingSuggestionRule(), 
             OverProvisioningRule(),
-            UnderProvisioningRule()
+            UnderProvisioningRule(),
+            ReadinessProbeMissingRule(),
+            NoLivenessProbeRule(),
+            NodePortExposureRule()
         ]
 
     def process(self, ctx: RunContext) -> None:
