@@ -6,8 +6,8 @@ class ReplicaScalingSuggestionRule(ValidationRule):
 
     name = "replica-scaling"
     CPU_THRESHOLD = 500  # millicores
-    category = RuleCategory.SCALING.value
-    
+    category = RuleCategory.SCALING
+
     def match(self, ir):
         return hasattr(ir, "resources")
 

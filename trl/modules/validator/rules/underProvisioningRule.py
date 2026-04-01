@@ -1,12 +1,12 @@
-from trl.core.base import ValidationRule, RuleCategory
+from trl.core.base import ValidationRule, RuleCategory, RuleSeverity
 from trl.modules.optimizer.utils.resources import cpu_to_millicores, memory_to_mi
 
 
 class UnderProvisioningRule(ValidationRule):
 
     name = "under-provisioning"
-    category = RuleCategory.RELIABILITY.value
-
+    category = RuleCategory.RELIABILITY
+    severity = RuleSeverity.LOW
     MIN_CPU = 100       # 100m
     MIN_MEMORY = 128    # 128Mi
 
@@ -58,6 +58,7 @@ class UnderProvisioningRule(ValidationRule):
 
         ctx.report.suggestion(
             category=self.category,
+            severity=self.severity,
             rule=self.name,
             engine=self.engine,
             resource=ir.name,

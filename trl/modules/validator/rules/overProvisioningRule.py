@@ -1,10 +1,12 @@
 
-from trl.core.base import ValidationRule, RuleCategory 
+from trl.core.base import ValidationRule, RuleCategory, RuleSeverity
 from trl.modules.optimizer.utils.resources import cpu_to_millicores, memory_to_mi 
 
 class OverProvisioningRule(ValidationRule):
      name = "over-provisioning" 
-     category = RuleCategory.COST.value 
+     category = RuleCategory.COST 
+     severity = RuleSeverity.LOW
+
      CPU_THRESHOLD = 1000 # 1 core 
      MEMORY_THRESHOLD = 1024 # 1 Gi 
      
@@ -31,7 +33,8 @@ class OverProvisioningRule(ValidationRule):
      def validate(self, ir, ctx):
         
         ctx.report.warning( 
-            category=self.category, 
+            category=self.category,
+            severity=self.severity, 
             engine = self.engine,
             rule=self.name, 
             resource=ir.name, 
@@ -39,6 +42,7 @@ class OverProvisioningRule(ValidationRule):
         
         ctx.report.suggestion(
             engine=self.engine,
+            severity=self.severity, 
             category=self.category,
             rule=self.name,
             resource=ir.name,

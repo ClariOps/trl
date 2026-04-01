@@ -1,10 +1,11 @@
-from trl.core.base import SecurityRule
+from trl.core.base import SecurityRule, RuleSeverity
 
 
 class PrivilegedContainerRule(SecurityRule):
 
     name = "privileged-container"
     category = "security"
+    severity = RuleSeverity.HIGH
     
     def match(self, ir):
         return hasattr(ir, "containers")
@@ -30,6 +31,7 @@ class PrivilegedContainerRule(SecurityRule):
                     rule=self.name,
                     engine = self.engine,
                     category = self.category,
+                    severity = self.severity,
                     resource=ir.name,
                     message=f"Container '{c.get("name")}' is running in privileged mode → high security risk"
                 )

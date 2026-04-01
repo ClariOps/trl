@@ -142,13 +142,14 @@ class SecurityRule:
         return True
 
 class ReportEvent:
-    def __init__(self, rule, resource, message, level, engine,  category):
+    def __init__(self, rule, resource, message, level, engine,  category, severity):
         self.rule = rule
         self.resource = resource
         self.message = message
         self.level = level
         self.engine = engine
-        self.category = category
+        self.category = category,
+        self.severity = severity
     def __str__(self):
         return f"[{self.rule}] {self.resource}: {self.message}"
 
@@ -156,10 +157,11 @@ class Report:
     def __init__(self):
         self.events = []
 
-    def _add(self, level, engine, category, rule, resource, message):
+    def _add(self, level, engine, category, severity, rule, resource, message):
         event = ReportEvent(
             engine=engine,
             category=category,
+            severity=severity,
             level=level,
             rule=rule,
             resource=resource,
@@ -167,16 +169,16 @@ class Report:
         )
         self.events.append(event)
 
-    def optimization(self, rule, engine, resource, message, category="generic"):
-        self._add("optimization", engine, category,  rule, resource, message)
+    def optimization(self, rule, engine, resource, message, category="generic", severity="low"):
+        self._add("optimization", engine, category, severity, rule, resource, message)
 
-    def warning(self, rule, engine, resource, message, category= "generic"):
-        self._add("warning", engine, category, rule, resource, message)
-    def error(self, rule, engine, resource, message, category= "generic"):
-        self._add("error", engine, category, rule, resource, message)
+    def warning(self, rule, engine, resource, message, category= "generic", severity="low"):
+        self._add("warning", engine, category, severity, rule, resource, message)
+    def error(self, rule, engine, resource, message, category= "generic", severity="low"):
+        self._add("error", engine, category, severity, rule, resource, message)
 
-    def suggestion(self, rule, engine, resource, message, category= "generic"):
-        self._add("suggestion", engine, category, rule, resource, message)
+    def suggestion(self, rule, engine, resource, message, category= "generic", severity="low"):
+        self._add("suggestion", engine, category, severity, rule, resource, message)
 
     @property
     def errors(self):
@@ -203,6 +205,12 @@ class RuleCategory(Enum):
     SECURITY = "security"
     COST = "cost"
     RELIABILITY = "reliability"
+
+
+class RuleSeverity(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "HIGH"
 class RemoteModuleClient(Module, ABC):
     """Drop-in replacement for Module in registry without changing callers."""
     pass
