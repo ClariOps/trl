@@ -22,8 +22,8 @@ A deliberately flawed setup that triggers multiple TRL rules.
 👉 Use this to see TRL’s **full detection capability**
 
 ```bash
-trl explain examples/bad.yaml
-trl optimize examples/bad.yaml
+trl explain examples/demo/bad.yaml
+trl optimize examples/demo/bad.yaml
 ```
 
 ---
@@ -45,7 +45,7 @@ A clean and well-configured deployment following Kubernetes best practices.
 * respects good configurations
 
 ```bash
-trl explain examples/good.yaml
+trl explain examples/demo/good.yaml
 ```
 
 ---
@@ -63,7 +63,7 @@ A minimal setup designed to highlight **security misconfigurations**.
 👉 Use this to isolate and test **Security Engine behavior**
 
 ```bash
-trl explain examples/security.yaml
+trl explain examples/demo/security.yaml
 ```
 
 ---
@@ -81,7 +81,7 @@ Focuses on inefficient CPU and memory configurations.
 👉 Use this to evaluate **Optimization Engine recommendations**
 
 ```bash
-trl optimize examples/perf.yaml
+trl optimize examples/demo/perf.yaml
 ```
 
 ---
@@ -141,9 +141,9 @@ These examples simulate real-world DevOps challenges:
 ## 🚀 Recommended Demo Flow
 
 ```bash
-trl explain examples/bad.yaml
-trl optimize examples/bad.yaml
-trl explain examples/good.yaml
+trl explain examples/demo/bad.yaml
+trl optimize examples/demo/bad.yaml
+trl explain examples/demo/good.yaml
 ```
 
 This demonstrates:
