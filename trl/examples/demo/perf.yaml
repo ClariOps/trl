@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: perf-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: perf
+  template:
+    metadata:
+      labels:
+        app: perf
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
