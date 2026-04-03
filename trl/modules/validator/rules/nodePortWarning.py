@@ -6,7 +6,7 @@ class NodePortExposureRule(ValidationRule):
     severity = RuleSeverity.MEDIUM
 
     def match(self, ir):
-        return hasattr(ir, "ports")
+        return getattr(ir, "kind", None) == "Service"
 
     def condition(self, ir):
         return getattr(ir, "service_type", "").lower() == "nodeport"

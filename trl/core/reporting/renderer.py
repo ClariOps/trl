@@ -59,6 +59,6 @@ def _print_item(item):
     icon = LEVEL_ICON.get(item.level.lower(), "•")
     severity = item.severity.value.upper() if hasattr(item.severity, "value") else str(item.severity).upper()
 
-    print(f"  {icon} [{severity}]{item.rule}")
+    print(f"  {icon} [{severity}][{item.engine}]{item.rule}")
     print(f"     Resource : {item.resource}")
     print(f"     Message  : {item.message}")

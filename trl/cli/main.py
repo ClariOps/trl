@@ -206,9 +206,9 @@ def main():
 
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
-                        OptimizerEngine()],
-                        parallel_checks = [ValidatorEngine()],
-                        #[ValidatorEngine() ,SecurityEngine()],
+                            ],
+                        parallel_checks = [
+                            ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine()]
                         )
               
