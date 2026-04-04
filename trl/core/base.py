@@ -78,21 +78,7 @@ class ValidationRule:
     def validate(self, ir, ctx):
         pass
 
-    def execute(self, ir, ctx):
-
-                        
-
-        if hasattr(ctx, "opts"):
-            if ctx.opts.get("skip_rules"):
-                if self.name in ctx.opts["skip_rules"]:
-                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
-                    return False
-
-            if ctx.opts.get("allow_rules"):
-
-                if self.name not in ctx.opts["allow_rules"]:
-                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
-                    return False
+    def execute(self, ir, ctx):                        
         if not self.match(ir):
             return False
 
@@ -105,7 +91,16 @@ class ValidationRule:
         logger.debug(f"{self.name}: completed")       
         return True
     
+    def enabled(self, ctx):
+        if ctx.opts.get("skip_rules") and self.name in ctx.opts["skip_rules"]:
+            logger.debug(f"{self.name}: skipped (disabled via CLI)")
+            return False
 
+        if ctx.opts.get("allow_rules") and self.name not in ctx.opts["allow_rules"]:
+            logger.debug(f"{self.name}: skipped (not in allow list)")
+            return False
+
+        return True
 
 class SecurityRule:
 
