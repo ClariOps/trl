@@ -33,11 +33,12 @@ class OptimizerEngine(Module):
         logger.info("Initializing optimizer ........")
         logger.info(f"{len(ctx.irs)} resources loaded")
 
-        for ir in ctx.irs:
-            for rule in self.rules:
+        for rule in self.rules:
+            if not rule.enabled(ctx):        
+                continue    
+            for ir in ctx.irs:
                 rule.execute(ir, ctx)
-            
-            logger.debug(f"Processed {ir.kind} IR : {ir.__dict__}")
+           
                         
         logger.info("Optimizer completed\n") 
             

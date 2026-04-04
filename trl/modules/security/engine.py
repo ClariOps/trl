@@ -17,8 +17,10 @@ class SecurityEngine(Module):
         ]
     def process(self, ctx: RunContext) -> None:
         logger.info(f"Initializing Security check ...")
-        for ir in ctx.irs:
-            for rule in self.rules:
+        for rule in self.rules:
+            if not rule.enabled(ctx):        
+                continue    
+            for ir in ctx.irs:
                 rule.execute(ir, ctx)
                 
         logger.info(f"Security check completed\n")
