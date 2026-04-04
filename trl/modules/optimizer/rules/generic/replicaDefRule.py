@@ -25,8 +25,7 @@ class ReplicaDefRule(OptimizationRule):
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message= f"Replica count injected {old} → {self.DEFAULT_REPLICAS}"
-                                  
+            message=f"Replica count not defined → defaulting to [{self.DEFAULT_REPLICAS}] to improve availability"                                  
         )
        #     f"[{self.name}] {ir.name}: Replica count injected {old}  → {self.DEFAULT_REPLICAS}"
        

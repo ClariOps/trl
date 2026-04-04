@@ -29,7 +29,7 @@ class CpuLimitRule(OptimizationRule):
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message= f"CPU limit injected → {self.DEFAULT_CPU_LIMIT}"                           
+            message=f"CPU limit not defined → defaulting to {self.DEFAULT_CPU_LIMIT} to prevent resource overuse"  
         )
             #f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
         

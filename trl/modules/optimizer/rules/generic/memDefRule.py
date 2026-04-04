@@ -24,7 +24,7 @@ class MemoryDefaultRule(OptimizationRule):
             rule= self.name,
             engine=self.engine,
             resource=ir.name,
-            message= f"Memory default injected → {self.DEFAULT_MEMORY}"
+            message=f"Memory request not defined → defaulting to {self.DEFAULT_MEMORY} to ensure stable scheduling"
                                
         )
         #    f"[{self.name}] {ir.name}: Memory default injected → {self.DEFAULT_MEMORY}"

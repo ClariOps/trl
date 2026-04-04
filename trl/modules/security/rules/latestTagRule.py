@@ -27,12 +27,12 @@ class LatestTagRule(SecurityRule):
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message= f"Uses Image tag as 'latest' "
+            message=f"Image uses mutable tag 'latest' → may lead to unpredictable deployments and unverified image changes"
         )
         ctx.report.suggestion(
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message= f"Change tag  ('latest' → v1)"
+            message="Use a fixed version tag (e.g., v1.2.3) to ensure consistent and reproducible deployments"
         )                    
             

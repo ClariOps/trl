@@ -36,8 +36,8 @@ class RunAsRootRule(SecurityRule):
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,
-                    resource=ir.name,
-                    message=f"Container '{name}' is running as root user (UID 0)"
+                    resource=name,
+                    message=f"Container '{name}' is running as root user (UID 0) → increases risk of container escape and privilege escalation"
                 )
 
                 ctx.report.suggestion(
@@ -45,7 +45,7 @@ class RunAsRootRule(SecurityRule):
                     engine=self.engine,
                     category=self.category,
                     resource=ir.name,
-                    message=f"Set runAsUser to non-root (e.g., 1000) for container '{name}'"
+                    message=f"Set container '{name}' runAsUser to a non-root UID (e.g., 1000) to enforce least-privilege execution"
                 )
 
             # 🟡 Missing user (soft signal)
@@ -55,5 +55,5 @@ class RunAsRootRule(SecurityRule):
                     engine=self.engine,
                     category=self.category,
                     resource=ir.name,
-                    message=f"Container '{self.name}' does not define runAsUser → defaults to root"
+                    message=f"Container '{name}' does not define runAsUser → defaults to root → potential security risk"
                 )

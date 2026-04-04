@@ -259,7 +259,7 @@ def main():
                         logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
 
         
-        logger.info(f"yaml data: {data}")
+        #logger.info(f"yaml data: {data}")
 
         opts = {}
         if args.target:

@@ -33,5 +33,5 @@ class PrivilegedContainerRule(SecurityRule):
                     category = self.category,
                     severity = self.severity,
                     resource=ir.name,
-                    message=f"Container '{c.get("name")}' is running in privileged mode → high security risk"
+                    message=f"Container '{c.get('name', 'unknown')}' is running in privileged mode → grants full host access → critical security risk"
                 )

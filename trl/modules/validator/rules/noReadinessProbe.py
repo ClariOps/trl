@@ -23,7 +23,7 @@ class ReadinessProbeMissingRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Missing readiness probe → traffic may hit unready pods"
+            message="Readiness probe not defined → traffic may be routed to unready pods → potential request failures"
         )
 
         ctx.report.suggestion(
@@ -32,5 +32,5 @@ class ReadinessProbeMissingRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Define readinessProbe to control traffic flow"
+            message="Define readinessProbe to ensure traffic is only sent to healthy pods"
         )

@@ -31,8 +31,7 @@ class MemoryMinimumRule(OptimizationRule):
             rule= self.name,
             engine= self.engine,
             resource=ir.name,
-            message= f"Memory increased {old} → {self.MIN_MEMORY}Mi"
-                                   
+            message=f"Memory request ({old}Mi) below recommended minimum → increased to {self.MIN_MEMORY}Mi to reduce OOM risk"                                   
         )
         
         #    f"[{self.name}] {ir.name}: Memory increased {old} → {self.MIN_MEMORY}Mi"

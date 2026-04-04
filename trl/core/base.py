@@ -42,25 +42,26 @@ class OptimizationRule:
     def execute(self, ir, ctx):
         if hasattr(ctx, "opts"):
             if ctx.opts.get("skip_rules"):
-                if self.name in ctx.opts["skip_rules"]:
-                    logger.debug(f"Initiate skip rules {self.name}")
+                if self.name in ctx.opts["skip_rules"]:                    
+                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
                     return False
 
             if ctx.opts.get("allow_rules"):
+
                 if self.name not in ctx.opts["allow_rules"]:
-                    logger.debug(f"Initiate allow rules {self.name}")
+                    logger.debug(f"{self.name}: skipped (not in allow list)")
                     return False
 
         if not self.match(ir):
             return False
 
         if not self.condition(ir):
-            logger.debug(f"Rules not matched: {self.name}")
+            logger.debug(f"{self.name}: not applicable (resource={ir.name})")
             return False
 
-        logger.debug(f"Rules executing : {self.name}")
+        logger.debug(f"{self.name}: executing (resource={ir.name})")
         self.action(ir, ctx)
-        logger.debug(f"Rules executed : {self.name}")
+        logger.debug(f"{self.name}: completed")
         return True
 
 class ValidationRule:
@@ -84,24 +85,27 @@ class ValidationRule:
         if hasattr(ctx, "opts"):
             if ctx.opts.get("skip_rules"):
                 if self.name in ctx.opts["skip_rules"]:
-                    logger.debug(f"Initiate skip rules {self.name}")
+                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
                     return False
 
             if ctx.opts.get("allow_rules"):
+
                 if self.name not in ctx.opts["allow_rules"]:
-                    logger.debug(f"Initiate allow rules {self.name}")
+                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
                     return False
         if not self.match(ir):
             return False
 
         if not self.condition(ir):
-            logger.debug(f"Rules not matched: {self.name}")
+            logger.debug(f"{self.name}: not applicable (resource={ir.name})")
             return False
                     
-        logger.debug(f"Rules executing : {self.name}")
+        logger.debug(f"{self.name}: executing (resource={ir.name})")
         self.validate(ir, ctx)
-        logger.debug(f"Rules executed : {self.name}")        
+        logger.debug(f"{self.name}: completed")       
         return True
+    
+
 
 class SecurityRule:
 
@@ -123,24 +127,24 @@ class SecurityRule:
         if hasattr(ctx, "opts"):
             if ctx.opts.get("skip_rules"):
                 if self.name in ctx.opts["skip_rules"]:
-                    logger.debug(f"Initiate skip rules {self.name}")
+                    logger.debug(f"{self.name}: skipped (disabled via CLI)")
                     return False
 
             if ctx.opts.get("allow_rules"):
                 if self.name not in ctx.opts["allow_rules"]:
-                    logger.debug(f"Initiate allow rules {self.name}")
+                    logger.debug(f"{self.name}: skipped (not in allow list)")
                     return False     
         if not self.match(ir):
             return False
 
         if not self.condition(ir):
-            logger.debug(f"Rules not matched: {self.name}")
+            logger.debug(f"{self.name}: not applicable (resource={ir.name})")
             return False
        
 
-        logger.debug(f"Rules executing : {self.name}")
+        logger.debug(f"{self.name}: executing (resource={ir.name})")
         self.action(ir, ctx)
-        logger.debug(f"Rules executed : {self.name}")        
+        logger.debug(f"{self.name}: completed")       
         return True
 
 class ReportEvent:

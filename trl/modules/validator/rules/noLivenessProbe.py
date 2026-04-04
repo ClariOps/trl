@@ -22,7 +22,7 @@ class NoLivenessProbeRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Missing liveness probe → failures may go undetected"
+            message="Liveness probe not defined → container failures may not be detected → pods may remain unhealthy"
         )
 
         ctx.report.suggestion(
@@ -31,5 +31,5 @@ class NoLivenessProbeRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Define livenessProbe to enable automatic restarts"
+            message="Define livenessProbe to enable automatic detection and recovery of failed containers"
         )

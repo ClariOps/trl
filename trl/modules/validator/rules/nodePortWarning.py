@@ -18,7 +18,7 @@ class NodePortExposureRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Service exposed via NodePort → external access risk"
+            message="Service exposed via NodePort → opens access on every node IP → increases attack surface"
         )
 
         ctx.report.suggestion(
@@ -27,5 +27,5 @@ class NodePortExposureRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Use ClusterIP or Ingress for controlled exposure"
+            message="Use ClusterIP for internal services or Ingress for controlled external access"
         )

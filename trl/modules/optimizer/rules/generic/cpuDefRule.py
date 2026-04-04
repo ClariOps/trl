@@ -23,7 +23,7 @@ class CpuDefaultRule(OptimizationRule):
         ctx.report.optimization(rule= self.name,
                         engine = self.engine,
                         resource=ir.name,
-                        message= f"CPU default injected → {self.DEFAULT_CPU}"
+                        message= f"CPU request not defined → defaulting to {self.DEFAULT_CPU} to ensure baseline scheduling"
                         )
 
 #        f"[{self.name}] {ir.name}: CPU default injected → {self.DEFAULT_CPU}"

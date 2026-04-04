@@ -29,7 +29,7 @@ class ReplicaScalingSuggestionRule(ValidationRule):
             category=RuleCategory.SCALING.value,
             rule=self.name,
             resource=ir.name,
-            message=f"High CPU ({ir.resources['requests'].get('cpu')}) with single replica"
+            message=f"High CPU request ({ir.resources['requests'].get('cpu')}) with single replica → creates single point of failure under load"
         )
 
         ctx.report.suggestion(
@@ -37,5 +37,5 @@ class ReplicaScalingSuggestionRule(ValidationRule):
             category=self.category,
             rule=self.name,
             resource=ir.name,
-            message="Increase replicas to 2+ for better load distribution"
+            message="Increase replicas [2+] to improve availability and distribute traffic"
         )

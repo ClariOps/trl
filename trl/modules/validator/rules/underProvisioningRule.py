@@ -41,10 +41,10 @@ class UnderProvisioningRule(ValidationRule):
         issues = []
 
         if cpu and cpu_to_millicores(cpu) <= self.MIN_CPU:
-            issues.append(f"CPU request too low ({cpu})")
+            issues.append(f"CPU request ({cpu}) is below recommended threshold → may cause throttling under load")
 
         if memory and memory_to_mi(memory) <= self.MIN_MEMORY:
-            issues.append(f"Memory request too low ({memory})")
+            issues.append(f"Memory request({memory}) is below recommended threshold → may cause throttling under load")
 
         msg = ", ".join(issues)
 
@@ -53,7 +53,7 @@ class UnderProvisioningRule(ValidationRule):
             rule=self.name,
             engine=self.engine,
             resource=ir.name,
-            message=f"Under-provisioning detected → {msg}"
+            message=f"Resource requests below recommended levels → {msg} → may cause throttling or instability under load"
         )
 
         ctx.report.suggestion(
@@ -62,5 +62,5 @@ class UnderProvisioningRule(ValidationRule):
             rule=self.name,
             engine=self.engine,
             resource=ir.name,
-            message="Increase resource requests to avoid throttling and instability"
+            message="Increase CPU and memory requests to ensure stable performance under load"
         )

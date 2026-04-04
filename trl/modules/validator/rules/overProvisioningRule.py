@@ -38,7 +38,7 @@ class OverProvisioningRule(ValidationRule):
             engine = self.engine,
             rule=self.name, 
             resource=ir.name, 
-            message="High resource requests with limited scaling → potential over-provisioning" )
+            message="Resource requests are high relative to workload → may lead to inefficient resource utilization and increased cost")
         
         ctx.report.suggestion(
             engine=self.engine,
@@ -46,5 +46,5 @@ class OverProvisioningRule(ValidationRule):
             category=self.category,
             rule=self.name,
             resource=ir.name,
-            message="Reduce resource requests or distribute load across more replicas"
+            message="Reduce resource requests or increase replicas to better distribute workload"
         )     
