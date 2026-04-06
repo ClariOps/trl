@@ -6,7 +6,7 @@ class ReplicaScalingSuggestionRule(ValidationRule):
 
     name = "replica-scaling"
     CPU_THRESHOLD = 500  # millicores
-    category = RuleCategory.SCALING
+    category = RuleCategory.SCALING.value
 
     def match(self, ir):
         return hasattr(ir, "resources")
@@ -29,13 +29,8 @@ class ReplicaScalingSuggestionRule(ValidationRule):
             category=RuleCategory.SCALING.value,
             rule=self.name,
             resource=ir.name,
-            message=f"High CPU request ({ir.resources['requests'].get('cpu')}) with single replica → creates single point of failure under load"
+            issue=f"High CPU request ({ir.resources['requests'].get('cpu')}) with single replica",
+            impact="Creates single point of failure under load",
+            fix="Increase replicas [2+] to improve availability and distribute traffic"    
         )
 
-        ctx.report.suggestion(
-            engine=self.engine,
-            category=self.category,
-            rule=self.name,
-            resource=ir.name,
-            message="Increase replicas [2+] to improve availability and distribute traffic"
-        )

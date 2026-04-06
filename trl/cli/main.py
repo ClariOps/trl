@@ -12,7 +12,7 @@ from trl.modules.validator.engine import ValidatorEngine
 from trl.modules.renderer.engine import RendererEngine
 from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
-from trl.core.reporting.renderer import render_report
+from trl.core.reporting.reportRenderer import ReportsRenderer
 from trl.core.logconfig.config import setup_logging
 
 
@@ -201,7 +201,11 @@ def main():
         logger.info("Analyzing kubernetes resources ...") 
         logger.debug(f"yaml data: {data}")
 
-       
+        # security rules       
+        # opts = {
+        #     "allow_rules": ["run-as-root", "privileged-container"],     
+        #     "skip_rules": ["latest-tag"]
+        # }
         opts = {}
 
         ctx = RunContext(irs=irs, opts=opts)
@@ -216,7 +220,8 @@ def main():
 
 
 
-        render_report(ctx.report, True)
+        renderer = ReportsRenderer(ctx.report, args.verbose) 
+        renderer.render()
 
 
     elif args.cmd == "optimize":
@@ -281,7 +286,11 @@ def main():
         if args.allow_rules:
             opts["allow_rules"]= args.allow_rules
             logger.info(f"Allowed Only: rule is {opts} ")
-
+        
+        if args.verbose:
+            logger.setLevel("DEBUG")
+        else:
+            logger.setLevel("INFO")
 
    
         ctx = RunContext(irs=irs, opts=opts)
@@ -293,8 +302,8 @@ def main():
                         seq_after = [RendererEngine(), CloudEngine()]
                         )
         bus.run(ctx)
-
-        render_report(ctx.report, args.verbose)
-
+        renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
+        renderer.render()
+        
 if __name__ == "__main__":
     main()

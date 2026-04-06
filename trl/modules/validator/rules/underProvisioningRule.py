@@ -5,8 +5,8 @@ from trl.modules.optimizer.utils.resources import cpu_to_millicores, memory_to_m
 class UnderProvisioningRule(ValidationRule):
 
     name = "under-provisioning"
-    category = RuleCategory.RELIABILITY
-    severity = RuleSeverity.LOW
+    category = RuleCategory.RELIABILITY.value
+    severity = RuleSeverity.LOW.value
     MIN_CPU = 100       # 100m
     MIN_MEMORY = 128    # 128Mi
 
@@ -41,10 +41,10 @@ class UnderProvisioningRule(ValidationRule):
         issues = []
 
         if cpu and cpu_to_millicores(cpu) <= self.MIN_CPU:
-            issues.append(f"CPU request ({cpu}) is below recommended threshold → may cause throttling under load")
+            issues.append(f"CPU request ({cpu})")
 
         if memory and memory_to_mi(memory) <= self.MIN_MEMORY:
-            issues.append(f"Memory request({memory}) is below recommended threshold → may cause throttling under load")
+            issues.append(f"Memory request({memory})")
 
         msg = ", ".join(issues)
 
@@ -53,14 +53,7 @@ class UnderProvisioningRule(ValidationRule):
             rule=self.name,
             engine=self.engine,
             resource=ir.name,
-            message=f"Resource requests below recommended levels → {msg} → may cause throttling or instability under load"
-        )
-
-        ctx.report.suggestion(
-            category=self.category,
-            severity=self.severity,
-            rule=self.name,
-            engine=self.engine,
-            resource=ir.name,
-            message="Increase CPU and memory requests to ensure stable performance under load"
+            issue=f"Resource requests below recommended levels → {msg}",
+            impact="May cause throttling or instability under load",
+            fix="Increase CPU and memory requests to ensure stable performance under load"
         )

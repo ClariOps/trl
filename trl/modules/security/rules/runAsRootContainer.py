@@ -1,10 +1,12 @@
-from trl.core.base import SecurityRule
+from trl.core.base import SecurityRule, RuleSeverity
 
 
 class RunAsRootRule(SecurityRule):
 
     name = "run-as-root"
     category = "security"
+    
+    severity= RuleSeverity
 
     def match(self, ir):
         return hasattr(ir, "containers") and len(ir.containers) > 0
@@ -31,29 +33,27 @@ class RunAsRootRule(SecurityRule):
 
             name = c.get("name", "unknown")
 
-            if sc.get("runAsUser") == 0:
+            if sc.get("runAsUser") == 0 or "runAsUser" not in sc: 
                 ctx.report.warning(
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,
                     resource=name,
-                    message=f"Container '{name}' is running as root user (UID 0) → increases risk of container escape and privilege escalation"
+                    severity=self.severity.HIGH.value,
+                    issue=f"Container '{name}' runs as root (UID 0)",
+                    impact="Increases risk of container escape and privilege escalation",
+                    fix="Set securityContext.runAsUser to a non-root UID (e.g., 1000)"
                 )
-
-                ctx.report.suggestion(
-                    rule=self.name,
-                    engine=self.engine,
-                    category=self.category,
-                    resource=ir.name,
-                    message=f"Set container '{name}' runAsUser to a non-root UID (e.g., 1000) to enforce least-privilege execution"
-                )
-
-            # 🟡 Missing user (soft signal)
             elif "runAsUser" not in sc:
-                ctx.report.suggestion(
+                ctx.report.warning(
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,
-                    resource=ir.name,
-                    message=f"Container '{name}' does not define runAsUser → defaults to root → potential security risk"
+                    resource=name,
+                    severity=self.severity.MEDIUM.value,
+                    issue=f"Container '{name}' does not define runAsUser",
+                    impact="Defaults to root user, increasing security risk",
+                    fix="Explicitly set securityContext.runAsUser to a non-root UID"
                 )
+
+   

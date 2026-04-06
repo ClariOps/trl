@@ -2,8 +2,8 @@ from trl.core.base import ValidationRule, RuleCategory, RuleSeverity
 
 class NodePortExposureRule(ValidationRule):
     name = "nodeport-exposure"
-    category = RuleCategory.NETWORK
-    severity = RuleSeverity.MEDIUM
+    category = RuleCategory.NETWORK.value
+    severity = RuleSeverity.MEDIUM.value
 
     def match(self, ir):
         return getattr(ir, "kind", None) == "ServiceIR"
@@ -18,14 +18,9 @@ class NodePortExposureRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Service exposed via NodePort → opens access on every node IP → increases attack surface"
+            issue="Service exposed via NodePort → opens access on every node IP",
+            impact="Increases attack surface",
+            fix="Use ClusterIP for internal services or Ingress for controlled external access"
         )
 
-        ctx.report.suggestion(
-            engine=self.engine,
-            category=self.category,
-            severity=self.severity,
-            rule=self.name,
-            resource=ir.name,
-            message="Use ClusterIP for internal services or Ingress for controlled external access"
-        )
+ 

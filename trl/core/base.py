@@ -140,14 +140,17 @@ class SecurityRule:
 
         return True
 class ReportEvent:
-    def __init__(self, rule, resource, message, level, engine,  category, severity):
+    def __init__(self, rule, resource, message, level, engine,  category, severity, issue, impact, fix):
         self.rule = rule
         self.resource = resource
         self.message = message
         self.level = level
         self.engine = engine
-        self.category = category,
+        self.category = category
         self.severity = severity
+        self.issue= issue
+        self.impact= impact
+        self.fix= fix
     def __str__(self):
         return f"[{self.rule}] {self.resource}: {self.message}"
 
@@ -155,7 +158,22 @@ class Report:
     def __init__(self):
         self.events = []
 
-    def _add(self, level, engine, category, severity, rule, resource, message):
+    def _add(self, level, engine, category, severity, rule, resource, message, issue=None, impact=None, fix=None):
+       # 🚨 Enforce consistency       
+        if level == "optimization":
+            if not message:
+                raise ValueError("Optimization event must have 'message'")
+            if issue or impact or fix:
+                raise ValueError("Optimization cannot use issue/impact/fix")
+
+        else:  # warning / error
+            if not issue:
+                raise ValueError("Problem event must have 'issue'")
+            if not fix:
+                raise ValueError("Problem event must have 'fix'")
+            if message:
+                raise ValueError("Do not use 'message' for problem events")
+            
         event = ReportEvent(
             engine=engine,
             category=category,
@@ -163,20 +181,20 @@ class Report:
             level=level,
             rule=rule,
             resource=resource,
-            message=message
+            message=message,
+            issue=issue,
+            impact=impact,
+            fix=fix
         )
         self.events.append(event)
 
     def optimization(self, rule, engine, resource, message, category="generic", severity="low"):
         self._add("optimization", engine, category, severity, rule, resource, message)
 
-    def warning(self, rule, engine, resource, message, category= "generic", severity="low"):
-        self._add("warning", engine, category, severity, rule, resource, message)
-    def error(self, rule, engine, resource, message, category= "generic", severity="low"):
-        self._add("error", engine, category, severity, rule, resource, message)
-
-    def suggestion(self, rule, engine, resource, message, category= "generic", severity="low"):
-        self._add("suggestion", engine, category, severity, rule, resource, message)
+    def warning(self, rule, engine, resource, message=None, issue=None, impact=None, fix=None, category="generic" , severity="low" ):
+        self._add("warning", engine, category, severity, rule, resource, message, issue, impact, fix)
+    def error(self, rule, engine, resource, message=None, issue=None, impact=None, fix=None, category= "generic", severity="low"):
+        self._add("error", engine, category, severity, rule, resource, message, issue, impact, fix)
 
     @property
     def errors(self):
@@ -189,10 +207,6 @@ class Report:
     @property
     def optimizations(self):
         return [e for e in self.events if e.level == "optimization"]
-
-    @property
-    def suggestions(self):
-        return [e for e in self.events if e.level == "suggestion"]
 
     def has_errors(self):
         return any(e.level == "error" for e in self.events)

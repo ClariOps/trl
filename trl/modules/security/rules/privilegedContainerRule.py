@@ -5,7 +5,7 @@ class PrivilegedContainerRule(SecurityRule):
 
     name = "privileged-container"
     category = "security"
-    severity = RuleSeverity.HIGH
+    severity = RuleSeverity.HIGH.value
     
     def match(self, ir):
         return hasattr(ir, "containers")
@@ -33,5 +33,7 @@ class PrivilegedContainerRule(SecurityRule):
                     category = self.category,
                     severity = self.severity,
                     resource=ir.name,
-                    message=f"Container '{c.get('name', 'unknown')}' is running in privileged mode → grants full host access → critical security risk"
+                    issue=f"Container runs in privileged mode",
+                    impact=f"Full host access (critical risk)",
+                    fix=f"Remove privileged: true"
                 )

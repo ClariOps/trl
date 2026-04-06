@@ -3,8 +3,8 @@ from trl.core.base import ValidationRule, RuleCategory, RuleSeverity
 
 class NoLivenessProbeRule(ValidationRule):
     name = "no-liveness-probe"
-    category = RuleCategory.RELIABILITY
-    severity = RuleSeverity.MEDIUM
+    category = RuleCategory.RELIABILITY.value
+    severity = RuleSeverity.MEDIUM.value
 
     def match(self, ir):
         return hasattr(ir, "containers")
@@ -22,14 +22,8 @@ class NoLivenessProbeRule(ValidationRule):
             severity=self.severity,
             rule=self.name,
             resource=ir.name,
-            message="Liveness probe not defined → container failures may not be detected → pods may remain unhealthy"
+            issue="Liveness probe not defined",
+            impact="Container failures may not be detected → pods may remain unhealthy",
+            fix="Define livenessProbe to enable automatic detection and recovery of failed containers"
         )
 
-        ctx.report.suggestion(
-            engine=self.engine,
-            category=self.category,
-            severity=self.severity,
-            rule=self.name,
-            resource=ir.name,
-            message="Define livenessProbe to enable automatic detection and recovery of failed containers"
-        )

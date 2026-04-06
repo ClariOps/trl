@@ -4,8 +4,8 @@ from trl.modules.optimizer.utils.resources import cpu_to_millicores, memory_to_m
 
 class OverProvisioningRule(ValidationRule):
      name = "over-provisioning" 
-     category = RuleCategory.COST 
-     severity = RuleSeverity.LOW
+     category = RuleCategory.COST.value
+     severity = RuleSeverity.LOW.value
 
      CPU_THRESHOLD = 1000 # 1 core 
      MEMORY_THRESHOLD = 1024 # 1 Gi 
@@ -38,13 +38,7 @@ class OverProvisioningRule(ValidationRule):
             engine = self.engine,
             rule=self.name, 
             resource=ir.name, 
-            message="Resource requests are high relative to workload → may lead to inefficient resource utilization and increased cost")
-        
-        ctx.report.suggestion(
-            engine=self.engine,
-            severity=self.severity, 
-            category=self.category,
-            rule=self.name,
-            resource=ir.name,
-            message="Reduce resource requests or increase replicas to better distribute workload"
-        )     
+            issue="Resource requests are high relative to workload",
+            impact="May lead to inefficient resource utilization and increased cost",
+            fix="Reduce resource requests or increase replicas to better distribute workload"
+            )
