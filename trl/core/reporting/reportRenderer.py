@@ -4,13 +4,14 @@ class ReportsRenderer:
         self.verbose = verbose
 
     def render(self):
-        self._print_header()
+        
         self._render_section("Errors", self.report.errors, "❌")
         self._render_section("Warnings", self.report.warnings, "⚠")
         self._render_section("Optimizations", self.report.optimizations, "💡")
         self._print_summary()
+        self._print_footer()
 
-    def _print_header(self):
+    def _print_footer(self):
         total = self._total_issues()
         print(f"Found {total} issues "
               f"({len(self.report.errors)} errors, "
