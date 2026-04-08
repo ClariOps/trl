@@ -92,14 +92,14 @@ python -m trl optimize ./examples/demo/bad.yaml --target=local --verbose=True --
 ## 🧪 Example Manifests
 
 ```bash
-examples/bad/   # intentionally misconfigured
-examples/good/  # optimized version
+examples/demo/bad.yaml   # intentionally misconfigured
+examples/demo/good.yaml  # optimized version
 ```
 
 Run:
 
 ```bash
-trl optimize ./examples/bad --target=local
+trl optimize ./examples/demo/bad.yaml --target=local
 ```
 
 ---
@@ -190,4 +190,5 @@ Will open after:
 ## 📜 License
 
 TBD
+##
 **Powered by [KinetixCore Labs ]**
