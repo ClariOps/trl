@@ -12,6 +12,16 @@ It acts as a **pre-deployment intelligence layer** for Kubernetes.
 
 ---
 
+## 🔥 Why TRL?
+
+Unlike traditional tools that focus only on linting or validation:
+
+- TRL combines validation, security, and optimization in a single run
+- Provides actionable fixes (not just warnings)
+- Focuses on pre-deployment intelligence, not post-failure debugging
+- Designed for clarity and fast feedback, not complex pipelines
+
+
 ## 🎯 The Problem
 
 Kubernetes is powerful — but:
@@ -135,9 +145,10 @@ TRL follows a pipeline-based architecture:
    * Validator
    * Security
 3. Aggregate findings
-4. Render final manifests
+4. Render optimized manifests and structured report
 
-👉 See: docs/architecture.md
+👉 See full structured output with Issue / Impact / Fix:
+docs/architecture.md
 
 ---
 
@@ -172,23 +183,22 @@ TRL follows a pipeline-based architecture:
 * SaaS platform (hosted analysis)
 * Multi-orchestrator support
 
-
-
 ---
+
+Experimental DSL support is under development and will be introduced in future releases.
 
 ## 🤝 Contributing
 
-Currently closed for contributions.
+Contributions will be opened soon.
 
-Will open after:
+We are currently stabilizing architecture and rules to ensure a consistent foundation.
 
-* architecture stabilization
-* rule maturity
-
+Stay tuned 🚀
 ---
 
 ## 📜 License
 
-TBD
+Copyright 2026 TruckOverload
+
+Apache 2.0 — See [LICENSE](LICENSE) file for details.
 ##
-**Powered by [KinetixCore Labs ]**
