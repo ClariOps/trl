@@ -1,14 +1,49 @@
+
+
 # 🏗 TRL Architecture
 
-TRL follows a **pipeline-based architecture** designed to analyze, validate, optimize, and secure Kubernetes manifests before deployment.
+TRL is a **pipeline-based pre-deployment intelligence system** for Kubernetes.
+
+It analyzes, optimizes, validates, and secures manifests **before deployment**, ensuring predictable and production-ready configurations.
 
 ---
 
 ## 🔄 High-Level Flow
 
 ```text
-Input YAML → IR → Engines → Aggregation → Renderer → Output
+Input → IR → Optimizer → Validator → Security → Renderer → (Optional) Cloud Engine
 ```
+
+---
+
+## 🧠 Architectural Philosophy
+
+TRL is built on three core principles:
+
+### 1. Pre-Deployment Intelligence
+
+All decisions are made **before deployment**, not after failure.
+
+---
+
+### 2. Clear Separation of Concerns
+
+| Layer        | Responsibility                |
+| ------------ | ----------------------------- |
+| Input        | Load manifests                |
+| IR           | Normalize data                |
+| Engines      | Apply logic (rules)           |
+| Renderer     | Generate final manifests      |
+| Cloud Engine | Execute deployment (optional) |
+
+---
+
+### 3. Predictable System Behavior
+
+* Deterministic output (same input → same result)
+* No hidden mutations
+* Explicit reporting of all changes
+* Strict module boundaries
 
 ---
 
@@ -21,28 +56,25 @@ TRL accepts:
 * Directory of manifests
 * Standard input (stdin)
 
-Examples:
-
 ```bash
-trl optimize ./examples/demo/bad.yaml
-cat manifest.yaml | trl optimize -
+trl optimize ./app.yaml
 ```
 
 ---
 
 ## 🔧 2. Intermediate Representation (IR)
 
-All input manifests are converted into a unified structure called:
+All manifests are converted into a unified structure:
 
 > **IR (Intermediate Representation)**
 
 ### 🎯 Purpose
 
-* Normalize different Kubernetes resources
-* Enable engine-level processing
+* Normalize Kubernetes resources
 * Decouple parsing from logic
+* Enable rule-based processing
 
-### 🧱 Example
+### 🧱 Examples
 
 ```text
 Deployment → DeploymentIR  
@@ -54,29 +86,37 @@ PVC → PersistentVolumeClaimIR
 
 ## ⚙️ 3. Engine Pipeline
 
-TRL processes IR through multiple independent engines.
+TRL processes IR through **independent engines**, executed in strict order.
 
-Each engine is:
+---
 
-* modular
-* rule-driven
-* extensible
+### 🔁 Execution Order
+
+```text
+1. Optimizer
+2. Validator
+3. Security
+4. Renderer
+5. Cloud Engine (optional)
+```
 
 ---
 
 ### 🧠 3.1 Optimizer Engine
 
-**Goal:** Improve resource efficiency
+**Goal:** Improve efficiency and prevent misconfiguration
 
 #### Responsibilities:
 
-* Set default CPU / memory
-* Enforce minimum resource thresholds
-* Suggest replica counts
+* Adjust CPU / memory
+* Enforce minimum thresholds
+* Suggest scaling improvements
+* Apply safe defaults
 
-#### Output:
+#### Behavior:
 
-* Modified IR (applies optimizations)
+* ✅ Allowed to modify IR
+* ✅ MUST report every change
 
 ---
 
@@ -86,14 +126,15 @@ Each engine is:
 
 #### Responsibilities:
 
-* Missing readiness/liveness probes
-* Over/under-provisioning
-* Incorrect service exposure (NodePort, etc.)
+* Missing probes
+* Incorrect exposure (NodePort, etc.)
 * Scaling inconsistencies
+* Misconfigurations
 
-#### Output:
+#### Behavior:
 
-* Warnings (non-blocking issues)
+* ❌ MUST NOT modify IR
+* ✅ Reports warnings with fixes
 
 ---
 
@@ -104,64 +145,153 @@ Each engine is:
 #### Responsibilities:
 
 * Privileged containers
-* Running as root (UID 0)
-* Use of `latest` image tags
-* Unsafe configurations
+* Running as root
+* Unsafe image tags (`latest`)
+* Risky configurations
 
-#### Output:
+#### Behavior:
 
-* Errors / high-severity warnings
+* ❌ MUST NOT modify IR
+* ✅ Reports errors / high-severity warnings
 
 ---
 
-### 🎨 3.4 Renderer Engine
+### 🎨 3.4 Renderer
 
-**Goal:** Generate final manifests
+**Goal:** Generate final Kubernetes manifests
 
 #### Responsibilities:
 
-* Convert IR back to Kubernetes YAML
+* Convert IR → YAML
 * Apply optimizer changes
-* Prepare output for deployment
+* Prepare deployment-ready output
 
 ---
 
-### ☁️ 3.5 Cloud Engine
+### ☁️ 3.5 Cloud Engine (Optional)
 
-**Goal:** Handle deployment
+**Goal:** Execute deployment
 
 #### Responsibilities:
 
-* Deploy manifests to target environment
-* Support dry-run mode
-* Integrate with local or cloud clusters
+* Apply manifests to Kubernetes cluster
+* Support local and cloud targets (AKS, GKE, EKS)
+* Handle dry-run mode
+
+#### 🚫 Strict Constraints:
+
+* MUST NOT modify manifests
+* MUST NOT apply defaults
+* MUST ONLY handle deployment
 
 ---
 
 ## 📊 4. Rule System
 
-Each engine operates using **rules**.
+All engines operate using **rules**.
 
-### 🧩 Rule Characteristics:
+---
+
+### 🧩 Rule Characteristics
 
 * Self-contained logic
-* Match → Apply pattern
-* Categorized (security, reliability, cost)
+* Deterministic behavior
+* No shared state
+* No cross-rule dependency
 
-### 🔁 Flow:
+---
+
+### 🏷 Rule Categories
+
+```text
+scaling
+security
+cost
+reliability
+network
+```
+
+---
+
+### 🔁 Rule Execution Model
 
 ```text
 For each resource:
     For each rule:
         if match:
-            execute
+            apply logic
 ```
 
 ---
 
-## 📦 5. Output Aggregation
+## 🧱 5. Rule Contracts
 
-Results from all engines are combined into:
+### 🔧 Optimizer Rules
+
+* Can modify IR
+* MUST report changes
+
+```python
+ctx.report.optimization(
+    category="scaling",
+    engine="optimizer",
+    rule="cpu-minimum",
+    resource=ir.name,
+    message="CPU adjusted 50m → 100m"
+)
+```
+
+---
+
+### ⚠️ Validator Rules
+
+* Match → Condition → Validate
+* MUST NOT modify IR
+
+```python
+def validate(self, ir, ctx):
+    ctx.report.warning(
+        engine="validator",
+        category="network",
+        severity="medium",
+        rule="nodeport-exposure",
+        resource=ir.name,
+        issue="Service exposed via NodePort",
+        impact="Increases attack surface",
+        fix="Use ClusterIP or Ingress"
+    )
+```
+
+---
+
+### 🔐 Security Rules
+
+* Same structure as validator
+* Higher severity focus
+
+---
+
+### 🔒 Rule Constraints
+
+* MUST be isolated
+* MUST be deterministic
+* MUST NOT share state
+* MUST NOT depend on other rules
+
+---
+
+## 🔁 6. Data Flow Model
+
+* IR is shared across engines
+* No deep copies (unless explicitly needed)
+* Optimizer mutations are visible to all subsequent engines
+* No cross-resource logic (current limitation)
+
+---
+
+## 📦 7. Output Aggregation
+
+Results are grouped into:
 
 * ❌ Errors (blocking)
 * ⚠ Warnings (non-blocking)
@@ -169,75 +299,133 @@ Results from all engines are combined into:
 
 ---
 
-## 🧾 6. Final Output
+## 🧾 8. Final Output
 
 TRL produces:
 
 1. CLI report (human-readable)
-2. Optimized manifests (via renderer)
+2. Optimized manifests (YAML)
 3. Summary (issue count, status)
 
 ---
 
-## 🧠 Design Principles
+# 🧩 Product Architecture Layers
 
-### 1. Pre-Deployment Focus
-
-Detect and fix issues **before** reaching the cluster.
+TRL is evolving into a **multi-layer system**, not just a CLI.
 
 ---
 
-### 2. Modular Architecture
+## 🧱 1. TRL Core (Current — Foundation)
 
-Each engine operates independently → easy to extend.
+**Status: ✅ Implemented**
 
----
+Capabilities:
 
-### 3. Rule-Based System
+* IR system
+* Rule engine
+* Optimizer / Validator / Security
+* CLI interface
 
-Flexible and scalable validation/optimization logic.
-
----
-
-### 4. Separation of Concerns
-
-| Layer    | Responsibility  |
-| -------- | --------------- |
-| Input    | Load manifests  |
-| IR       | Normalize data  |
-| Engines  | Process logic   |
-| Renderer | Generate output |
-| Cloud    | Deploy          |
+👉 This is the **decision engine**
+👉 Must remain stable and predictable
 
 ---
 
-### 5. Extensibility
+## 🚀 2. TRL Deploy (Planned)
 
-TRL is designed to support:
+**Goal:** One-command deployment
 
-* New resource types
-* Custom rules
-* Additional engines
-* Future orchestrators
+```bash
+trl deploy app.yaml
+```
 
----
+Capabilities:
 
-## 🔮 Future Architecture Evolution
+* Wraps kubectl / Helm
+* Uses TRL intelligence
+* Safe deployment execution
 
-Planned enhancements:
-
-* 🤖 AI-based suggestion engine
-* 🌍 Multi-orchestrator support (beyond Kubernetes)
-* ☁️ SaaS-based analysis platform
-* 📊 Cost estimation engine
-* 🧩 CRD generation support
+👉 Developer-friendly UX layer
 
 ---
 
-## 🎯 Summary
+## ☁️ 3. TRL SaaS (Future)
 
-TRL transforms Kubernetes manifests into a structured pipeline:
+**Goal:** Hosted intelligence platform
 
-* Normalize → Analyze → Optimize → Secure → Render
+Capabilities:
 
-👉 Delivering **safe, efficient, and production-ready configurations** before deployment.
+* Upload YAML → get analysis
+* Cost + security insights
+* Team-level usage
+
+👉 Business and scaling layer
+
+---
+
+# 🔮 Future Architecture Evolution
+
+Planned improvements:
+
+---
+
+### ☁️ Cloud Adapter Layer
+
+* AKS / GKE / EKS specific adjustments
+* Applied BEFORE deployment
+* Keeps Cloud Engine pure
+
+---
+
+### 🤖 AI-Based Intelligence
+
+* Smarter optimization suggestions
+* Context-aware recommendations
+
+---
+
+### 🌍 Multi-Orchestrator Support
+
+* Extend beyond Kubernetes
+* Support other deployment platforms
+
+---
+
+### 📊 Cost Intelligence Engine
+
+* Predict cloud cost
+* Recommend savings
+
+---
+
+### 🧩 DSL Layer (Advanced)
+
+* Developer-friendly abstraction
+* Optional, not core
+
+---
+
+# 🎯 Summary
+
+TRL is a **pipeline-driven intelligence system**:
+
+```text
+Normalize → Optimize → Validate → Secure → Render → Deploy
+```
+
+It ensures:
+
+* safer deployments
+* optimized resources
+* predictable behavior
+
+---
+
+## 🧠 Final Principle
+
+> TRL does not replace Kubernetes
+>
+> It makes Kubernetes **safe, efficient, and predictable before execution**
+
+---
+

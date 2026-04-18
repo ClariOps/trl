@@ -13,6 +13,7 @@ from trl.modules.renderer.engine import RendererEngine
 from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
 from trl.core.reporting.reportRenderer import ReportsRenderer
+from trl.core.reporting.deprecatedRenderer import render_report
 from trl.core.logconfig.config import setup_logging
 
 
@@ -51,7 +52,7 @@ def main():
     o.add_argument("--dry-run")  
     o.add_argument("--skip-rules")  
     o.add_argument("--allow-rules")  
-
+    o.add_argument("--apply-aks-defaults")
 
     e = sub.add_parser("explain")
     e.add_argument("file")
@@ -292,7 +293,12 @@ def main():
         else:
             logger.setLevel("INFO")
 
-   
+        # explicit default cloud settings
+        if args.apply_aks_defaults:
+            opts["apply_aks_defaults"]=args.apply_aks_defaults
+
+        logger.info(f"args, {args}")
+
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 

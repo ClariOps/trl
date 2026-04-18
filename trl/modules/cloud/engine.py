@@ -23,7 +23,7 @@ class CloudEngine(Module):
         try:
             kube_client = self._get_aks_client(ctx, target)
             for manifest in ctx.manifests:
-                self._deploy_manifest(kube_client, manifest, target)
+                self._deploy_manifest(kube_client, manifest, ctx.opts, target)
             
             logger.info("Successfully deployed all manifests to AKS")
         
@@ -60,17 +60,21 @@ class CloudEngine(Module):
 
         return HTTPClient(config)       
         
-    def _deploy_manifest(self, kube_client, manifest, target: str):
+    def _deploy_manifest(self, kube_client, manifest, opts, target: str):
         kind = manifest.get("kind")
         name = manifest["metadata"]["name"]
         
         if kind == "Deployment":
-            if target == "aks":
+            if target == "aks" and opts.get("apply_aks_defaults"):
             # for time being cloud value can be set here 
                 # will replace by independent engine for cloud optimization         
-            
-                manifest["spec"]["template"]["spec"].setdefault("nodeSelector", {})["kubernetes.io/arch"] = "amd64"
-            #         
+                spec = manifest["spec"]["template"]["spec"]
+                spec.setdefault("nodeSelector", {})
+                spec["nodeSelector"]["kubernetes.io/arch"] = "amd64"
+                logger.warning(
+                    f"[cloud-default] Applied AKS nodeSelector to Deployment: {name}"
+                )                #    
+                     
             deployment = Deployment(kube_client, manifest)
             deployment.create()
             logger.info(f"Deployed Deployment: {name}")
