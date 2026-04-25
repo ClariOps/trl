@@ -120,18 +120,22 @@ It is a **modular intelligence engine** that can evolve into:
 
 ---
 
-### 3. Execution Layer (Evolving)
+### 3. Execution Layer (Optional)
 
-* optional deployment support
-* integration with Kubernetes clusters
+* Deployment is optional and not required for TRL core usage
+* Responsible only for applying already-processed manifests
+* Does not perform analysis or mutation
 
+👉 Keeps intelligence (core) separate from execution
 ---
 
-### 4. Platform Layer (Future)
+### 4. Platform & Intelligence Layer (Future)
 
-* hosted analysis (SaaS)
-* team-level policies
-* cost and performance insights
+* Cloud Adapter Layer (environment-specific configuration)
+* Relationship Engine (cross-resource analysis)
+* AutoFix Engine (controlled fix execution)
+* Cost Intelligence Engine
+* SaaS platform capabilities
 
 ---
 
@@ -146,23 +150,43 @@ It is a **modular intelligence engine** that can evolve into:
 
 ## 🚧 Non-Goals (Current Phase)
 
-TRL intentionally does NOT aim to:
+TRL intentionally does NOT:
 
-* replace Kubernetes tooling (kubectl, Helm)
-* introduce complex abstractions or DSLs
-* manage runtime orchestration
-* become a full platform prematurely
+* Perform runtime orchestration or monitoring
+* Replace Kubernetes tools (kubectl, Helm)
+* Introduce implicit or automatic fixes without user consent
+* Support cross-resource mutation (until Relationship Engine is introduced)
+* Act as a full platform (focus is core engine first)
 
+👉 DSL is postponed, not abandoned
 ---
 
 ## 🗺 Direction
 
-TRL will evolve in stages:
+TRL evolves in structured phases:
 
-1. **Stability & Trust** — consistent, predictable analysis
-2. **Usability** — smoother CLI workflows and developer experience
-3. **Intelligence** — deeper optimization and cost awareness
-4. **Platform** — SaaS and team-level capabilities
+### 1. Stability & Trust (Current)
+- Deterministic engine
+- Strong guarantees
+- Clear reporting
+
+### 2. Intelligence Expansion
+- Relationship Engine (cross-resource awareness)
+- Cost Intelligence
+- Smarter rule system
+
+### 3. Controlled Mutation Layer
+- AutoFix Engine (opt-in fixes)
+- Safe execution of suggestions
+
+### 4. Environment Awareness
+- Cloud Adapter Layer
+- Multi-cloud compatibility
+
+### 5. Platform Evolution
+- SaaS
+- Team policies
+- CI/CD integrations
 
 ---
 

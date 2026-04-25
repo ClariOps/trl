@@ -6,9 +6,13 @@
 
 ## 🚀 What is TRL?
 
-TRL is a CLI-first engine that **analyzes Kubernetes manifests before deployment** to detect issues, optimize resources, and enforce best practices automatically.
+TRL is a CLI-first engine that **analyzes and improves Kubernetes manifests before deployment**.
 
-It acts as a **pre-deployment intelligence layer** for Kubernetes.
+It acts as a **pre-deployment intelligence layer**, helping teams detect issues, optimize resources, and enforce best practices.
+
+Deployment is optional — TRL can be used purely for analysis or integrated into deployment workflows.
+
+👉 [See system model for how TRL works conceptually](docs/system-model.md)
 
 ---
 
@@ -71,7 +75,13 @@ git clone <repo>
 cd trl
 pip install -r requirements.txt
 
-python -m trl optimize ./examples/demo/bad.yaml --target=local --verbose=True --dry-run
+### Analyze & Optimize (Recommended)
+
+python -m trl optimize ./examples/demo/bad.yaml --dry-run
+
+### Deploy (Optional)
+
+python -m trl optimize ./examples/demo/bad.yaml --target=local
 ```
 
 ---
@@ -109,8 +119,13 @@ examples/demo/good.yaml  # optimized version
 Run:
 
 ```bash
+trl optimize ./examples/demo/bad.yaml --dry-run
+```
+Run with Deployment(Optional):
+```bash
 trl optimize ./examples/demo/bad.yaml --target=local
 ```
+
 
 ---
 
@@ -139,15 +154,16 @@ Native Helm support is planned in future releases.
 TRL follows a pipeline-based architecture:
 
 1. Load manifests → convert into IR (Intermediate Representation)
-2. Run engines:
+2. Run engines in order:
 
-   * Optimizer
-   * Validator
-   * Security
-3. Aggregate findings
-4. Render optimized manifests and structured report
+   * Optimizer (applies safe improvements)
+   * Validator (detects misconfigurations)
+   * Security (detects risks)
 
-👉 See full structured output with Issue / Impact / Fix:
+3. Render final manifests from IR
+4. (Optional) Deploy to cluster
+
+👉 See full architecture:
 docs/architecture.md
 
 ---
@@ -178,6 +194,9 @@ docs/architecture.md
 
 ## 🗺 Roadmap
 
+* Auto-fix engine for safe automated remediation
+* Cloud-specific adaptation layer (AKS, GKE, EKS)
+* Relationship-aware analysis (cross-resource intelligence)
 * Rule expansion (cost + reliability)
 * AI-powered suggestions
 * SaaS platform (hosted analysis)

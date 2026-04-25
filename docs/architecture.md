@@ -283,6 +283,7 @@ def validate(self, ir, ctx):
 ## 🔁 6. Data Flow Model
 
 * IR is shared across engines
+* Renderer produces final canonical manifests, [Cloud Adapter(In Future) operates on rendered output, not IR]
 * No deep copies (unless explicitly needed)
 * Optimizer mutations are visible to all subsequent engines
 * No cross-resource logic (current limitation)
@@ -371,9 +372,64 @@ Planned improvements:
 
 ### ☁️ Cloud Adapter Layer
 
-* AKS / GKE / EKS specific adjustments
-* Applied BEFORE deployment
-* Keeps Cloud Engine pure
+Applies environment-specific adjustments before deployment.
+
+Responsibilities:
+
+- Inject cloud-specific configurations (AKS, GKE, EKS)
+- Handle storage classes, load balancer types, etc.
+
+#### Constraints:
+
+- MUST NOT mutate IR
+- MUST operate on rendered manifests only
+- Runs before Cloud Engine
+- Keeps Cloud Engine execution-only
+
+---
+
+### 🔧 AutoFix Engine
+
+A controlled mutation engine for applying fixes suggested by Validator and Security.
+
+Responsibilities:
+
+- Apply safe, rule-based fixes
+- Convert suggestions into actionable changes
+- Operate only when explicitly enabled
+
+#### Design Principles:
+
+- Separate detection from action
+- Preserve deterministic behavior
+- All mutations must be explicitly reported
+
+#### Position in Pipeline (Future):
+
+Input → IR → Optimizer → Validator → Security → AutoFix → Renderer
+
+---
+
+### 🧩 Relationship Engine
+
+A dedicated engine for cross-resource analysis.
+
+Responsibilities:
+
+- Detect relationships between resources (Deployment, Service, Ingress)
+- Identify broken or missing connections
+- Surface system-level misconfigurations
+
+Examples:
+
+- Deployment without Service  
+- Service with unmatched selectors  
+- Ingress pointing to non-existent backend  
+
+#### Constraints:
+
+- MUST NOT mutate IR (initial phase)
+- Operates after Validator and Security
 
 ---
 
