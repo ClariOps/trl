@@ -6,7 +6,7 @@
 
 ## 🚀 What is TRL?
 
-TRL is a CLI-first engine that **analyzes and improves Kubernetes manifests before deployment**.
+TRL is a CLI-first engine that **analyzes and improves Kubernetes manifests before deployment**. 
 
 It acts as a **pre-deployment intelligence layer**, helping teams detect issues, optimize resources, and enforce best practices.
 
@@ -15,6 +15,13 @@ Deployment is optional — TRL can be used purely for analysis or integrated int
 👉 [See system model for how TRL works conceptually](docs/system-model.md)
 
 ---
+
+## 📚 Documentation
+
+TRL documentation is structured across multiple layers (architecture, system model, guarantees, and vision).
+
+👉 Start here: [Documentation Index](docs/README.md)
+
 
 ## 🔥 Why TRL?
 
@@ -165,6 +172,7 @@ TRL follows a pipeline-based architecture:
 
 👉 See full architecture:
 docs/architecture.md
+
 
 ---
 
