@@ -22,6 +22,7 @@ TRL documentation is structured across multiple layers (architecture, system mod
 
 👉 Start here: [Documentation Index](docs/README.md)
 
+---
 
 ## 🔥 Why TRL?
 
