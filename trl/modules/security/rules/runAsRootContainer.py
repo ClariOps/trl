@@ -27,31 +27,31 @@ class RunAsRootRule(SecurityRule):
         return False
 
     def action(self, ir, ctx):
-
+        resource = ir.name
         for c in ir.containers:
             sc = c.get("securityContext", {})
 
             name = c.get("name", "unknown")
 
-            if sc.get("runAsUser") == 0 or "runAsUser" not in sc: 
-                ctx.report.warning(
+            if sc.get("runAsUser") == 0: 
+                ctx.report.error(
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,
-                    resource=name,
+                    resource=resource,
                     severity=self.severity.HIGH.value,
-                    issue=f"Container '{name}' runs as root (UID 0)",
+                    issue=f"Container '{resource}/{name}' runs as root (UID 0)",
                     impact="Increases risk of container escape and privilege escalation",
                     fix="Set securityContext.runAsUser to a non-root UID (e.g., 1000)"
                 )
             elif "runAsUser" not in sc:
-                ctx.report.warning(
+                ctx.report.error(
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,
-                    resource=name,
+                    resource=resource,
                     severity=self.severity.MEDIUM.value,
-                    issue=f"Container '{name}' does not define runAsUser",
+                    issue=f"Container '{resource}/{name}' does not define runAsUser",
                     impact="Defaults to root user, increasing security risk",
                     fix="Explicitly set securityContext.runAsUser to a non-root UID"
                 )

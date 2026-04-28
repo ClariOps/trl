@@ -21,7 +21,7 @@ class ReportsRenderer:
     def _render_section(self, title, items, icon):
         if not items:
             return
-
+        print("-" * 40)
         print(f"{icon} {title} ({len(items)})")
         print("-" * 40)
 

@@ -6,7 +6,6 @@ class CpuLimitRule(OptimizationRule):
     name = "cpu-limit-default"
     category = "generic"
 
-    DEFAULT_CPU_LIMIT = "100m"
 
     def match(self, ir):
         return hasattr(ir, "resources")
@@ -23,13 +22,13 @@ class CpuLimitRule(OptimizationRule):
 
         ir.resources.setdefault("limits", {})
 
-        ir.resources["limits"]["cpu"] = self.DEFAULT_CPU_LIMIT
+        ir.resources["limits"]["cpu"] = ir.resources["requests"]["cpu"]
 
         ctx.report.optimization(
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message=f"CPU limit not defined → defaulting to {self.DEFAULT_CPU_LIMIT} to prevent resource overuse"  
+            message=f"CPU limit not defined → defaulting to {ir.resources["requests"]["cpu"]} to prevent resource overuse"  
         )
             #f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
         

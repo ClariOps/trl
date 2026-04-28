@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: over-provisioned
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: over
+  template:
+    metadata:
+      labels:
+        app: over
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        resources:
+          requests:
+            cpu: "2000m"
+            memory: "2Gi"

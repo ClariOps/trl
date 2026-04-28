@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: full-risk-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: full-risk
+  template:
+    metadata:
+      labels:
+        app: full-risk
+    spec:
+      containers:
+        - name: app
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+          # ❌ Missing resources (optimizer will mutate)
+          # ❌ Missing probes
+          # ❌ Running as root
+          securityContext:
+            runAsUser: 0
+            privileged: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: full-risk-service
+spec:
+  type: NodePort
+  selector:
+    app: WRONG-LABEL   # ❌ mismatch
+  ports:
+    - port: 80
+      targetPort: 9999  # ❌ invalid target
+      nodePort: 30080

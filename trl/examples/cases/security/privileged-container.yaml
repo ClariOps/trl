@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privileged-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: privileged
+  template:
+    metadata:
+      labels:
+        app: privileged
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        securityContext:
+          privileged: true

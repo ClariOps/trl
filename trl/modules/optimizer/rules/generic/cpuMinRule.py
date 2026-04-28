@@ -30,7 +30,7 @@ class CpuMinimumRule(OptimizationRule):
                 rule= self.name,
                 engine = self.engine,
                 resource=ir.name,
-                message= f"CPU request ({old}) below recommended minimum → increased to {self.MIN_CPU} to avoid throttling",
+                message= f"CPU request ({old}) below recommended minimum → increased to {self.MIN_CPU}m to avoid throttling",
         )
           #  f"[{self.name}] {ir.name}: CPU increased {old} → {self.MIN_CPU}m"
         

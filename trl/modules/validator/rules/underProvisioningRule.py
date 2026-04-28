@@ -7,8 +7,8 @@ class UnderProvisioningRule(ValidationRule):
     name = "under-provisioning"
     category = RuleCategory.RELIABILITY.value
     severity = RuleSeverity.LOW.value
-    MIN_CPU = 100       # 100m
-    MIN_MEMORY = 128    # 128Mi
+    MIN_CPU = 90       # 90m
+    MIN_MEMORY = 120    # 120Mi
 
     def match(self, ir):
         return hasattr(ir, "resources")

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: under-provisioned
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: under
+  template:
+    metadata:
+      labels:
+        app: under
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "8Mi"

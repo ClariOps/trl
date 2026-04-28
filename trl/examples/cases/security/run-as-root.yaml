@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: root-user
+spec:
+  selector:
+    matchLabels:
+      app: root
+  template:
+    metadata:
+      labels:
+        app: root
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        securityContext:
+          runAsUser: 0

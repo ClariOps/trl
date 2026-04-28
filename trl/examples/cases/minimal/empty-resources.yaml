@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: empty-resources
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: empty
+  template:
+    metadata:
+      labels:
+        app: empty
+    spec:
+      containers:
+      - name: app
+        image: nginx
+        resources: {}

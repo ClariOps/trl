@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minimal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minimal
+  template:
+    metadata:
+      labels:
+        app: minimal
+    spec:
+      containers:
+      - name: app
+        image: nginx

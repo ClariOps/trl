@@ -1,0 +1,15 @@
+
+
+
+# TRL limitation: no cross-resource validation yet
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mismatch
+spec:
+  selector:
+    app: wrong-label
+  ports:
+    - port: 80
+      targetPort: 80
