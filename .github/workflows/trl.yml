@@ -23,7 +23,7 @@ jobs:
 
       - name: Run TRL
         run: |
-          python -m trl optimize ./examples/demo/bad.yaml --dry-run --output=json > report.json
+          python -m trl optimize ./examples/demo/good.yaml --dry-run --output=json > report.json
 
       - name: Fail on errors
         run: |
