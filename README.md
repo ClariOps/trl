@@ -1,6 +1,5 @@
 
 # TRL — Pre-Deployment Intelligence for Kubernetes
-> Think of TRL as “lint + security + optimization — combined into one intelligent pre-deployment engine.”
 
 > Analyze • Optimize • Secure • Validate — before it hits your cluster
 
@@ -170,6 +169,8 @@ or
 ```bash
    python -m trl explain ./trl/examples/demo/good.yaml  --verbose --output=json
 ```
+
+```json
    {
   "summary": {
     "status": "PASSED",
@@ -192,7 +193,7 @@ or
     }
   }
 }
-
+```
 ---
 ## 🧪 Example Manifests
 
@@ -227,6 +228,7 @@ Example using GitHub Actions:
 - name: Fail if issues found
   run: |
     cat report.json | jq -r '.status' | grep FAILED && exit 1 || exit 0
+```
 
 ---
 
