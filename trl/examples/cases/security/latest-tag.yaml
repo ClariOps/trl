@@ -1,16 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: no-probes
+  name: root-user
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: no-probes
+      app: root
   template:
     metadata:
       labels:
-        app: no-probes
+        app: root
     spec:
       containers:
       - name: app

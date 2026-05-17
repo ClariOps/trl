@@ -6,7 +6,7 @@ class UnderProvisioningRule(ValidationRule):
 
     name = "under-provisioning"
     category = RuleCategory.RELIABILITY.value
-    severity = RuleSeverity.LOW.value
+    severity = RuleSeverity.MEDIUM.value
     MIN_CPU = 90       # 90m
     MIN_MEMORY = 120    # 120Mi
 

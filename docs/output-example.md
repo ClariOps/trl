@@ -7,7 +7,7 @@ This example demonstrates how TRL analyzes Kubernetes manifests and provides act
 ## 🚀 Command
 
 ```bash
-python -m trl optimize ./examples/demo/bad.yaml --target=local --verbose=true --dry-run=True
+python -m trl optimize ./trl/examples/cases/mixed/full-risk-app.yaml --dry-run --verbose
 ```
 
 ---
@@ -15,97 +15,216 @@ python -m trl optimize ./examples/demo/bad.yaml --target=local --verbose=true --
 ## 🔍 Execution Logs (Verbose Mode)
 
 ```text
-02:35:20 | INFO     | trl.cli.main | check arg target: local
-02:35:20 | INFO     | trl.modules.optimizer.engine | Initializing optimizer ........
-02:35:20 | INFO     | trl.modules.optimizer.engine | 2 resources loaded
+████████╗██████╗ ██╗     
+╚══██╔══╝██╔══██╗██║     
+   ██║   ██████╔╝██║     
+   ██║   ██╔══██╗██║     
+   ██║   ██║  ██║███████╗
+   ╚═╝   ╚═╝  ╚═╝╚══════╝
 
-02:35:20 | DEBUG    | trl.core.base | cpu-minimum: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | cpu-minimum: completed
-02:35:20 | DEBUG    | trl.core.base | memory-minimum: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | memory-minimum: completed
+🚚 TRL — Pre-Deployment Intelligence System
+────────────────────────────────────────────
+Analyze • Optimize • Validate • Secure
 
-02:35:20 | INFO     | trl.modules.optimizer.engine | Optimizer completed
+"Making Kubernetes predictable before it runs"
 
-02:35:20 | INFO     | trl.modules.validator.engine | Initializing Validator ...
-02:35:20 | DEBUG    | trl.core.base | under-provisioning: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | no-readiness-probe: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | no-liveness-probe: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | nodeport-exposure: executing (resource=backend-service)
-02:35:20 | INFO     | trl.modules.validator.engine | Validator completed
+14:03:35 | INFO     | trl.cli.main | args, Namespace(cmd='optimize', file='./trl/examples/cases/mixed/full-risk-app.yaml', target=None, context=None, verbose=True, dry_run=True, skip_rules=False, allow_rules=False, apply_aks_defaults=False, output=None)
+14:03:35 | INFO     | trl.modules.optimizer.engine | Initializing optimizer ........
+14:03:35 | INFO     | trl.modules.optimizer.engine | 2 resources loaded
+14:03:35 | DEBUG    | trl.core.base | cpu-default: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | cpu-default: completed
+14:03:35 | DEBUG    | trl.core.base | memory-default: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | memory-default: completed
+14:03:35 | DEBUG    | trl.core.base | cpu-limit-default: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | cpu-limit-default: completed
+14:03:35 | DEBUG    | trl.core.base | memory-limit-default: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | memory-limit-default: completed
+14:03:35 | DEBUG    | trl.core.base | replica-default: not applicable (resource=full-risk-app)
+14:03:35 | INFO     | trl.modules.optimizer.engine | Optimizer completed
 
-02:35:20 | INFO     | trl.modules.security.engine | Initializing Security check ...
-02:35:20 | DEBUG    | trl.core.base | latest-tag: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | privileged-container: executing (resource=backend)
-02:35:20 | DEBUG    | trl.core.base | run-as-root: executing (resource=backend)
-02:35:20 | INFO     | trl.modules.security.engine | Security check completed
+14:03:35 | DEBUG    | asyncio | Using selector: KqueueSelector
+14:03:35 | INFO     | trl.modules.validator.engine | Initializing Validator ...
+14:03:35 | DEBUG    | trl.core.base | replica-scaling: not applicable (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | over-provisioning: not applicable (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | under-provisioning: not applicable (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | no-readiness-probe: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | no-readiness-probe: completed
+14:03:35 | DEBUG    | trl.core.base | no-liveness-probe: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | no-liveness-probe: completed
+14:03:35 | DEBUG    | trl.core.base | nodeport-exposure: executing (resource=full-risk-service)
+14:03:35 | DEBUG    | trl.core.base | nodeport-exposure: completed
+14:03:35 | INFO     | trl.modules.validator.engine | Validator completed
 
-02:35:20 | INFO     | trl.modules.renderer.engine | Renderer completed
-02:35:20 | INFO     | trl.modules.cloud.engine | Dry-run enabled, skipping deployment
-```
+14:03:35 | INFO     | trl.modules.security.engine | Initializing Security check ...
+14:03:35 | DEBUG    | trl.core.base | latest-tag: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | latest-tag: completed
+14:03:35 | DEBUG    | trl.core.base | privileged-container: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | privileged-container: completed
+14:03:35 | DEBUG    | trl.core.base | run-as-root: executing (resource=full-risk-app)
+14:03:35 | DEBUG    | trl.core.base | run-as-root: completed
+14:03:35 | INFO     | trl.modules.security.engine | Security check completed
 
----
+14:03:35 | INFO     | trl.modules.renderer.engine | Initializing Renderer ...
+14:03:35 | INFO     | trl.modules.renderer.engine | Renderer completed
 
-## ❌ Errors
+14:03:35 | INFO     | trl.modules.cloud.engine | Dry-run enabled, skipping deployment
 
-```text
-[HIGH] privileged-container
-Resource: backend
+
+--------------------------------------------------
+Resource: full-risk-app
+--------------------------------------------------
+❌ [HIGH] privileged-container
 Issue : Container runs in privileged mode
 Impact: Full host access (critical risk)
 Fix   : Remove privileged: true
-```
+Engine: security
+Category: security
 
----
+❌ [HIGH] run-as-root
+Issue : Container 'full-risk-app/app' runs as root (UID 0)
+Impact: Increases risk of container escape and privilege escalation
+Fix   : Set securityContext.runAsUser to a non-root UID (e.g., 1000)
+Engine: security
+Category: security
 
-## ⚠ Warnings
+⚠ [MEDIUM] no-readiness-probe
+Issue : Readiness probe not defined
+Impact: Traffic may be routed to unready pods → potential request failures
+Fix   : Define readinessProbe to ensure traffic is only sent to healthy pods
+Engine: validator
+Category: reliability
 
-```text
-[LOW] under-provisioning
-Issue : CPU (100m), Memory (128Mi) below recommended levels
+⚠ [MEDIUM] no-liveness-probe
+Issue : Liveness probe not defined
+Impact: Container failures may not be detected → pods may remain unhealthy
+Fix   : Define livenessProbe to enable automatic detection and recovery of failed containers
+Engine: validator
+Category: reliability
 
-[MEDIUM] no-readiness-probe
-Issue : Traffic may be routed to unready pods
-
-[MEDIUM] no-liveness-probe
-Issue : Container failures may not be detected
-
-[MEDIUM] nodeport-exposure
-Issue : Service exposed on all node IPs
-
-[LOW] latest-tag
+⚠ [LOW] latest-tag
 Issue : Image uses mutable tag 'latest'
+Impact: May lead to unpredictable deployments → increases risk of unverified changes
+Fix   : Use a fixed version tag (e.g., v1.2.3) to ensure consistent and reproducible deployments
+Engine: security
+Category: generic
 
-[HIGH] run-as-root
-Issue : Container runs as root (UID 0)
+💡 [LOW] cpu-default
+Change   : CPU request not defined → defaulting to 100m → ensure baseline scheduling
+Engine: optimizer
+
+💡 [LOW] memory-default
+Change   : Memory request not defined → defaulting to 128Mi to ensure stable scheduling
+Engine: optimizer
+
+💡 [LOW] cpu-limit-default
+Change   : CPU limit not defined → defaulting to 100m to prevent resource overuse
+Engine: optimizer
+
+💡 [LOW] memory-limit-default
+Change   : Memory limit not defined → defaulting to 128Mi to prevent excessive memory usage
+Engine: optimizer
+
+--------------------------------------------------
+Resource: full-risk-service
+--------------------------------------------------
+⚠ [MEDIUM] nodeport-exposure
+Issue : Service exposed via NodePort → opens access on every node IP
+Impact: Increases attack surface → may lead to unauthorized access
+Fix   : Use ClusterIP for internal services or Ingress for controlled external access
+Engine: validator
+Category: network
+
+
+Status: FAILED
+Found 10 issues (❌ 2 errors, ⚠ 4 warnings, 💡 4 optimizations)
 ```
 
 ---
+## 🔄 JSON Output (Pipeline Mode)
 
-## 💡 Optimizations Applied
-
-```text
-[LOW] cpu-minimum
-Change : CPU increased from 50m → 100m
-
-[LOW] memory-minimum
-Change : Memory increased from 64Mi → 128Mi
+```bash
+python -m trl optimize ./trl/examples/cases/mixed/full-risk-app.yaml --dry-run --verbose --output=json
 ```
 
----
-
-## 📊 Summary
-
-```text
-Errors        : 1
-Warnings      : 6
-Optimizations : 2
-
-Total Issues  : 9
-Status        : FAILED
 ```
+{
+  "summary": {
+    "total": 10,
+    "errors": 2,
+    "warnings": 4,
+    "optimizations": 4
+  },
+  "resources": {
+    "full-risk-app": {
+      "errors": [
+        {
+          "rule": "privileged-container",
+          "severity": "HIGH",
+          "category": "security"
+        },
+        {
+          "rule": "run-as-root",
+          "severity": "HIGH",
+          "category": "security"
+        }
+      ],
+      "warnings": [
+        {
+          "rule": "no-readiness-probe",
+          "severity": "medium",
+          "category": "reliability"
+        },
+        {
+          "rule": "no-liveness-probe",
+          "severity": "medium",
+          "category": "reliability"
+        },
+        {
+          "rule": "latest-tag",
+          "severity": "low",
+          "category": "generic"
+        }
+      ],
+      "optimizations": [
+        {
+          "rule": "cpu-default",
+          "severity": "low",
+          "category": "generic"
+        },
+        {
+          "rule": "memory-default",
+          "severity": "low",
+          "category": "generic"
+        },
+        {
+          "rule": "cpu-limit-default",
+          "severity": "low",
+          "category": "generic"
+        },
+        {
+          "rule": "memory-limit-default",
+          "severity": "low",
+          "category": "generic"
+        }
+      ]
+    },
+    "full-risk-service": {
+      "errors": [],
+      "warnings": [
+        {
+          "rule": "nodeport-exposure",
+          "severity": "medium",
+          "category": "network"
+        }
+      ],
+      "optimizations": []
+    }
+  }
+}
 
+
+```
 ---
-
 ## 🧠 What This Shows
 
 TRL automatically:

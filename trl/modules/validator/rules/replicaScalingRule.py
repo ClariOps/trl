@@ -5,7 +5,7 @@ from trl.modules.optimizer.utils.resources import cpu_to_millicores
 class ReplicaScalingSuggestionRule(ValidationRule):
 
     name = "replica-scaling"
-    CPU_THRESHOLD = 500  # millicores
+    CPU_THRESHOLD = 499  # millicores
     category = RuleCategory.SCALING.value
     severity = RuleSeverity.MEDIUM.value
     def match(self, ir):

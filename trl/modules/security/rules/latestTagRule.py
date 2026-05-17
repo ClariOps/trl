@@ -28,7 +28,7 @@ class LatestTagRule(SecurityRule):
             engine = self.engine,
             resource=ir.name,
             issue=f"Image uses mutable tag 'latest'",
-            impact=f"may lead to unpredictable deployments and unverified image change",
+            impact=f"May lead to unpredictable deployments → increases risk of unverified changes",
             fix=f"Use a fixed version tag (e.g., v1.2.3) to ensure consistent and reproducible deployments",
         )
                  

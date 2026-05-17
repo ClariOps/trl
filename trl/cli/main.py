@@ -13,8 +13,10 @@ from trl.modules.renderer.engine import RendererEngine
 from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
 from trl.core.reporting.reportRenderer import ReportsRenderer
+from trl.core.reporting.jsonRenderer import JSONRenderer
 from trl.core.reporting.deprecatedRenderer import render_report
 from trl.core.logconfig.config import setup_logging
+from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner
 
 
 def main():
@@ -30,33 +32,34 @@ def main():
 
     d.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     d.add_argument("--verbose", help="Detailed Reporting")
-    d.add_argument("--dry-run")
-    d.add_argument("--skip-rules")  
-    d.add_argument("--allow-rules")  
+    d.add_argument("--dry-run", action="store_true")
+    d.add_argument("--skip-rules", action="store_true")  
+    d.add_argument("--allow-rules", action="store_true")  
 
     r = sub.add_parser("run")
     r.add_argument("file")
     r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     r.add_argument("--verbose", help="Detailed Reporting")
     r.add_argument("--helm")
-    r.add_argument("--dry-run")
-    r.add_argument("--skip-rules")  
-    r.add_argument("--allow-rules")  
-
-
+    r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--skip-rules", action="store_true")  
+    r.add_argument("--allow-rules", action="store_true")  
+    
     o = sub.add_parser("optimize")
     o.add_argument("file")
     o.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     o.add_argument("--context",help="Set Context to deploy")
-    o.add_argument("--verbose", help="Detailed Reporting")
-    o.add_argument("--dry-run")  
-    o.add_argument("--skip-rules")  
-    o.add_argument("--allow-rules")  
-    o.add_argument("--apply-aks-defaults")
+    o.add_argument("--verbose", help="Detailed Reporting", action="store_true")
+    o.add_argument("--dry-run", action="store_true")  
+    o.add_argument("--skip-rules",action="store_true")  
+    o.add_argument("--allow-rules",action="store_true")  
+    o.add_argument("--apply-aks-defaults",action="store_true")
+    o.add_argument("--output",choices=["json"])
 
     e = sub.add_parser("explain")
     e.add_argument("file")
-    e.add_argument("--verbose", help="Detailed Reporting")
+    e.add_argument("--verbose", help="Detailed Reporting",action="store_true")
+    e.add_argument("--output",choices=["json"])
 
     args = p.parse_args()
 
@@ -64,7 +67,9 @@ def main():
     #print("args response is:", args)
 
     #cli based
-    setup_logging(verbose=args.verbose)
+    if not args.output == "json":
+        setup_logging(verbose=args.verbose)
+        render_banner()
     logger = logging.getLogger(__name__)
 
 
@@ -77,25 +82,7 @@ def main():
             raise SystemExit("Missing required flags: --name --cpu --memory --image or use --helm")
         irs.append(DeploymentIR(name=args.name, image=args.image, cpu=args.cpu, memory=args.memory))
         
-        opts = {}
-        if args.target:
-            opts["target"] = args.target
-
-        if args.target != "local" and args.context:
-            opts["context"] = args.context    
-        
-        if args.dry_run:
-            opts["dry_run"] = args.dry_run
-
-        if args.skip_rules:
-            opts["skip_rules"]= args.skip_rules
-            logger.info(f"Skip: rule is {opts} ")
-
-    
-        if args.allow_rules:
-            opts["allow_rules"]= args.allow_rules
-            logger.info(f"Allowed Only: rule is {opts} ")
-
+        opts = build_opts(args)
        
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Enter main module: {ctx.artifacts}") 
@@ -117,25 +104,7 @@ def main():
         irs = load_user_irs(args.file)
         logger.info(f"dsl irs are:{irs}")
 
-        opts = {}
-        if args.target:
-            opts["target"] = args.target
-
-        if args.target != "local" and args.context:
-            opts["context"] = args.context            
-        
-        if args.dry_run:
-            opts["dry_run"] = args.dry_run
-
-        if args.skip_rules:
-            opts["skip_rules"]= args.skip_rules
-            logger.info(f"Skip: rule is {opts} ")
-
-    
-        if args.allow_rules:
-            opts["allow_rules"]= args.allow_rules
-            logger.info(f"Allowed Only: rule is {opts} ")
-
+        opts = build_opts(args)
        
         ctx = RunContext(irs=irs, opts= opts)
         logger.info(f"Artifacts: {ctx.artifacts}") 
@@ -153,62 +122,20 @@ def main():
         logger.info(f"After run context is: {ctx.__dict__}")
 
         render_report(ctx.report, args.verbose)
+
     # yaml based
-    
     elif args.cmd == "explain":
-        irs = []
         user_path = args.file 
-
-        # 2. Check if the user gave a directory or a specific file
-        if os.path.isdir(user_path):
-        # If it's a folder, look for all .yaml and .yml files inside
-            search_pattern = os.path.join(user_path, "*.y*ml")
-        else:
-        # If it's a specific file, just use that
-            search_pattern = user_path
-
-        IR_MAPPING = {
-            "Deployment": DeploymentIR,
-            "Service": ServiceIR,
-            "Ingress": IngressIR,
-            "ConfigMap": ConfigMapIR,
-            "Secret": SecretIR,
-            "PersistentVolumeClaim": PVCIR,
-        }
-
-        for filepath in glob.glob(search_pattern):
-            with open(filepath, "r") as f:
-            # 3. Use safe_load_all to handle multi-document YAML files
-                documents = yaml.safe_load_all(f)
-            
-                for data in documents:
-                    if not data or "kind" not in data:
-                        continue
-                
-                # 4. Dispatch to the correct IR class based on 'kind'
-                    kind = data.get("kind")
-                    ir_class = IR_MAPPING.get(kind)
-                
-                    if ir_class:
-                        irs.append(ir_class(manifest=data))
-                    else:
-                        logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
-
-        if args.verbose:
-            logger.setLevel("DEBUG")
-        else:
-            logger.setLevel("INFO")
-
+        irs = load_yaml_irs(user_path, logger)
+        opts = {}
         logger.info("Analyzing kubernetes resources ...") 
-        logger.debug(f"yaml data: {data}")
-
+        
         # security rules       
         # opts = {
         #     "allow_rules": ["run-as-root", "privileged-container"],     
         #     "skip_rules": ["latest-tag"]
         # }
-        opts = {}
-
+        
         ctx = RunContext(irs=irs, opts=opts)
         bus = ServiceBus(seq_before=[
                             ],
@@ -218,85 +145,24 @@ def main():
                         )
               
         bus.run(ctx)
-
-
-
-        renderer = ReportsRenderer(ctx.report, args.verbose) 
+        if args.output == "json":
+            renderer = JSONRenderer(ctx.report)
+        else:
+            renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
+        
         renderer.render()
 
 
     elif args.cmd == "optimize":
-        irs = []
+        
         user_path = args.file 
 
-        # 2. Check if the user gave a directory or a specific file
-        if os.path.isdir(user_path):
-        # If it's a folder, look for all .yaml and .yml files inside
-            search_pattern = os.path.join(user_path, "*.y*ml")
-        else:
-        # If it's a specific file, just use that
-            search_pattern = user_path
+        irs = load_yaml_irs(user_path, logger)
 
-        IR_MAPPING = {
-            "Deployment": DeploymentIR,
-            "Service": ServiceIR,
-            "Ingress": IngressIR,
-            "ConfigMap": ConfigMapIR,
-            "Secret": SecretIR,
-            "PersistentVolumeClaim": PVCIR,
-        }
-
-        for filepath in glob.glob(search_pattern):
-            with open(filepath, "r") as f:
-            # 3. Use safe_load_all to handle multi-document YAML files
-                documents = yaml.safe_load_all(f)
-            
-                for data in documents:
-                    if not data or "kind" not in data:
-                        continue
-                
-                # 4. Dispatch to the correct IR class based on 'kind'
-                    kind = data.get("kind")
-                    ir_class = IR_MAPPING.get(kind)
-                
-                    if ir_class:
-                        irs.append(ir_class(manifest=data))
-                    else:
-                        logger.warning(f"Warning: No IR class defined for kind '{kind}' in {filepath}")
-
+        opts = build_opts(args)       
         
-        #logger.info(f"yaml data: {data}")
-
-        opts = {}
-        if args.target:
-            opts["target"] = args.target
-
-        if args.target != "local" and args.context:
-            opts["context"] = args.context  
-
-
-        logger.info(f"check arg target: {args.target}")
-
-        if args.dry_run:
-            opts["dry_run"]= args.dry_run
-        if args.skip_rules:
-            opts["skip_rules"]= args.skip_rules
-            logger.info(f"Skip: rule is {opts} ")
-
-    
-        if args.allow_rules:
-            opts["allow_rules"]= args.allow_rules
-            logger.info(f"Allowed Only: rule is {opts} ")
-        
-        if args.verbose:
-            logger.setLevel("DEBUG")
-        else:
-            logger.setLevel("INFO")
-
         # explicit default cloud settings
-        if args.apply_aks_defaults:
-            opts["apply_aks_defaults"]=args.apply_aks_defaults
-
+        
         logger.info(f"args, {args}")
 
         ctx = RunContext(irs=irs, opts=opts)
@@ -308,7 +174,11 @@ def main():
                         seq_after = [RendererEngine(), CloudEngine()]
                         )
         bus.run(ctx)
-        renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
+        if args.output == "json":
+            renderer = JSONRenderer(ctx.report)
+        else:
+            renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
+        
         renderer.render()
         
 if __name__ == "__main__":

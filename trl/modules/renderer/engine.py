@@ -10,7 +10,7 @@ class RendererEngine(Module):
     def process(self, ctx: RunContext) -> None:
         logger.info("Initializing Renderer ...")
         ctx.manifests = [ir.to_manifest() for ir in ctx.irs]
-        logger.debug(f"Manifest in renderer {ctx.manifests}")       
+        #logger.debug(f"Manifest in renderer {ctx.manifests}")       
         logger.info("Renderer completed\n")
         
 

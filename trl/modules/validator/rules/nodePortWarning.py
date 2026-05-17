@@ -19,7 +19,7 @@ class NodePortExposureRule(ValidationRule):
             rule=self.name,
             resource=ir.name,
             issue="Service exposed via NodePort → opens access on every node IP",
-            impact="Increases attack surface",
+            impact="Increases attack surface → may lead to unauthorized access",
             fix="Use ClusterIP for internal services or Ingress for controlled external access"
         )
 

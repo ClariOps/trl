@@ -45,7 +45,7 @@ class RunAsRootRule(SecurityRule):
                     fix="Set securityContext.runAsUser to a non-root UID (e.g., 1000)"
                 )
             elif "runAsUser" not in sc:
-                ctx.report.error(
+                ctx.report.warning(
                     rule=self.name,
                     engine=self.engine,
                     category=self.category,

@@ -1,75 +1,123 @@
+from collections import defaultdict
+
+
+
 class ReportsRenderer:
     def __init__(self, report, verbose=False):
         self.report = report
         self.verbose = verbose
 
+
     def render(self):
-        
-        self._render_section("Errors", self.report.errors, "❌")
-        self._render_section("Warnings", self.report.warnings, "⚠")
-        self._render_section("Optimizations", self.report.optimizations, "💡")
-        self._print_summary()
+        grouped = self._group_all()
+        print("\n")
+        for resource, sections in grouped.items():
+            print("-" * 50)
+            print(f"Resource: {resource}")
+            print("-" * 50)
+            # Errors
+            for e in sections["errors"]:
+                self._render_event(e, "Errors")
+
+            # Warnings
+            for e in sections["warnings"]:
+                self._render_event(e, "Warnings")
+
+            # Optimizations
+            for e in sections["optimizations"]:
+                self._render_event(e, "Optimizations")
+
         self._print_footer()
 
     def _print_footer(self):
-        total = self._total_issues()
-        print(f"Found {total} issues "
-              f"({len(self.report.errors)} errors, "
-              f"{len(self.report.warnings)} warnings, "
-              f"{len(self.report.optimizations)} optimizations)\n")
-
-    def _render_section(self, title, items, icon):
-        if not items:
-            return
-        print("-" * 40)
-        print(f"{icon} {title} ({len(items)})")
-        print("-" * 40)
-
-        for e in items:
-            self._render_event(e)
-
-    def _render_event(self, e):        
-        print(f"[{e.severity.upper()}] {e.rule}")
-        print(f"Resource: {e.resource}")
-
-        if e.level == "optimization":
-            print(f"Change   : {e.message}")
-        else:
-            print(f"Issue : {e.issue}")
-
-            if getattr(e, "impact", None):
-                print(f"Impact: {e.impact}")
-
-            if getattr(e, "fix", None):
-                print(f"Fix   : {e.fix}")
-         
-        if self.verbose:
-            print(f"Engine: {e.engine}")
-            print(f"Category: {e.category}")
-
-        print()
-
-    def _print_summary(self):
-        print("-" * 40)
-        print("Summary")
-        print("-" * 40)
-
-        print(f"Errors        : {len(self.report.errors)}")
-        print(f"Warnings      : {len(self.report.warnings)}")
-        print(f"Optimizations : {len(self.report.optimizations)}")
-
-        total = self._total_issues()
-        print("-" * 40)
-        print(f"Total Issues  : {total}")
-
         status = "FAILED" if self.report.errors else "PASSED"
         icon = "❌" if self.report.errors else "✔"
 
-        print(f"\nStatus: {icon} {status}")
+        print(f"\nStatus: {status}")
+        total = self._total_issues()
+        print(f"Found {total} issues "
+              f"(❌ {len(self.report.errors)} errors, "
+              f"⚠ {len(self.report.warnings)} warnings, "
+              f"💡 {len(self.report.optimizations)} optimizations)\n")
 
+        
+   
+
+    def _render_event(self, e, title):        
+        print(f"{self._icon(title)} [{e.severity.upper()}] {e.rule}")
+
+        if self.verbose:     
+            if e.level == "optimization":
+                print(f"Change   : {e.message}")
+                print(f"Engine: {e.engine}")
+            else:
+                print(f"Issue : {e.issue}")
+
+                if getattr(e, "impact", None):
+                    print(f"Impact: {e.impact}")
+
+                if getattr(e, "fix", None):
+                    print(f"Fix   : {e.fix}")
+         
+        
+                print(f"Engine: {e.engine}")
+                print(f"Category: {e.category}")       
+        print()
+    def _print_summary(self):
+        print("-" * 50)
+        print("📊 Summary")
+        print("-" * 50)
+
+        errors = len(self.report.errors)
+        warnings = len(self.report.warnings)
+        optimizations = len(self.report.optimizations)
+
+        print(f"Errors        : {errors}")
+        print(f"Warnings      : {warnings}")
+        print(f"Optimizations : {optimizations}")
+
+        total = self._total_issues()
+
+        print("-" * 50)
+        print(f"Total Issues    : {total}")
+
+        status = "FAILED" if errors else "PASSED"
+        icon = "❌" if errors else "✔"
+
+        print(f"\nStatus: {icon} {status}")
+    
+    
     def _total_issues(self):
         return (
             len(self.report.errors)
             + len(self.report.warnings)
             + len(self.report.optimizations)
         )
+    
+    def _icon(self, title):
+        if title.upper() == "ERRORS":
+            return "❌"
+        elif title.upper() == "WARNINGS":
+            return "⚠"
+        else:
+            return "💡"
+        
+    def _group_all(self):
+        from collections import defaultdict
+
+        grouped = defaultdict(lambda: {
+            "errors": [],
+            "warnings": [],
+            "optimizations": []
+        })
+
+        for e in self.report.errors:
+            grouped[e.resource]["errors"].append(e)
+
+        for e in self.report.warnings:
+            grouped[e.resource]["warnings"].append(e)
+
+        for e in self.report.optimizations:
+            grouped[e.resource]["optimizations"].append(e)
+
+        return grouped

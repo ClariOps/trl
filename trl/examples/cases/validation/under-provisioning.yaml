@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: under-provisioned
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: under-provisioned
+  template:
+    metadata:
+      labels:
+        app: under-provisioned
+    spec:
+      containers:
+        - name: backend
+          image: nginx:1.25
+          ports:
+            - containerPort: 5000
+          securityContext:
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+          resources:
+            requests:
+              cpu: "50m"        # 🔴 under-provisioning
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: over-provisioned
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: over-provisioned
+  template:
+    metadata:
+      labels:
+        app: over-provisioned
+    spec:
+      containers:
+        - name: backend
+          image: nginx:1.25
+          ports:
+            - containerPort: 5000
+          securityContext:
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: "2560Mi"
+            limits:
+              cpu: "2500m"
+              memory: "2560Mi"

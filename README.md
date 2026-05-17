@@ -1,4 +1,6 @@
+
 # TRL — Pre-Deployment Intelligence for Kubernetes
+> Think of TRL as “lint + security + optimization — combined into one intelligent pre-deployment engine.”
 
 > Analyze • Optimize • Secure • Validate — before it hits your cluster
 
@@ -10,7 +12,7 @@ TRL is a CLI-first engine that **analyzes and improves Kubernetes manifests befo
 
 It acts as a **pre-deployment intelligence layer**, helping teams detect issues, optimize resources, and enforce best practices.
 
-Deployment is optional — TRL can be used purely for analysis or integrated into deployment workflows.
+Deployment is optional — TRL can run purely as an analysis engine or integrate into CI/CD pipelines.
 
 👉 [See system model for how TRL works conceptually](docs/system-model.md)
 
@@ -33,6 +35,13 @@ Unlike traditional tools that focus only on linting or validation:
 - Focuses on pre-deployment intelligence, not post-failure debugging
 - Designed for clarity and fast feedback, not complex pipelines
 
+## ⚖️ Comparison
+
+| Tool        | Validation | Security | Optimization | Auto Fix |
+|------------|-----------|----------|-------------|---------|
+| kube-score | ✅        | ❌       | ❌          | ❌      |
+| trivy      | ❌        | ✅       | ❌          | ❌      |
+| TRL        | ✅        | ✅       | ✅          | 🚧      |
 
 ## 🎯 The Problem
 
@@ -85,38 +94,106 @@ pip install -r requirements.txt
 
 ### Analyze & Optimize (Recommended)
 
-python -m trl optimize ./examples/demo/bad.yaml --dry-run
+python -m trl optimize ./examples/demo/bad.yaml --dry-run 
 
 ### Deploy (Optional)
 
-python -m trl optimize ./examples/demo/bad.yaml --target=local
+python -m trl optimize ./examples/demo/good.yaml --target=local
 ```
 
 ---
 
-## 📊 Example Output
+## 📊 Example Output (CLI)
 
 ```text
-❌ Errors (1)
-[HIGH] privileged-container → Container runs in privileged mode
+████████╗██████╗ ██╗     
+╚══██╔══╝██╔══██╗██║     
+   ██║   ██████╔╝██║     
+   ██║   ██╔══██╗██║     
+   ██║   ██║  ██║███████╗
+   ╚═╝   ╚═╝  ╚═╝╚══════╝
 
-⚠ Warnings (6)
-[LOW] under-provisioning
-[MEDIUM] no-readiness-probe
-[MEDIUM] no-liveness-probe
-[MEDIUM] nodeport-exposure
-[LOW] latest-tag
-[HIGH] run-as-root
+🚚 TRL — Pre-Deployment Intelligence System
+────────────────────────────────────────────
+Analyze • Optimize • Validate • Secure
 
-💡 Optimizations (2)
-[LOW] cpu-minimum
-[LOW] memory-minimum → set to 128Mi to reduce OOM risk
+"Making Kubernetes predictable before it runs"
+
+
+01:21:24 | INFO     | trl.cli.main | args, Namespace(cmd='optimize', file='./trl/examples/demo/bad.yaml', target=None, context=None, verbose=False, dry_run=True, skip_rules=False, allow_rules=False, apply_aks_defaults=False, output=None)
+01:21:24 | INFO     | trl.modules.optimizer.engine | Initializing optimizer ........
+01:21:24 | INFO     | trl.modules.optimizer.engine | 2 resources loaded
+01:21:24 | INFO     | trl.modules.optimizer.engine | Optimizer completed
+
+01:21:24 | INFO     | trl.modules.validator.engine | Initializing Validator ...
+01:21:24 | INFO     | trl.modules.validator.engine | Validator completed
+
+01:21:24 | INFO     | trl.modules.security.engine | Initializing Security check ...
+01:21:24 | INFO     | trl.modules.security.engine | Security check completed
+
+01:21:24 | INFO     | trl.modules.renderer.engine | Initializing Renderer ...
+01:21:24 | INFO     | trl.modules.renderer.engine | Renderer completed
+
+01:21:24 | INFO     | trl.modules.cloud.engine | Dry-run enabled, skipping deployment
+
+
+--------------------------------------------------
+Resource: backend
+--------------------------------------------------
+❌ [HIGH] privileged-container
+
+⚠ [LOW] under-provisioning
+
+⚠ [MEDIUM] no-readiness-probe
+
+⚠ [MEDIUM] no-liveness-probe
+
+⚠ [LOW] latest-tag
+
+⚠ [MEDIUM] run-as-root
+
+--------------------------------------------------
+Resource: backend-service
+--------------------------------------------------
+⚠ [MEDIUM] nodeport-exposure
+
+
+Status: FAILED
+Found 7 issues (❌ 1 errors, ⚠ 6 warnings, 💡 0 optimizations)
 ```
-
+or 
 👉 Full output: see docs/output-example.md
 
 ---
 
+## 📊 Example Output JSON (Pipeline)
+```bash
+   python -m trl explain ./trl/examples/demo/good.yaml  --verbose --output=json
+```
+   {
+  "summary": {
+    "status": "PASSED",
+    "total": 1,
+    "errors": 0,
+    "warnings": 1,
+    "optimizations": 0
+  },
+  "resources": {
+    "backend-clean": {
+      "errors": [],
+      "warnings": [
+        {
+          "rule": "run-as-root",
+          "severity": "medium",
+          "category": "security"
+        }
+      ],
+      "optimizations": []
+    }
+  }
+}
+
+---
 ## 🧪 Example Manifests
 
 ```bash
@@ -134,6 +211,22 @@ Run with Deployment(Optional):
 trl optimize ./examples/demo/bad.yaml --target=local
 ```
 
+
+---
+## 🔄 CI/CD Integration
+
+TRL is designed to run in pipelines.
+
+Example using GitHub Actions:
+
+```yaml
+- name: Run TRL
+  run: |
+    python -m trl optimize ./k8s.yaml --dry-run --output=json > report.json
+
+- name: Fail if issues found
+  run: |
+    cat report.json | jq -r '.status' | grep FAILED && exit 1 || exit 0
 
 ---
 

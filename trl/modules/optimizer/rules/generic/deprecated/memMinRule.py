@@ -23,9 +23,9 @@ class MemoryMinimumRule(OptimizationRule):
 
     def action(self, ir, ctx):
 
-        old = ir.resources["requests"]["memory"]
+        #old = ir.resources["requests"]["memory"]
 
-        ir.resources["requests"]["memory"] = f"{self.MIN_MEMORY}Mi"
+        #ir.resources["requests"]["memory"] = f"{self.MIN_MEMORY}Mi"
 
         ctx.report.optimization(
             rule= self.name,
