@@ -147,7 +147,7 @@ python -m trl optimize ./trl/examples/cases/mixed/full-risk-app.yaml --dry-run -
 ```
 
 ```
-{
+{ "status": "FAILED",
   "summary": {
     "total": 10,
     "errors": 2,

@@ -2,7 +2,7 @@ name: TRL Scan
 
 on:
   push:
-    branches: [ "stagingV1" ]
+    branches: [ "staging" ]
   pull_request:
 
 jobs:

@@ -1,3 +1,12 @@
+## ⚖️ Role of This Document
+
+This document defines the **strict behavioral contract** of TRL.
+
+- Architecture describes *how the system is built*
+- Guarantees define *how the system must behave*
+
+In case of conflict, **guarantees take precedence**.
+
 # 🔒 TRL Guarantees
 
 TRL is designed to provide **predictable, transparent, and safe pre-deployment intelligence** for Kubernetes.
@@ -26,7 +35,7 @@ TRL is deterministic, explicit, and free from hidden behavior.
 
 ### 2. Explicit Mutations Only
 
-* Only the **Optimizer Engine** is allowed to modify IR
+* Only the **Optimizer Engine** is limited to modify IR
 * All mutations MUST be explicitly reported
 * No silent or implicit changes are allowed
 

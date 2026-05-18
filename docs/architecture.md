@@ -100,6 +100,16 @@ TRL processes IR through **independent engines**, executed in strict order.
 5. Cloud Engine (optional)
 ```
 
+### 🔒 Engine Contracts
+
+| Engine     | Can Modify IR | Produces Reports | Order Dependent |
+|-----------|--------------|------------------|----------------|
+| Optimizer | ✅ Yes        | ✅ Yes            | ✅ Yes          |
+| Validator | ❌ No         | ✅ Yes            | ✅ Yes          |
+| Security  | ❌ No         | ✅ Yes            | ✅ Yes          |
+| Renderer  | ❌ No         | ❌ No             | ✅ Yes          |
+| Cloud     | ❌ No         | ❌ No             | ❌ No           |
+
 ---
 
 ### 🧠 3.1 Optimizer Engine
@@ -232,13 +242,11 @@ For each resource:
 * MUST report changes
 
 ```python
-ctx.report.optimization(
-    category="scaling",
-    engine="optimizer",
-    rule="cpu-minimum",
-    resource=ir.name,
-    message="CPU adjusted 50m → 100m"
-)
+        ctx.report.optimization(rule= self.name,
+            engine = self.engine,
+            resource=ir.name,
+            message= f"CPU request not defined → defaulting to {self.DEFAULT_CPU} → ensure baseline scheduling"
+            )
 ```
 
 ---
@@ -250,16 +258,16 @@ ctx.report.optimization(
 
 ```python
 def validate(self, ir, ctx):
-    ctx.report.warning(
-        engine="validator",
-        category="network",
-        severity="medium",
-        rule="nodeport-exposure",
-        resource=ir.name,
-        issue="Service exposed via NodePort",
-        impact="Increases attack surface",
-        fix="Use ClusterIP or Ingress"
-    )
+        ctx.report.warning(
+            engine=self.engine,
+            category=self.category,
+            severity=self.severity,
+            rule=self.name,
+            resource=ir.name,
+            issue="Service exposed via NodePort → opens access on every node IP",
+            impact="Increases attack surface → may lead to unauthorized access",
+            fix="Use ClusterIP for internal services or Ingress for controlled external access"
+        )
 ```
 
 ---
@@ -292,7 +300,7 @@ def validate(self, ir, ctx):
 
 ## 📦 7. Output Aggregation
 
-Results are grouped into:
+Results are grouped based on Resources with :
 
 * ❌ Errors (blocking)
 * ⚠ Warnings (non-blocking)
@@ -300,13 +308,19 @@ Results are grouped into:
 
 ---
 
-## 🧾 8. Final Output
+## 📊 8. /
+l
 
-TRL produces:
+TRL produces three outputs:
 
-1. CLI report (human-readable)
-2. Optimized manifests (YAML)
-3. Summary (issue count, status)
+1. **Human-readable report (CLI)**
+2. **Machine-readable report (JSON)** for CI/CD
+3. **Optimized manifests (YAML)**
+
+### Status Model
+
+- `PASSED` → no errors
+- `FAILED` → errors present
 
 ---
 
