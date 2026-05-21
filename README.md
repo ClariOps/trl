@@ -23,6 +23,7 @@ TRL documentation is structured across multiple layers (architecture, system mod
 
 👉 Start here: [Documentation Index](docs/README.md)
 
+
 ---
 
 ## 🔥 Why TRL?
@@ -161,7 +162,8 @@ Status: FAILED
 Found 7 issues (❌ 1 errors, ⚠ 6 warnings, 💡 0 optimizations)
 ```
 or 
-👉 Full output: see docs/output-example.md
+👉 Full output: see 
+- [output-example](./docs/transparency/output-example.md)
 
 ---
 
@@ -238,8 +240,9 @@ TRL does not directly parse Helm charts.
 
 Instead, it works with **rendered Kubernetes manifests**, enabling seamless integration with Helm workflows.
 
-```bash
-helm template mychart | trl optimize -
+```bash 
+helm create mychart
+helm template ./examples/helmCharts/mychart | python -m trl optimize -  --dry-run  --output=json
 ```
 
 This approach:
@@ -321,7 +324,6 @@ Stay tuned 🚀
 
 ## 📜 License
 
-Copyright 2026 TruckOverload
+© 2026 TruckOverload. Licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
-Apache 2.0 — See [LICENSE](LICENSE) file for details.
 ##

@@ -1,5 +1,6 @@
 from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR)
 
+
 IR_MAPPING = {
     "Deployment": DeploymentIR,
     "Service": ServiceIR,
@@ -11,10 +12,27 @@ IR_MAPPING = {
 
 
 def load_yaml_irs(user_path, logger):
-    import glob, os, yaml
+    import glob, os, yaml, sys
 
     irs = []
+    # ✅ NEW: stdin support for helm
+    if user_path == "-":
+        documents = yaml.safe_load_all(sys.stdin.read())
 
+        for data in documents:
+            if not data or "kind" not in data:
+                continue
+
+            kind = data.get("kind")
+            ir_class = IR_MAPPING.get(kind)
+
+            if ir_class:
+                irs.append(ir_class(manifest=data))
+            else:
+                logger.warning(f"No IR class defined for kind '{kind}' (stdin)")
+
+        return irs
+    
     # directory vs file
     if os.path.isdir(user_path):
         search_pattern = os.path.join(user_path, "*.y*ml")

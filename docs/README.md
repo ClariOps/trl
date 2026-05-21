@@ -47,14 +47,14 @@ Defines:
 
 ---
 
-## 🔒 Rules
+## 🔒 System Laws (Global Guarantees)
 
 > What cannot break
 
 - [guarantees.md](guarantees.md)
 
 Defines:
-- deterministic execution rules
+- deterministic execution laws
 - mutation constraints
 - engine boundaries
 - system safety guarantees
