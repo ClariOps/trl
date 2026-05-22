@@ -28,7 +28,7 @@ class CpuLimitRule(OptimizationRule):
             rule= self.name,
             engine = self.engine,
             resource=ir.name,
-            message=f"CPU limit not defined → defaulting to {ir.resources["requests"]["cpu"]} to prevent resource overuse"  
+            message=f"CPU limit not defined → defaulting to {ir.resources['requests']['cpu']} to prevent resource overuse"  
         )
             #f"[{self.name}] {ir.name}: CPU limit injected → {self.DEFAULT_CPU_LIMIT}"
         
