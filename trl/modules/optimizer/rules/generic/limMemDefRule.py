@@ -28,7 +28,7 @@ class MemoryLimitRule(OptimizationRule):
             rule= self.name,
             engine= self.engine,
             resource=ir.name,
-            message=f"Memory limit not defined → defaulting to {ir.resources["requests"]["memory"]} to prevent excessive memory usage"
+            message=f"Memory limit not defined → defaulting to {ir.resources['requests']['memory']} to prevent excessive memory usage"
                                     
         )    
         #    f"[{self.name}] {ir.name}: Memory limit injected → {self.DEFAULT_MEMORY_LIMIT}"
