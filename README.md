@@ -92,9 +92,13 @@ git clone <repo>
 cd trl
 pip install -r requirements.txt
 
-### Analyze & Optimize (Recommended)
+### Analyze (Fastest)
 
-python -m trl optimize ./examples/demo/bad.yaml --dry-run 
+python -m trl explain ./examples/demo/bad.yaml
+
+### Analyze + Optimize (Recommended)
+
+python -m trl optimize ./examples/demo/bad.yaml --dry-run
 
 ### Deploy (Optional)
 
@@ -102,8 +106,23 @@ python -m trl optimize ./examples/demo/good.yaml --target=local
 ```
 
 ---
+## 🧭 Command Guide
+
+TRL provides different commands depending on your use case:
+
+| Command        | Purpose |
+|---------------|--------|
+| `optimize`    | Full pipeline: optimize + validate + security (recommended) |
+| `explain`     | Analysis-only (no optimization) — ideal for reports and demos |
+| `run`         | Execute TRL DSL workflows (experimental) |
+| `deploy`      | Apply CLI based to cluster (optional) |
+
+---
 
 ## 📊 Example Output (CLI)
+```bash
+   python -m trl optimize ./trl/examples/demo/bad.yaml  --verbose 
+```
 
 ```text
 ████████╗██████╗ ██╗     
@@ -242,7 +261,7 @@ Instead, it works with **rendered Kubernetes manifests**, enabling seamless inte
 
 ```bash 
 helm create mychart
-helm template ./examples/helmCharts/mychart | python -m trl optimize -  --dry-run  --output=json
+helm template ./examples/helmCharts/mychart | python -m trl optimize - --dry-run 
 ```
 
 This approach:
