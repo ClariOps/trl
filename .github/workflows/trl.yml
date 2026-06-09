@@ -2,7 +2,7 @@ name: TRL Scan
 
 on:
   push:
-    branches: [ "stagingV1" ]
+    branches: [ "main" ]
   pull_request:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
 
       - name: Run TRL
         run: |
-          python -m trl optimize ./trl/examples/demo/good.yaml --dry-run --output=json > report.json
+          python -m trl optimize ./trl/examples/demo/bad.yaml --dry-run --output=json > report.json
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
