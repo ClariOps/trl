@@ -346,12 +346,14 @@ We are currently stabilizing the core system, so we recommend reviewing the cont
 
 ## 📜 License
 
-© 2026 TruckOverload. Licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
+© 2026 ClariOps. Licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
 ##
 
 ---
 
-## 🧩 About
+## 🧩 About ClariOps
 
-TRL is developed and maintained by **ClariOps** — focused on building tools that bring clarity and intelligence to Kubernetes and DevOps workflows.
+ClariOps builds developer-first tools focused on clarity, reliability, and intelligence in Kubernetes and DevOps.
+
+TRL is the first step toward a broader platform for pre-deployment intelligence.
