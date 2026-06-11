@@ -3,7 +3,10 @@
 
 > Analyze • Optimize • Secure • Validate — before it hits your cluster
 
+**Built by ClariOps** — bringing clarity to Kubernetes operations.
+
 ---
+
 
 ## 🚀 What is TRL?
 
@@ -334,15 +337,21 @@ Experimental DSL support is under development and will be introduced in future r
 
 ## 🤝 Contributing
 
-Contributions will be opened soon.
+Contributions are welcome!
 
-We are currently stabilizing architecture and rules to ensure a consistent foundation.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, rules, and architecture details.
 
-Stay tuned 🚀
----
+We are currently stabilizing the core system, so we recommend reviewing the contribution rules before submitting changes.
+
 
 ## 📜 License
 
 © 2026 TruckOverload. Licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
 
 ##
+
+---
+
+## 🧩 About
+
+TRL is developed and maintained by **ClariOps** — focused on building tools that bring clarity and intelligence to Kubernetes and DevOps workflows.
