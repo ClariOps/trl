@@ -16,11 +16,11 @@ class SecurityEngine(Module):
             RunAsRootRule()
         ]
     def process(self, ctx: RunContext) -> None:
-        #logger.info(f"Initializing Security check ...")
+        logger.info(f"Initializing Security check ...")
         for rule in self.rules:
             if not rule.enabled(ctx):        
                 continue    
             for ir in ctx.irs:
                 rule.execute(ir, ctx)
                 
-        #logger.info(f"Security check completed\n")
+        logger.info(f"Security check completed\n")

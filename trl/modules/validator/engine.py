@@ -28,7 +28,7 @@ class ValidatorEngine(Module):
         ]
 
     def process(self, ctx: RunContext) -> None:
-        #logger.info(f"Initializing Validator ...")
+        logger.info(f"Initializing Validator ...")
         
         for rule in self.rules:
             if not rule.enabled(ctx):
@@ -37,4 +37,4 @@ class ValidatorEngine(Module):
             for ir in ctx.irs:    
                 rule.execute(ir, ctx)
 
-        #logger.info(f"Validator completed\n")
+        logger.info(f"Validator completed\n")

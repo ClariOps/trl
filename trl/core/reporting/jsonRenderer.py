@@ -45,7 +45,6 @@ class JSONRenderer:
     
     def _build_summary(self, report):
         return {
-            "total": len(report.errors) + len(report.warnings) + len(report.optimizations),
             "errors": len(report.errors),
             "warnings": len(report.warnings),
             "optimizations": len(report.optimizations)

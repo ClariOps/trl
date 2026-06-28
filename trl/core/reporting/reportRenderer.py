@@ -52,7 +52,7 @@ class ReportsRenderer:
 
         if self.verbose:     
             if e.level == "optimization":
-                print(f"\nChange   : {e.message}")
+                print(f"\nChange: {e.message}")
                 print(f"Engine: {e.engine}")
             else:
                 print(f"\nIssue : {e.issue}")

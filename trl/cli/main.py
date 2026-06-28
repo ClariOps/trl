@@ -128,7 +128,8 @@ def main():
         user_path = args.file 
         irs = load_yaml_irs(user_path, logger)
         opts = {}
-        print("🔍 Analyzing:",os.path.basename(user_path))
+        if args.output != "json":
+            print("🔍 Analyzing:",os.path.basename(user_path), "\n")
         #logger.info("Analyzing kubernetes resources ...") 
         
         # security rules       
@@ -161,7 +162,8 @@ def main():
         irs = load_yaml_irs(user_path, logger)
 
         opts = build_opts(args)       
-        
+        if args.output != "json":
+            print("🔍 Analyzing:",os.path.basename(user_path),"\n")
         # explicit default cloud settings
         
         logger.info(f"args, {args}")

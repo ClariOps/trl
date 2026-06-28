@@ -128,99 +128,48 @@ TRL provides different commands depending on your use case:
 
 ---
 
-## 📊 Example Output (CLI)
+## 📊 Example Output 
+👉 See: [Detailed Output](docs/transparency/output-example.md)
+
+### CLI (human-readable)
 ```bash
-   python -m trl optimize ./trl/examples/demo/bad.yaml  --verbose 
+   python -m trl explain ./trl/examples/demo/bad.yaml 
 ```
 
 ```text
-████████╗██████╗ ██╗     
-╚══██╔══╝██╔══██╗██║     
-   ██║   ██████╔╝██║     
-   ██║   ██╔══██╗██║     
-   ██║   ██║  ██║███████╗
-   ╚═╝   ╚═╝  ╚═╝╚══════╝
 
-🚚 TRL — Pre-Deployment Intelligence System
-────────────────────────────────────────────
-Analyze • Optimize • Validate • Secure
+📦 Resource: backend
 
-"Making Kubernetes predictable before it runs"
+❌ HIGH: privileged-container
+⚠ LOW: under-provisioning
+⚠ MEDIUM: no-readiness-probe
+⚠ MEDIUM: no-liveness-probe
+⚠ LOW: latest-tag
+⚠ MEDIUM: run-as-root
 
 
-01:21:24 | INFO     | trl.cli.main | args, Namespace(cmd='optimize', file='./trl/examples/demo/bad.yaml', target=None, context=None, verbose=False, dry_run=True, skip_rules=False, allow_rules=False, apply_aks_defaults=False, output=None)
-01:21:24 | INFO     | trl.modules.optimizer.engine | Initializing optimizer ........
-01:21:24 | INFO     | trl.modules.optimizer.engine | 2 resources loaded
-01:21:24 | INFO     | trl.modules.optimizer.engine | Optimizer completed
+📦 Resource: backend-service
 
-01:21:24 | INFO     | trl.modules.validator.engine | Initializing Validator ...
-01:21:24 | INFO     | trl.modules.validator.engine | Validator completed
+⚠ MEDIUM: nodeport-exposure
 
-01:21:24 | INFO     | trl.modules.security.engine | Initializing Security check ...
-01:21:24 | INFO     | trl.modules.security.engine | Security check completed
+📊 Summary
+Errors: 1	Warnings: 6	Optimizations: 0
 
-01:21:24 | INFO     | trl.modules.renderer.engine | Initializing Renderer ...
-01:21:24 | INFO     | trl.modules.renderer.engine | Renderer completed
-
-01:21:24 | INFO     | trl.modules.cloud.engine | Dry-run enabled, skipping deployment
-
-
---------------------------------------------------
-Resource: backend
---------------------------------------------------
-❌ [HIGH] privileged-container
-
-⚠ [LOW] under-provisioning
-
-⚠ [MEDIUM] no-readiness-probe
-
-⚠ [MEDIUM] no-liveness-probe
-
-⚠ [LOW] latest-tag
-
-⚠ [MEDIUM] run-as-root
-
---------------------------------------------------
-Resource: backend-service
---------------------------------------------------
-⚠ [MEDIUM] nodeport-exposure
-
-
-Status: FAILED
-Found 7 issues (❌ 1 errors, ⚠ 6 warnings, 💡 0 optimizations)
+❌ Status: FAILED
 ```
-or 
-👉 Full output: see 
-- [output-example](./docs/transparency/output-example.md)
-
 ---
 
-## 📊 Example Output JSON (Pipeline)
+### JSON (Pipeline)
 ```bash
-   python -m trl explain ./trl/examples/demo/good.yaml  --verbose --output=json
+   python -m trl explain ./trl/examples/demo/bad.yaml --output=json 
 ```
 
 ```json
-   {
+{
+  "status": "FAILED",
   "summary": {
-    "status": "PASSED",
-    "total": 1,
-    "errors": 0,
-    "warnings": 1,
-    "optimizations": 0
-  },
-  "resources": {
-    "backend-clean": {
-      "errors": [],
-      "warnings": [
-        {
-          "rule": "run-as-root",
-          "severity": "medium",
-          "category": "security"
-        }
-      ],
-      "optimizations": []
-    }
+    "errors": 1,
+    "warnings": 6
   }
 }
 ```
