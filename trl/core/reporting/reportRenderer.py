@@ -12,9 +12,9 @@ class ReportsRenderer:
         grouped = self._group_all()
         print("\n")
         for resource, sections in grouped.items():
-            print("-" * 50)
-            print(f"Resource: {resource}")
-            print("-" * 50)
+            print("━" * 50) 
+            print(f"\n📦 Resource: {resource}\n")
+         
             # Errors
             for e in sections["errors"]:
                 self._render_event(e, "Errors")
@@ -26,32 +26,36 @@ class ReportsRenderer:
             # Optimizations
             for e in sections["optimizations"]:
                 self._render_event(e, "Optimizations")
-
+        
         self._print_footer()
 
     def _print_footer(self):
+        print("━" * 50) 
+        print(f"\n📊 Summary\n"
+              f"Errors: {len(self.report.errors)}\t"
+              f"Warnings: {len(self.report.warnings)}\t"
+              f"Optimizations: {len(self.report.optimizations)}\n")
+
+        
         status = "FAILED" if self.report.errors else "PASSED"
         icon = "❌" if self.report.errors else "✔"
 
-        print(f"\nStatus: {status}")
+        print(icon, f"Status: {status}")
+        if self.report.errors:
+            print("💡 Fix issues before they reach your cluster")
         total = self._total_issues()
-        print(f"Found {total} issues "
-              f"(❌ {len(self.report.errors)} errors, "
-              f"⚠ {len(self.report.warnings)} warnings, "
-              f"💡 {len(self.report.optimizations)} optimizations)\n")
-
-        
+ 
    
 
     def _render_event(self, e, title):        
-        print(f"{self._icon(title)} [{e.severity.upper()}] {e.rule}")
+        print(f"{self._icon(title)} {e.severity.upper()}: {e.rule}")
 
         if self.verbose:     
             if e.level == "optimization":
-                print(f"Change   : {e.message}")
+                print(f"\nChange   : {e.message}")
                 print(f"Engine: {e.engine}")
             else:
-                print(f"Issue : {e.issue}")
+                print(f"\nIssue : {e.issue}")
 
                 if getattr(e, "impact", None):
                     print(f"Impact: {e.impact}")
@@ -64,9 +68,9 @@ class ReportsRenderer:
                 print(f"Category: {e.category}")       
         print()
     def _print_summary(self):
-        print("-" * 50)
+        print("━" * 50) 
         print("📊 Summary")
-        print("-" * 50)
+        print("━" * 50) 
 
         errors = len(self.report.errors)
         warnings = len(self.report.warnings)
@@ -78,7 +82,7 @@ class ReportsRenderer:
 
         total = self._total_issues()
 
-        print("-" * 50)
+        print("━" * 50) 
         print(f"Total Issues    : {total}")
 
         status = "FAILED" if errors else "PASSED"

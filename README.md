@@ -3,6 +3,12 @@
 
 > Analyze • Optimize • Secure • Validate — before it hits your cluster
 
+## 🎬 Demo
+
+See TRL in action — analyzing a misconfigured Kubernetes manifest in seconds:
+
+![TRL Demo](./docs/assets/trl-demo.gif)
+
 **Built by ClariOps** — bringing clarity to Kubernetes operations.
 
 ---

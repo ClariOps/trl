@@ -128,7 +128,8 @@ def main():
         user_path = args.file 
         irs = load_yaml_irs(user_path, logger)
         opts = {}
-        logger.info("Analyzing kubernetes resources ...") 
+        print("🔍 Analyzing:",os.path.basename(user_path))
+        #logger.info("Analyzing kubernetes resources ...") 
         
         # security rules       
         # opts = {
