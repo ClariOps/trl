@@ -152,7 +152,7 @@ Category: network
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📊 Summary
-Errors: 2	Warnings: 4	Optimizations: 4
+Errors: 2     Warnings: 4     Optimizations: 4
 
 ❌ Status: FAILED
 💡 Fix issues before they reach your cluster
@@ -168,7 +168,6 @@ python -m trl optimize ./trl/examples/cases/mixed/full-risk-app.yaml --dry-run -
 ```
 { "status": "FAILED",
   "summary": {
-    "total": 10,
     "errors": 2,
     "warnings": 4,
     "optimizations": 4
