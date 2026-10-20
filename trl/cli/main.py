@@ -14,6 +14,8 @@ from trl.adapters.remote import HTTPModuleClient
 from trl.core.bus import ServiceBus
 from trl.core.reporting.reportRenderer import ReportsRenderer
 from trl.core.reporting.jsonRenderer import JSONRenderer
+from trl.core.reporting.yamlRenderer import YamlRenderer
+
 from trl.core.reporting.deprecatedRenderer import render_report
 from trl.core.logconfig.config import setup_logging
 from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner
@@ -54,12 +56,12 @@ def main():
     o.add_argument("--skip-rules",action="store_true")  
     o.add_argument("--allow-rules",action="store_true")  
     o.add_argument("--apply-aks-defaults",action="store_true")
-    o.add_argument("--output",choices=["json"])
+    o.add_argument("--output",choices=["json","yaml"])
 
     e = sub.add_parser("explain")
     e.add_argument("file")
     e.add_argument("--verbose", help="Detailed Reporting",action="store_true")
-    e.add_argument("--output",choices=["json"])
+    e.add_argument("--output",choices=["json","yaml"])
 
     args = p.parse_args()
 
@@ -67,7 +69,7 @@ def main():
     #print("args response is:", args)
 
     #cli based
-    if not args.output == "json":
+    if args.output not in ["json","yaml"]:
         setup_logging(verbose=args.verbose)
         render_banner()
     logger = logging.getLogger(__name__)
@@ -128,7 +130,7 @@ def main():
         user_path = args.file 
         irs = load_yaml_irs(user_path, logger)
         opts = {}
-        if args.output != "json":
+        if args.output not in ["json", "yaml"]:
             print("🔍 Analyzing:",os.path.basename(user_path), "\n")
         #logger.info("Analyzing kubernetes resources ...") 
         
@@ -149,9 +151,13 @@ def main():
         bus.run(ctx)
         if args.output == "json":
             renderer = JSONRenderer(ctx.report)
+        elif args.output == "yaml":
+            renderer =  YamlRenderer(ctx.manifests, verbose=args.verbose)                       
         else:
             renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
         
+    
+
         renderer.render()
 
 
@@ -162,7 +168,7 @@ def main():
         irs = load_yaml_irs(user_path, logger)
 
         opts = build_opts(args)       
-        if args.output != "json":
+        if args.output not in ["json","yaml"]:
             print("🔍 Analyzing:",os.path.basename(user_path),"\n")
         # explicit default cloud settings
         
@@ -179,6 +185,8 @@ def main():
         bus.run(ctx)
         if args.output == "json":
             renderer = JSONRenderer(ctx.report)
+        elif args.output == "yaml":
+            renderer =  YamlRenderer(ctx.manifests, verbose=args.verbose)                       
         else:
             renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
         
