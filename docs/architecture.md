@@ -83,117 +83,232 @@ PVC → PersistentVolumeClaimIR
 ```
 
 ---
+## ⚙️ 3. Engine Architecture
 
-## ⚙️ 3. Engine Pipeline
+TRL is composed of independent engines that operate on the shared Intermediate Representation (IR).
 
-TRL processes IR through **independent engines**, executed in strict order.
+The engines are designed to be:
 
----
+- Self-contained
+- Replaceable
+- Plug-and-play
+- Responsible for their own logic
+- Free from dependencies on other engines' internal implementations
 
-### 🔁 Execution Order
+### 🔌 Engine Independence vs Workflow Order
+
+Engine independence and workflow order are separate concepts.
+
+> **Engine independence describes the module boundary. Workflow order describes how modules are composed for a particular execution.**
+
+The default TRL workflow is:
 
 ```text
-1. Optimizer
-2. Validator
-3. Security
-4. Renderer
-5. Cloud Engine (optional)
+Input
+  ↓
+IR
+  ↓
+Optimizer
+  ↓
+Validator
+  ↓
+Security
+  ↓
+Renderer
+  ↓
+Cloud Engine (optional)
 ```
+
+This order is the current default workflow.
+
+It does **not** mean that Validator is structurally dependent on Optimizer, or that Security is structurally dependent on Validator.
+
+Each engine must remain usable according to its own contract.
+
+---
 
 ### 🔒 Engine Contracts
 
-| Engine     | Can Modify IR | Produces Reports | Order Dependent |
-|-----------|--------------|------------------|----------------|
-| Optimizer | ✅ Yes        | ✅ Yes            | ✅ Yes          |
-| Validator | ❌ No         | ✅ Yes            | ✅ Yes          |
-| Security  | ❌ No         | ✅ Yes            | ✅ Yes          |
-| Renderer  | ❌ No         | ❌ No             | ✅ Yes          |
-| Cloud     | ❌ No         | ❌ No             | ❌ No           |
+| Engine | Reads IR | May Modify IR | Produces Reports | Default Position |
+| :--- | :---: | :---: | :---: | :---: |
+| **Optimizer** | ✅ | ✅ | ✅ | 1 |
+| **Validator** | ✅ | ❌ | ✅ | 2 |
+| **Security** | ✅ | ❌ | ✅ | 3 |
+| **Renderer** | ✅ | ❌ | Output | 4 |
+| **Cloud Engine** | Output | ❌ | Operational | 5 |
+
+The **default position is a workflow decision**, not a module dependency.
+
+### 🧠 Optimizer
+
+The Optimizer is the only normal preparation engine allowed to autonomously modify the deployment state.
+
+Its responsibility is to improve or prepare the state according to optimization rules.
+
+Examples include:
+
+- Establishing safe defaults
+- Improving resource configuration
+- Adjusting resource values according to optimization policy
+- Applying safe optimization decisions
+
+Every mutation must be reported.
+
+### ⚠️ Validator
+
+The Validator evaluates the current deployment state.
+
+It:
+
+- Detects configuration problems
+- Reports warnings and errors
+- Provides actionable explanations
+- May suggest fixes
+
+It **must not modify IR**.
+
+A Validator rule is defined by its responsibility to **detect and report**, not by whether the problem happens to involve a missing, explicit, high, low, or default value.
+
+### 🔐 Security
+
+Security evaluates the deployment state for security and policy risks.
+
+It:
+
+- Detects dangerous configurations
+- Reports security findings
+- Provides severity and remediation information
+
+It **must not modify IR**.
+
+Security rules follow the same independence principle as Validator rules but have a security/policy responsibility.
+
+### 🎨 Renderer
+
+Renderer converts the prepared IR into the required output representation.
+
+It does not decide whether the deployment should be optimized, validated, or considered secure.
+
+Its responsibility is:
+
+```text
+Prepared IR → Kubernetes Manifest
+```
+
+### ☁️ Cloud Engine
+
+The Cloud Engine operates on the final deployment representation.
+
+It is responsible for deployment operations and does not modify the prepared manifest as part of deployment logic.
 
 ---
 
-### 🧠 3.1 Optimizer Engine
+## 🧩 Rule Design Principle
 
-**Goal:** Improve efficiency and prevent misconfiguration
+TRL may eventually contain a large number of rules contributed by different developers.
 
-#### Responsibilities:
+To keep those rules maintainable, contributors should classify a rule by **what the rule is responsible for doing**, not simply by what field it examines.
 
-* Adjust CPU / memory
-* Enforce minimum thresholds
-* Suggest scaling improvements
-* Apply safe defaults
+### Optimizer Rule
 
-#### Behavior:
+Use when the rule is responsible for **changing the deployment state**.
 
-* ✅ Allowed to modify IR
-* ✅ MUST report every change
+```text
+Input state
+    ↓
+Optimization decision
+    ↓
+Modified state
+```
 
----
+### Validator Rule
 
-### ⚠️ 3.2 Validator Engine
+Use when the rule is responsible for **detecting and reporting a configuration problem**.
 
-**Goal:** Detect configuration issues
+```text
+Input state
+    ↓
+Validation decision
+    ↓
+Finding / warning / error
+```
 
-#### Responsibilities:
+### Security Rule
 
-* Missing probes
-* Incorrect exposure (NodePort, etc.)
-* Scaling inconsistencies
-* Misconfigurations
+Use when the rule is responsible for **detecting security or policy risk**.
 
-#### Behavior:
+```text
+Input state
+    ↓
+Security decision
+    ↓
+Security finding
+```
 
-* ❌ MUST NOT modify IR
-* ✅ Reports warnings with fixes
+### 🚫 Important
 
----
+Do not classify rules using a simplistic rule such as:
 
-### 🔐 3.3 Security Engine
+```text
+Missing field → Optimizer
+Bad field → Validator
+```
 
-**Goal:** Detect security risks
+That is not a TRL architectural boundary.
 
-#### Responsibilities:
+The correct question is:
 
-* Privileged containers
-* Running as root
-* Unsafe image tags (`latest`)
-* Risky configurations
-
-#### Behavior:
-
-* ❌ MUST NOT modify IR
-* ✅ Reports errors / high-severity warnings
-
----
-
-### 🎨 3.4 Renderer
-
-**Goal:** Generate final Kubernetes manifests
-
-#### Responsibilities:
-
-* Convert IR → YAML
-* Apply optimizer changes
-* Prepare deployment-ready output
+> **Is this rule responsible for changing the state, detecting a configuration problem, or detecting a security/policy risk?**
 
 ---
 
-### ☁️ 3.5 Cloud Engine (Optional)
+## 🔁 Data Flow
 
-**Goal:** Execute deployment
+The default workflow shares the IR between preparation engines:
 
-#### Responsibilities:
+```text
+                    Shared IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Optimizer │
+                 └─────┬─────┘
+                       │
+                 Modified IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Validator │
+                 └─────┬─────┘
+                       │
+                 Same IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Security  │
+                 └─────┬─────┘
+                       │
+                       ▼
+                  Prepared IR
+                       │
+                       ▼
+                   Renderer
+                       │
+                       ▼
+                 Final Manifest
+                       │
+                       ▼
+                Cloud Engine
+                  (optional)
+```
 
-* Apply manifests to Kubernetes cluster
-* Support local and cloud targets (AKS, GKE, EKS)
-* Handle dry-run mode
+The important architectural property is:
 
-#### 🚫 Strict Constraints:
+> **Each engine owns its own responsibility. The workflow owns the order in which independent engines are composed.**
 
-* MUST NOT modify manifests
-* MUST NOT apply defaults
-* MUST ONLY handle deployment
+Optimizer mutations are visible to subsequent engines because the default workflow intentionally passes the resulting IR forward.
 
+That visibility is a workflow behavior, not a dependency between engine implementations.
 ---
 
 ## 📊 4. Rule System
@@ -291,7 +406,7 @@ def validate(self, ir, ctx):
 ## 🔁 6. Data Flow Model
 
 * IR is shared across engines
-* Renderer produces final canonical manifests, [Cloud Adapter(In Future) operates on rendered output, not IR]
+* Renderer produces final canonical manifests
 * No deep copies (unless explicitly needed)
 * Optimizer mutations are visible to all subsequent engines
 * No cross-resource logic (current limitation)
@@ -308,8 +423,7 @@ Results are grouped based on Resources with :
 
 ---
 
-## 📊 8. /
-l
+## 📊 8.
 
 TRL produces three outputs:
 

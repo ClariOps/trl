@@ -47,44 +47,95 @@ TRL attempts to understand the deployment state before execution and prepare it 
 
 ---
 
-# 🧠 TRL Is 3 Systems in One
+## 🧠 TRL Is 3 Systems in One
 
-## 1. Preparation System — Core Intelligence
+### 1. Preparation System — Core Intelligence
 
-This is where TRL **thinks and prepares the deployment state**.
+This is where TRL analyzes and prepares the deployment state.
+
+The default preparation workflow is:
 
 ```text
 Optimizer → Validator → Security
 ```
 
-### What it does
+The order above describes the **default workflow**, not a dependency between the engines.
 
-- Identifies opportunities for improvement.
-- Applies safe, autonomous optimizations.
-- Validates the resulting state.
-- Detects security risks and policy concerns.
-- Produces the state that will be passed to execution.
+Each engine remains an independent, self-contained module with its own responsibility and contract.
 
-### Module responsibilities
+### Module Responsibilities
 
-| Module | Responsibility | Behavior |
-|---|---|---|
-| **Optimizer** | Improve the deployment state | May autonomously mutate |
-| **Validator** | Determine whether the state is valid | Read-only |
-| **Security** | Identify security risks and concerns | Read-only |
+| Engine | Primary Responsibility | State Behavior |
+| :--- | :--- | :--- |
+| **Optimizer** | Improve the deployment state | May autonomously mutate IR |
+| **Validator** | Detect configuration problems | Read-only |
+| **Security** | Detect security and policy risks | Read-only |
 
-The modules remain **locally responsible for their own concerns**.
+### 🔌 Independence vs Workflow
 
-The Optimizer does not need to know how Security works.
+These are two different concepts:
 
-Security does not need to know how the Optimizer arrived at a particular configuration.
+> **Engine independence defines how a module is built. Workflow order defines how modules are composed.**
 
-The Preparation System therefore remains modular and architecture-independent.
+An engine must not depend on another engine's internal implementation merely because the default workflow places one before another.
 
-### System model
+This allows TRL to support:
 
-> **“Prepare and understand the state before it is executed.”**
+```text
+Optimizer → Validator → Security
+```
 
+as the normal workflow while also allowing engines to be composed differently when a different workflow requires it.
+
+For example:
+
+```text
+Validator
+```
+
+can operate independently without the Optimizer.
+
+Likewise:
+
+```text
+Optimizer
+```
+
+does not need to know how Validator or Security is implemented.
+
+### 🔒 Preparation Boundary
+
+The Preparation System has one fundamental state rule:
+
+> **The Optimizer may autonomously change the deployment state. Validator and Security evaluate the state without changing it.**
+
+This is a behavioral boundary, not a rule about whether a field is missing, present, large, small, valid, or invalid.
+
+Therefore:
+
+- An **Optimizer rule** is appropriate when its purpose is to improve or prepare the deployment state.
+- A **Validator rule** is appropriate when its purpose is to detect or report a configuration problem.
+- A **Security rule** is appropriate when its purpose is to detect a security or policy risk.
+
+A missing field may therefore be handled by either engine depending on the rule's responsibility.
+
+For example:
+
+```text
+Optimizer:
+  Missing CPU request
+  → safely establish a baseline
+
+Validator:
+  Missing readiness probe
+  → report a reliability problem
+```
+
+Both are valid because their responsibilities are different.
+
+### System Model
+
+> **Prepare and understand the deployment state before execution.**
 ---
 
 ## 2. Execution System — Delivery Layer

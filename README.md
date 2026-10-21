@@ -117,61 +117,237 @@ python -m trl optimize ./examples/demo/good.yaml --target=local
 ---
 ## 🧭 Command Guide
 
-TRL provides different commands depending on your use case:
+TRL provides different ways to use the same independent engines.
 
-| Command        | Purpose |
-|---------------|--------|
-| `optimize`    | Full pipeline: optimize + validate + security (recommended) |
-| `explain`     | Analysis-only (no optimization) — ideal for reports and demos |
-| `run`         | Execute TRL DSL workflows (experimental) |
-| `deploy`      | Apply CLI based to cluster (optional) |
+| Command | Workflow | Purpose |
+| :--- | :--- | :--- |
+| `trl explain` | `Validator → Security` | Analyze the input without running the Optimizer |
+| `trl optimize` | `Optimizer → Validator → Security` | Optimize the deployment state, then analyze the resulting state |
+| `trl run` | User-defined workflow | Execute TRL DSL workflows *(experimental)* |
+| `trl deploy` | Deployment workflow | Apply prepared output to a target *(optional)* |
 
+### 🔌 Engine Composition
+
+The engines are independent modules.
+
+The workflow determines their order.
+
+The default optimization workflow is:
+
+```text
+Optimizer → Validator → Security → Renderer
+```
+
+This does **not** mean the engines depend on one another internally.
+
+For example, `Validator` can run without `Optimizer`:
+
+```text
+Validator → Security
+```
+
+while `optimize` uses the normal preparation workflow:
+
+```text
+Optimizer → Validator → Security
+```
+
+This allows TRL to remain plug-and-play while still providing predictable default workflows.
+
+---
+
+## 📊 Output Formats
+
+TRL can produce results in different formats depending on the use case.
+
+### CLI
+
+Human-readable output for developers:
+
+```bash
+trl explain ./manifest.yaml
+```
+
+### JSON
+
+Machine-readable output for CI/CD and automation:
+
+```bash
+trl explain ./manifest.yaml --output=json
+```
+
+### YAML
+
+Manifest output for workflows that need the resulting Kubernetes configuration:
+
+```bash
+trl optimize ./manifest.yaml --output=yaml
+```
+
+These formats represent the same TRL processing results for different consumers:
+
+```text
+Developer       → CLI
+CI/CD / Tools   → JSON
+Kubernetes      → YAML
+```
+
+When using `--verbose`, the selected reporting mode controls how detailed information is presented. Keep the documentation aligned with the currently supported output modes rather than describing `--verbose` as a separate processing engine or workflow.
 ---
 
 ## 📊 Example Output 
 👉 See: [Detailed Output](docs/transparency/output-example.md)
 
-### CLI (human-readable)
+### CLI (Developer)
 ```bash
    python -m trl explain ./trl/examples/demo/bad.yaml 
 ```
+Output:
 
 ```text
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 📦 Resource: backend
 
-❌ HIGH: privileged-container
 ⚠ LOW: under-provisioning
+
 ⚠ MEDIUM: no-readiness-probe
+
 ⚠ MEDIUM: no-liveness-probe
+
 ⚠ LOW: latest-tag
+
 ⚠ MEDIUM: run-as-root
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📦 Resource: backend-service
 
 ⚠ MEDIUM: nodeport-exposure
 
-📊 Summary
-Errors: 1	Warnings: 6	Optimizations: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-❌ Status: FAILED
+📊 Summary
+Errors: 0	Warnings: 6	Optimizations: 0
+
+✔ Status: PASSED
+
 ```
 ---
 
-### JSON (Pipeline)
+### JSON (CI/CD / Tools)
 ```bash
    python -m trl explain ./trl/examples/demo/bad.yaml --output=json 
 ```
+Output:
 
 ```json
 {
-  "status": "FAILED",
+  "status": "PASSED",
   "summary": {
-    "errors": 1,
-    "warnings": 6
+    "errors": 0,
+    "warnings": 6,
+    "optimizations": 0
+  },
+  "resources": {
+    "backend": {
+      "errors": [],
+      "warnings": [
+        {
+          "rule": "under-provisioning",
+          "severity": "low",
+          "category": "reliability"
+        },
+        {
+          "rule": "no-readiness-probe",
+          "severity": "medium",
+          "category": "reliability"
+        },
+        {
+          "rule": "no-liveness-probe",
+          "severity": "medium",
+          "category": "reliability"
+        },
+        {
+          "rule": "latest-tag",
+          "severity": "low",
+          "category": "generic"
+        },
+        {
+          "rule": "run-as-root",
+          "severity": "medium",
+          "category": "security"
+        }
+      ],
+      "optimizations": []
+    },
+    "backend-service": {
+      "errors": [],
+      "warnings": [
+        {
+          "rule": "nodeport-exposure",
+          "severity": "medium",
+          "category": "network"
+        }
+      ],
+      "optimizations": []
+    }
   }
 }
+```
+
+### YAML (Kubernetes)
+```bash
+   python -m trl explain ./trl/examples/demo/bad.yaml --output=yaml 
+```
+
+Output: 
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: nginx:latest
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+    nodePort: 30030
+
 ```
 ---
 ## 🧪 Example Manifests

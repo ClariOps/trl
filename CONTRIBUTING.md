@@ -31,6 +31,22 @@ python -m trl optimize ./examples/demo/bad.yaml --dry-run
 
 ## 🧩 Rule Types (Important)
 
+┌───────────────────────────────────────────────────────┐
+│                 CONTRIBUTOR RULE                      │
+├───────────────────────────────────────────────────────┤
+│                                                       │
+│  Do not classify a rule by the field it examines.     │
+│                                                       │
+│  Classify it by what the rule is responsible for:     │
+│                                                       │
+│  CHANGE STATE  ───────────────► Optimizer             │
+│  DETECT PROBLEM ──────────────► Validator             │
+│  DETECT SECURITY RISK ────────► Security              │
+│                                                       │
+│  Workflow order is separate from module ownership.    │
+│                                                       │
+└───────────────────────────────────────────────────────┘
+
 TRL has **two types of rules**:
 
 ### 1. Read-only Rules
