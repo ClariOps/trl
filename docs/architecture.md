@@ -1,107 +1,133 @@
-
-
 # 🏗 TRL Architecture
 
-TRL is a **pipeline-based pre-deployment intelligence system** for Kubernetes.
+TRL is a pipeline-based pre-deployment intelligence system for Kubernetes.
 
-It analyzes, optimizes, validates, and secures manifests **before deployment**, ensuring predictable and production-ready configurations.
+It analyzes, optimizes, validates, and secures Kubernetes resources before they are passed to the final output or optional execution stage.
 
 ---
 
-## 🔄 High-Level Flow
+# 🧭 1. High-Level Architecture
 
 ```text
-Input → IR → Optimizer → Validator → Security → Renderer → (Optional) Cloud Engine
+Input
+  │
+  ▼
+Intermediate Representation (IR)
+  │
+  ▼
+┌───────────────────────────────┐
+│       Preparation Phase       │
+│                               │
+│  Optimizer → Validator       │
+│              → Security      │
+└───────────────┬───────────────┘
+                │
+                ▼
+          Prepared IR
+                │
+                ▼
+            Renderer
+                │
+                ▼
+             Output
+                │
+                ▼
+      Optional Cloud Engine
 ```
 
----
+### Important
 
-## 🧠 Architectural Philosophy
+**Preparation** is a conceptual phase.
 
-TRL is built on three core principles:
+It groups the engines that inspect or prepare the deployment state.
 
-### 1. Pre-Deployment Intelligence
-
-All decisions are made **before deployment**, not after failure.
+It is not a separate engine or implementation component.
 
 ---
 
-### 2. Clear Separation of Concerns
+# 🧱 2. Intermediate Representation
 
-| Layer        | Responsibility                |
-| ------------ | ----------------------------- |
-| Input        | Load manifests                |
-| IR           | Normalize data                |
-| Engines      | Apply logic (rules)           |
-| Renderer     | Generate final manifests      |
-| Cloud Engine | Execute deployment (optional) |
+TRL converts supported Kubernetes resources into a shared Intermediate Representation (IR).
 
----
-
-### 3. Predictable System Behavior
-
-* Deterministic output (same input → same result)
-* No hidden mutations
-* Explicit reporting of all changes
-* Strict module boundaries
-
----
-
-## 📥 1. Input Layer
-
-TRL accepts:
-
-* Single YAML file
-* Multiple YAML files
-* Directory of manifests
-* Standard input (stdin)
-
-```bash
-trl optimize ./app.yaml
-```
-
----
-
-## 🔧 2. Intermediate Representation (IR)
-
-All manifests are converted into a unified structure:
-
-> **IR (Intermediate Representation)**
-
-### 🎯 Purpose
-
-* Normalize Kubernetes resources
-* Decouple parsing from logic
-* Enable rule-based processing
-
-### 🧱 Examples
+The IR provides a common structure between input handling and rule processing.
 
 ```text
-Deployment → DeploymentIR  
-Service → ServiceIR  
-PVC → PersistentVolumeClaimIR
+Kubernetes Manifest
+        │
+        ▼
+      Input
+        │
+        ▼
+       IR
+        │
+        ▼
+     Engines
+```
+
+The IR helps TRL:
+
+- normalize resources
+- separate parsing from rule logic
+- provide a common structure for engines
+
+Examples:
+
+```text
+Deployment
+    ↓
+DeploymentIR
+
+Service
+    ↓
+ServiceIR
+
+PersistentVolumeClaim
+    ↓
+PersistentVolumeClaimIR
 ```
 
 ---
-## ⚙️ 3. Engine Architecture
 
-TRL is composed of independent engines that operate on the shared Intermediate Representation (IR).
+# 🔌 3. Independent Engines
 
-The engines are designed to be:
+TRL is composed of independent engines operating on the shared IR.
 
-- Self-contained
-- Replaceable
-- Plug-and-play
-- Responsible for their own logic
-- Free from dependencies on other engines' internal implementations
+The engines are intended to be:
 
-### 🔌 Engine Independence vs Workflow Order
+- self-contained
+- replaceable
+- independently understandable
+- independently testable
+- responsible for their own logic
+- free from dependencies on another engine's internal implementation
 
-Engine independence and workflow order are separate concepts.
+"Plug-and-play" describes this architectural goal:
 
-> **Engine independence describes the module boundary. Workflow order describes how modules are composed for a particular execution.**
+> An engine should be usable as a distinct module within a workflow without requiring another engine to understand its internal implementation.
 
-The default TRL workflow is:
+It does **not** imply that TRL currently provides a dynamic plugin-loading framework.
+
+---
+
+# 🔄 4. Engine Independence vs Workflow
+
+These are two different concepts.
+
+```text
+ENGINE INDEPENDENCE
+        │
+        ▼
+"What does this module own?"
+
+        +
+
+WORKFLOW
+        │
+        ▼
+"When is this module executed?"
+```
+
+The current default workflow is:
 
 ```text
 Input
@@ -116,500 +142,529 @@ Security
   ↓
 Renderer
   ↓
-Cloud Engine (optional)
+Optional Cloud Engine
 ```
 
-This order is the current default workflow.
+The workflow order does not create implementation coupling.
 
-It does **not** mean that Validator is structurally dependent on Optimizer, or that Security is structurally dependent on Validator.
+For example:
 
-Each engine must remain usable according to its own contract.
+```text
+Optimizer
+    │
+    │ produces a resulting IR
+    ▼
+Validator
+```
+
+means that Validator sees the resulting state.
+
+It does not mean that Validator contains or depends on Optimizer's implementation.
 
 ---
 
-### 🔒 Engine Contracts
+# 🧠 5. Engine Responsibilities
 
-| Engine | Reads IR | May Modify IR | Produces Reports | Default Position |
-| :--- | :---: | :---: | :---: | :---: |
-| **Optimizer** | ✅ | ✅ | ✅ | 1 |
-| **Validator** | ✅ | ❌ | ✅ | 2 |
-| **Security** | ✅ | ❌ | ✅ | 3 |
-| **Renderer** | ✅ | ❌ | Output | 4 |
-| **Cloud Engine** | Output | ❌ | Operational | 5 |
+Engine ownership is based on **responsibility**.
 
-The **default position is a workflow decision**, not a module dependency.
-
-### 🧠 Optimizer
-
-The Optimizer is the only normal preparation engine allowed to autonomously modify the deployment state.
-
-Its responsibility is to improve or prepare the state according to optimization rules.
-
-Examples include:
-
-- Establishing safe defaults
-- Improving resource configuration
-- Adjusting resource values according to optimization policy
-- Applying safe optimization decisions
-
-Every mutation must be reported.
-
-### ⚠️ Validator
-
-The Validator evaluates the current deployment state.
-
-It:
-
-- Detects configuration problems
-- Reports warnings and errors
-- Provides actionable explanations
-- May suggest fixes
-
-It **must not modify IR**.
-
-A Validator rule is defined by its responsibility to **detect and report**, not by whether the problem happens to involve a missing, explicit, high, low, or default value.
-
-### 🔐 Security
-
-Security evaluates the deployment state for security and policy risks.
-
-It:
-
-- Detects dangerous configurations
-- Reports security findings
-- Provides severity and remediation information
-
-It **must not modify IR**.
-
-Security rules follow the same independence principle as Validator rules but have a security/policy responsibility.
-
-### 🎨 Renderer
-
-Renderer converts the prepared IR into the required output representation.
-
-It does not decide whether the deployment should be optimized, validated, or considered secure.
-
-Its responsibility is:
+It is not based simply on the Kubernetes field being inspected.
 
 ```text
-Prepared IR → Kubernetes Manifest
+                         Engine Responsibility
+                                  │
+              ┌───────────────────┼──────────────────┐
+              │                   │                  │
+              ▼                   ▼                  ▼
+       Improve / change      Detect configuration  Detect security /
+            state                 problem            policy risk
+              │                   │                  │
+              ▼                   ▼                  ▼
+          Optimizer             Validator           Security
 ```
 
-### ☁️ Cloud Engine
-
-The Cloud Engine operates on the final deployment representation.
-
-It is responsible for deployment operations and does not modify the prepared manifest as part of deployment logic.
+The same Kubernetes field may be examined by more than one engine when the purpose is different.
 
 ---
 
-## 🧩 Rule Design Principle
+# 🔧 6. Optimizer
 
-TRL may eventually contain a large number of rules contributed by different developers.
+The Optimizer is responsible for optimization decisions that may change the deployment state.
 
-To keep those rules maintainable, contributors should classify a rule by **what the rule is responsible for doing**, not simply by what field it examines.
+Examples may include:
 
-### Optimizer Rule
+- establishing optimization defaults
+- improving resource configuration
+- applying optimization policies
+- adjusting configuration according to optimization rules
 
-Use when the rule is responsible for **changing the deployment state**.
-
-```text
-Input state
-    ↓
-Optimization decision
-    ↓
-Modified state
-```
-
-### Validator Rule
-
-Use when the rule is responsible for **detecting and reporting a configuration problem**.
+Conceptually:
 
 ```text
-Input state
-    ↓
-Validation decision
-    ↓
-Finding / warning / error
+Input State
+    │
+    ▼
+Optimizer Rule
+    │
+    ▼
+Optimization Decision
+    │
+    ▼
+Modified IR
 ```
 
-### Security Rule
+### Current behavior
 
-Use when the rule is responsible for **detecting security or policy risk**.
+Optimizer rules may mutate IR.
+
+Mutations must be explicitly reported.
+
+---
+
+# ⚠️ 7. Validator
+
+The Validator detects and reports configuration problems.
+
+It may:
+
+- identify invalid or undesirable configuration
+- produce warnings
+- produce errors
+- explain impact
+- provide recommendations
+
+Conceptually:
 
 ```text
-Input state
-    ↓
-Security decision
-    ↓
-Security finding
+Input State
+    │
+    ▼
+Validator Rule
+    │
+    ▼
+Finding
 ```
 
-### 🚫 Important
+Validator rules are read-only.
 
-Do not classify rules using a simplistic rule such as:
+They do not modify IR.
+
+---
+
+# 🔐 8. Security
+
+Security detects security and policy risks.
+
+It may:
+
+- identify dangerous configurations
+- report severity
+- explain impact
+- provide remediation guidance
+
+Conceptually:
+
+```text
+Input State
+    │
+    ▼
+Security Rule
+    │
+    ▼
+Security Finding
+```
+
+Security rules are read-only.
+
+They do not modify IR.
+
+---
+
+# 🎨 9. Renderer
+
+The Renderer converts the prepared IR into the requested output representation.
+
+```text
+Prepared IR
+    │
+    ▼
+Renderer
+    │
+    ▼
+Output
+```
+
+The Renderer does not decide:
+
+- what should be optimized
+- whether a configuration is problematic
+- whether a configuration is a security risk
+
+Those responsibilities belong to the preparation engines.
+
+---
+
+# ☁️ 10. Cloud Engine
+
+The Cloud Engine operates on the final output representation.
+
+```text
+Final Output
+     │
+     ▼
+Cloud Engine
+     │
+     ▼
+Target Environment
+```
+
+Its responsibility is execution.
+
+It is separate from the preparation engines.
+
+The architectural term should remain **Cloud Engine**.
+
+The user-facing command `trl deploy` can be documented separately as the deployment operation.
+
+---
+
+# 🔒 11. Documented Engine Boundaries
+
+TRL currently follows these boundaries:
+
+| Engine | Responsibility | Current IR behavior |
+|---|---|---|
+| Optimizer | Improve / change deployment state | May mutate |
+| Validator | Detect configuration problems | Read-only |
+| Security | Detect security / policy risks | Read-only |
+| Renderer | Convert prepared IR to output | Read-only |
+| Cloud Engine | Execute final representation | Operates on final output |
+
+These are **documented architectural boundaries**.
+
+They are not currently enforced by a separate contract-authority engine.
+
+The purpose of documenting them is to keep the implementation and contributions consistent.
+
+---
+
+# 🧩 12. Rule Architecture
+
+Engines contain rules.
+
+Rules should be:
+
+- self-contained
+- deterministic
+- isolated
+- independently testable
+- free from hidden shared state
+
+A rule should not depend on another rule's internal implementation.
+
+Conceptually:
+
+```text
+Engine
+  │
+  ├── Rule A
+  ├── Rule B
+  ├── Rule C
+  └── Rule D
+```
+
+The engine provides the responsibility boundary.
+
+The individual rule provides the specific behavior.
+
+---
+
+# 🏷 13. Rule Classification
+
+The key contributor rule is:
+
+> **Classify rules by responsibility, not by the field they inspect.**
+
+For example:
+
+```text
+CPU request
+    │
+    ├── Optimizer rule
+    │      └── changes / improves state
+    │
+    └── Validator rule
+           └── detects / reports a problem
+```
+
+Therefore this classification is too simplistic:
 
 ```text
 Missing field → Optimizer
-Bad field → Validator
+Bad field     → Validator
 ```
 
-That is not a TRL architectural boundary.
+Instead:
 
-The correct question is:
-
-> **Is this rule responsible for changing the state, detecting a configuration problem, or detecting a security/policy risk?**
+```text
+What does the rule do?
+        │
+        ├── Change / improve state → Optimizer
+        ├── Detect configuration   → Validator
+        └── Detect security risk   → Security
+```
 
 ---
 
-## 🔁 Data Flow
+# 🔁 14. Data Flow
 
-The default workflow shares the IR between preparation engines:
+The default workflow passes the shared IR forward.
 
 ```text
-                    Shared IR
-                       │
-                       ▼
-                 ┌───────────┐
-                 │ Optimizer │
-                 └─────┬─────┘
-                       │
-                 Modified IR
-                       │
-                       ▼
-                 ┌───────────┐
-                 │ Validator │
-                 └─────┬─────┘
-                       │
+                 Shared IR
+                    │
+                    ▼
+              ┌───────────┐
+              │ Optimizer │
+              └─────┬─────┘
+                    │
+              Modified IR
+                    │
+                    ▼
+              ┌───────────┐
+              │ Validator │
+              └─────┬─────┘
+                    │
                  Same IR
-                       │
-                       ▼
-                 ┌───────────┐
-                 │ Security  │
-                 └─────┬─────┘
-                       │
-                       ▼
-                  Prepared IR
-                       │
-                       ▼
-                   Renderer
-                       │
-                       ▼
-                 Final Manifest
-                       │
-                       ▼
-                Cloud Engine
-                  (optional)
+                    │
+                    ▼
+              ┌───────────┐
+              │ Security  │
+              └─────┬─────┘
+                    │
+                    ▼
+               Prepared IR
+                    │
+                    ▼
+                Renderer
+                    │
+                    ▼
+                 Output
 ```
 
-The important architectural property is:
+Optimizer changes are visible to subsequent engines because the workflow passes the resulting IR forward.
 
-> **Each engine owns its own responsibility. The workflow owns the order in which independent engines are composed.**
-
-Optimizer mutations are visible to subsequent engines because the default workflow intentionally passes the resulting IR forward.
-
-That visibility is a workflow behavior, not a dependency between engine implementations.
----
-
-## 📊 4. Rule System
-
-All engines operate using **rules**.
+This is workflow behavior, not implementation coupling.
 
 ---
 
-### 🧩 Rule Characteristics
+# 📊 15. Reporting and Output
 
-* Self-contained logic
-* Deterministic behavior
-* No shared state
-* No cross-rule dependency
+TRL separates engine processing from output representation.
 
----
-
-### 🏷 Rule Categories
+Conceptually:
 
 ```text
-scaling
-security
-cost
-reliability
-network
+                    TRL RESULT
+                        │
+          ┌─────────────┼─────────────┐
+          │             │             │
+          ▼             ▼             ▼
+         CLI           JSON          YAML
+       Human         Machine       Manifest
+       report        report        output
 ```
+
+Current reporting includes:
+
+- human-readable CLI reporting
+- JSON reporting
+- YAML output for manifests
+
+The output format does not change engine ownership.
 
 ---
 
-### 🔁 Rule Execution Model
+# 🧪 16. Predictable Behavior
+
+The architecture aims to provide:
+
+- deterministic rule behavior
+- explicit mutation reporting
+- clear engine responsibilities
+- isolated rules
+- predictable workflow composition
+
+The important distinction is:
 
 ```text
-For each resource:
-    For each rule:
-        if match:
-            apply logic
+Documented boundary
+        ≠
+Runtime authority system
 ```
 
+TRL currently relies on implementation structure, rule design, tests, and contributor discipline to maintain these boundaries.
+
 ---
 
-## 🧱 5. Rule Contracts
+# 🔮 17. Future Engines
 
-### 🔧 Optimizer Rules
+Future engines should preserve the same architectural principles.
 
-* Can modify IR
-* MUST report changes
+Possible future capabilities include:
 
-```python
-        ctx.report.optimization(rule= self.name,
-            engine = self.engine,
-            resource=ir.name,
-            message= f"CPU request not defined → defaulting to {self.DEFAULT_CPU} → ensure baseline scheduling"
-            )
+```text
+AutoFix
+Relationship Engine
+Cloud Adapter
+Cost Intelligence
+AI-based Intelligence
+Multi-Orchestrator Support
 ```
 
----
+A future engine should define its own responsibility.
 
-### ⚠️ Validator Rules
+For example:
 
-* Match → Condition → Validate
-* MUST NOT modify IR
+```text
+Optimizer
+    → optimization responsibility
 
-```python
-def validate(self, ir, ctx):
-        ctx.report.warning(
-            engine=self.engine,
-            category=self.category,
-            severity=self.severity,
-            rule=self.name,
-            resource=ir.name,
-            issue="Service exposed via NodePort → opens access on every node IP",
-            impact="Increases attack surface → may lead to unauthorized access",
-            fix="Use ClusterIP for internal services or Ingress for controlled external access"
-        )
+Validator
+    → configuration analysis
+
+Security
+    → security / policy analysis
+
+AutoFix (future)
+    → explicit correction responsibility
 ```
 
----
-
-### 🔐 Security Rules
-
-* Same structure as validator
-* Higher severity focus
+This prevents future engines from being forced into today's classifications.
 
 ---
 
-### 🔒 Rule Constraints
+# 🔧 18. AutoFix — Future
 
-* MUST be isolated
-* MUST be deterministic
-* MUST NOT share state
-* MUST NOT depend on other rules
+AutoFix is planned as a future correction capability.
 
----
+Conceptually:
 
-## 🔁 6. Data Flow Model
-
-* IR is shared across engines
-* Renderer produces final canonical manifests
-* No deep copies (unless explicitly needed)
-* Optimizer mutations are visible to all subsequent engines
-* No cross-resource logic (current limitation)
-
----
-
-## 📦 7. Output Aggregation
-
-Results are grouped based on Resources with :
-
-* ❌ Errors (blocking)
-* ⚠ Warnings (non-blocking)
-* 💡 Optimizations (applied changes)
-
----
-
-## 📊 8.
-
-TRL produces three outputs:
-
-1. **Human-readable report (CLI)**
-2. **Machine-readable report (JSON)** for CI/CD
-3. **Optimized manifests (YAML)**
-
-### Status Model
-
-- `PASSED` → no errors
-- `FAILED` → errors present
-
----
-
-# 🧩 Product Architecture Layers
-
-TRL is evolving into a **multi-layer system**, not just a CLI.
-
----
-
-## 🧱 1. TRL Core (Current — Foundation)
-
-**Status: ✅ Implemented**
-
-Capabilities:
-
-* IR system
-* Rule engine
-* Optimizer / Validator / Security
-* CLI interface
-
-👉 This is the **decision engine**
-👉 Must remain stable and predictable
-
----
-
-## 🚀 2. TRL Deploy (Planned)
-
-**Goal:** One-command deployment
-
-```bash
-trl deploy app.yaml
+```text
+Validator / Security
+        │
+        ▼
+     Finding
+        │
+        ▼
+     AutoFix
+     (future)
+        │
+        ▼
+    Corrected State
 ```
 
-Capabilities:
+AutoFix should remain separate from detection.
 
-* Wraps kubectl / Helm
-* Uses TRL intelligence
-* Safe deployment execution
+Its future mutation behavior should be explicitly documented when implemented.
 
-👉 Developer-friendly UX layer
+No current architecture should claim that AutoFix already exists.
 
 ---
 
-## ☁️ 3. TRL SaaS (Future)
+# 🧩 19. Relationship Engine — Future
 
-**Goal:** Hosted intelligence platform
-
-Capabilities:
-
-* Upload YAML → get analysis
-* Cost + security insights
-* Team-level usage
-
-👉 Business and scaling layer
-
----
-
-# 🔮 Future Architecture Evolution
-
-Planned improvements:
-
----
-
-### ☁️ Cloud Adapter Layer
-
-Applies environment-specific adjustments before deployment.
-
-Responsibilities:
-
-- Inject cloud-specific configurations (AKS, GKE, EKS)
-- Handle storage classes, load balancer types, etc.
-
-#### Constraints:
-
-- MUST NOT mutate IR
-- MUST operate on rendered manifests only
-- Runs before Cloud Engine
-- Keeps Cloud Engine execution-only
-
----
-
-### 🔧 AutoFix Engine
-
-A controlled mutation engine for applying fixes suggested by Validator and Security.
-
-Responsibilities:
-
-- Apply safe, rule-based fixes
-- Convert suggestions into actionable changes
-- Operate only when explicitly enabled
-
-#### Design Principles:
-
-- Separate detection from action
-- Preserve deterministic behavior
-- All mutations must be explicitly reported
-
-#### Position in Pipeline (Future):
-
-Input → IR → Optimizer → Validator → Security → AutoFix → Renderer
-
----
-
-### 🧩 Relationship Engine
-
-A dedicated engine for cross-resource analysis.
-
-Responsibilities:
-
-- Detect relationships between resources (Deployment, Service, Ingress)
-- Identify broken or missing connections
-- Surface system-level misconfigurations
+A future Relationship Engine may analyze relationships between resources.
 
 Examples:
 
-- Deployment without Service  
-- Service with unmatched selectors  
-- Ingress pointing to non-existent backend  
-
-#### Constraints:
-
-- MUST NOT mutate IR (initial phase)
-- Operates after Validator and Security
-
----
-
-### 🤖 AI-Based Intelligence
-
-* Smarter optimization suggestions
-* Context-aware recommendations
-
----
-
-### 🌍 Multi-Orchestrator Support
-
-* Extend beyond Kubernetes
-* Support other deployment platforms
-
----
-
-### 📊 Cost Intelligence Engine
-
-* Predict cloud cost
-* Recommend savings
-
----
-
-### 🧩 DSL Layer (Advanced)
-
-* Developer-friendly abstraction
-* Optional, not core
-
----
-
-# 🎯 Summary
-
-TRL is a **pipeline-driven intelligence system**:
-
 ```text
-Normalize → Optimize → Validate → Secure → Render → Deploy
+Deployment
+     │
+     ▼
+Service
+     │
+     ▼
+Ingress
 ```
 
-It ensures:
+Potential checks include:
 
-* safer deployments
-* optimized resources
-* predictable behavior
+- Deployment without Service
+- Service with unmatched selectors
+- Ingress pointing to a missing backend
 
----
-
-## 🧠 Final Principle
-
-> TRL does not replace Kubernetes
->
-> It makes Kubernetes **safe, efficient, and predictable before execution**
+Its implementation and workflow position should be defined when the engine is introduced.
 
 ---
 
+# ☁️ 20. Cloud Adapter — Future
+
+A future Cloud Adapter may perform environment-specific transformations.
+
+For example:
+
+```text
+Prepared Output
+      │
+      ▼
+Cloud Adapter
+      │
+      ▼
+Environment-specific Output
+      │
+      ▼
+Cloud Engine
+```
+
+Examples may include:
+
+- AKS-specific configuration
+- GKE-specific configuration
+- EKS-specific configuration
+- storage classes
+- load balancer configuration
+
+This remains a future architecture concept until implemented.
+
+---
+
+# 🎯 21. Architecture in Four Rules
+
+The TRL architecture can be remembered through four simple ideas:
+
+```text
+1. Engines are independent modules.
+
+2. Responsibility determines engine ownership.
+
+3. Current implementation determines what an engine may do.
+
+4. Workflow determines execution order.
+```
+
+Or:
+
+```text
+RESPONSIBILITY
+"What do I own?"
+        │
+        ▼
+ENGINE
+        │
+        ▼
+CURRENT CAPABILITY
+"What can I do?"
+        │
+        ▼
+WORKFLOW
+"When do I run?"
+        │
+        ▼
+OUTPUT
+"What do I produce?"
+```
+
+> **Engine independence is the module design.  
+> Responsibility defines ownership.  
+> Current implementation defines capability.  
+> Workflow defines composition.**

@@ -1,387 +1,584 @@
 # 🧠 TRL System Model
 
-This document explains how TRL should be **understood**, not just how it is implemented.
+This document explains how TRL should be **understood**.
 
-It defines the conceptual boundaries, system thinking, and behavioral model of TRL.
+It describes the system's mental model, responsibilities, and flow.
+
+For implementation structure, see `architecture.md`.
+
+For behavioral guarantees, see `guarantees.md`.
+
+For contribution rules, see `CONTRIBUTING.md`.
 
 ---
 
-## 🎯 Core Idea
+# 🎯 1. What Is TRL?
 
-TRL is not just a CLI tool.
+TRL is a:
 
-It is a:
-
-> **Pre-deployment decision system for Kubernetes**
+> **Pre-deployment decision system for Kubernetes.**
 
 It helps answer:
 
-- What is wrong?
-- What can be improved?
-- What is risky?
-- What will happen if deployed?
+```text
+What is wrong?
+What can be improved?
+What is risky?
+What would the resulting deployment look like?
+```
 
-The goal is to make deployment decisions **before** changes reach the target environment.
+TRL operates before optional execution.
+
+```text
+Traditional
+
+Write → Deploy → Discover Problems
+
+
+TRL
+
+Write → Analyze → Prepare → Render → Decide → Optional Execution
+```
+
+The fundamental shift is:
+
+> **From reactive debugging to proactive decision-making.**
 
 ---
 
-## 🧩 The Fundamental Shift
+# 🧠 2. The TRL Mental Model
 
-Most Kubernetes tools operate like this:
-
-```text
-Write YAML → Deploy → Debug issues later
-```
-
-TRL changes the flow to:
+Think of TRL as four conceptual steps:
 
 ```text
-Write YAML → Optimize → Validate → Assess Security → Decide → (Optional) Deploy
+        UNDERSTAND
+             │
+             ▼
+         PREPARE
+             │
+             ▼
+          RENDER
+             │
+             ▼
+     OPTIONAL EXECUTION
 ```
 
-👉 The key shift:
-
-> **From reactive debugging → to proactive decision-making.**
-
-TRL attempts to understand the deployment state before execution and prepare it for safe delivery.
+These describe **system behavior**, not four required software layers.
 
 ---
 
-## 🧠 TRL Is 3 Systems in One
+# 🧩 3. Preparation Is a Phase, Not an Engine
 
-### 1. Preparation System — Core Intelligence
-
-This is where TRL analyzes and prepares the deployment state.
-
-The default preparation workflow is:
+The Preparation Phase is a conceptual grouping of engines that analyze or prepare the deployment state.
 
 ```text
-Optimizer → Validator → Security
+                 PREPARATION PHASE
+          ┌──────────────────────────┐
+          │                          │
+          │  Optimizer               │
+          │       ↓                  │
+          │  Validator               │
+          │       ↓                  │
+          │  Security                │
+          │                          │
+          └────────────┬─────────────┘
+                       │
+                       ▼
+                  Prepared IR
 ```
 
-The order above describes the **default workflow**, not a dependency between the engines.
+Important:
 
-Each engine remains an independent, self-contained module with its own responsibility and contract.
+> **Preparation is not a super-engine.**
 
-### Module Responsibilities
+There is no "Preparation Engine".
 
-| Engine | Primary Responsibility | State Behavior |
-| :--- | :--- | :--- |
-| **Optimizer** | Improve the deployment state | May autonomously mutate IR |
-| **Validator** | Detect configuration problems | Read-only |
-| **Security** | Detect security and policy risks | Read-only |
+There is no central intelligence authority above the engines.
 
-### 🔌 Independence vs Workflow
+The engines remain independent modules.
 
-These are two different concepts:
+---
 
-> **Engine independence defines how a module is built. Workflow order defines how modules are composed.**
+# 🔌 4. Independent Engines
 
-An engine must not depend on another engine's internal implementation merely because the default workflow places one before another.
-
-This allows TRL to support:
+Each engine has its own responsibility.
 
 ```text
-Optimizer → Validator → Security
+┌─────────────┐
+│  Optimizer  │
+└─────────────┘
+
+┌─────────────┐
+│  Validator  │
+└─────────────┘
+
+┌─────────────┐
+│  Security   │
+└─────────────┘
 ```
 
-as the normal workflow while also allowing engines to be composed differently when a different workflow requires it.
+They share the IR, but they do not need to understand each other's internal implementation.
 
-For example:
+This is the plug-and-play architectural goal.
 
-```text
-Validator
-```
+---
 
-can operate independently without the Optimizer.
+# 🔄 5. Independence Does Not Mean No Workflow
 
-Likewise:
+Independent engines can still be composed into a workflow.
 
 ```text
+ENGINE DESIGN
+
+Optimizer ───── independent
+Validator ───── independent
+Security  ───── independent
+
+
+WORKFLOW
+
 Optimizer
+    ↓
+Validator
+    ↓
+Security
 ```
-
-does not need to know how Validator or Security is implemented.
-
-### 🔒 Preparation Boundary
-
-The Preparation System has one fundamental state rule:
-
-> **The Optimizer may autonomously change the deployment state. Validator and Security evaluate the state without changing it.**
-
-This is a behavioral boundary, not a rule about whether a field is missing, present, large, small, valid, or invalid.
 
 Therefore:
 
-- An **Optimizer rule** is appropriate when its purpose is to improve or prepare the deployment state.
-- A **Validator rule** is appropriate when its purpose is to detect or report a configuration problem.
-- A **Security rule** is appropriate when its purpose is to detect a security or policy risk.
+> **Engine independence answers "Who owns this responsibility?"**
 
-A missing field may therefore be handled by either engine depending on the rule's responsibility.
+while:
+
+> **Workflow answers "When does this engine run?"**
+
+These are separate concepts.
+
+---
+
+# 🧭 6. Current Default Flow
+
+The current default TRL flow is:
+
+```text
+Input
+  │
+  ▼
+ IR
+  │
+  ▼
+Optimizer
+  │
+  ▼
+Validator
+  │
+  ▼
+Security
+  │
+  ▼
+Prepared IR
+  │
+  ▼
+Renderer
+  │
+  ▼
+Output
+  │
+  ▼
+Optional Cloud Execution
+```
+
+This is the **current default workflow**.
+
+It should not be interpreted as a permanent restriction on future workflow composition.
+
+---
+
+# 🔧 7. What Each Engine Means
+
+## Optimizer
+
+The Optimizer is responsible for:
+
+> **Improving or changing deployment state according to optimization logic.**
+
+Current behavior:
+
+```text
+Inspect
+   ↓
+Decide
+   ↓
+Change IR
+   ↓
+Report mutation
+```
+
+---
+
+## Validator
+
+The Validator is responsible for:
+
+> **Detecting configuration problems.**
+
+Current behavior:
+
+```text
+Inspect
+   ↓
+Evaluate
+   ↓
+Report
+```
+
+Validator does not modify IR.
+
+---
+
+## Security
+
+Security is responsible for:
+
+> **Detecting security and policy risks.**
+
+Current behavior:
+
+```text
+Inspect
+   ↓
+Evaluate
+   ↓
+Report
+```
+
+Security does not modify IR.
+
+---
+
+## Renderer
+
+Renderer is responsible for:
+
+> **Turning the resulting IR into the requested output representation.**
+
+```text
+Prepared IR
+    ↓
+Renderer
+    ↓
+Output
+```
+
+Renderer does not decide whether something should be optimized, validated, or secured.
+
+---
+
+## Cloud Execution
+
+The Cloud Execution Engine is responsible for:
+
+> **Executing the final result in a target environment.**
+
+```text
+Final Output
+    ↓
+Cloud Execution
+    ↓
+Target Environment
+```
+
+Execution is separate from preparation.
+
+---
+
+# 🏷 8. How Rules Are Classified
+
+Rules are classified by **responsibility**, not by the Kubernetes field they inspect.
+
+```text
+                         RULE
+                           │
+                           ▼
+                 What does it own?
+                           │
+             ┌─────────────┼─────────────┐
+             │             │             │
+             ▼             ▼             ▼
+         Change /       Detect         Detect
+         improve        config        security
+          state         problem         risk
+             │             │             │
+             ▼             ▼             ▼
+         Optimizer      Validator      Security
+```
+
+The same field may legitimately be inspected by multiple engines.
+
+Example:
+
+```text
+CPU Request
+    │
+    ├── Optimizer
+    │      └── improves configuration
+    │
+    └── Validator
+           └── detects undesirable configuration
+```
+
+The field does not determine ownership.
+
+The responsibility does.
+
+---
+
+# 🔒 9. Current Mutation Model
+
+Currently:
+
+```text
+Optimizer  → may mutate IR
+Validator  → read-only
+Security   → read-only
+Renderer   → no preparation mutations
+```
+
+This is a **current architectural behavior**.
+
+It is not a claim that Optimizer is permanently the only possible mutating engine.
+
+Future engines may have different capabilities when they are explicitly designed and implemented.
+
+---
+
+# 🔮 10. Future Engines
+
+TRL may eventually gain additional capabilities.
 
 For example:
 
 ```text
-Optimizer:
-  Missing CPU request
-  → safely establish a baseline
-
-Validator:
-  Missing readiness probe
-  → report a reliability problem
+                Future
+                   │
+       ┌───────────┼────────────┐
+       ▼           ▼            ▼
+    AutoFix   Relationship    AI
+               Engine        Engine
 ```
 
-Both are valid because their responsibilities are different.
+These should be introduced as independent responsibilities.
 
-### System Model
-
-> **Prepare and understand the deployment state before execution.**
----
-
-## 2. Execution System — Delivery Layer
-
-This is where TRL **acts on the prepared state**.
+For example:
 
 ```text
-Renderer → Cloud Adapter[] → Cloud Engine
+AutoFix
+    → correction
+
+Relationship Engine
+    → cross-resource analysis
+
+AI Engine
+    → intelligent analysis / assistance
 ```
 
-### What it does
-
-- Converts the prepared state into the required representation.
-- Adapts the deployment for the target environment.
-- Produces the final deployment artifacts.
-- Executes the deployment against the target environment.
-
-### Module responsibilities
-
-| Module | Responsibility |
-|---|---|
-| **Renderer** | Transform prepared state into YAML/JSON or another required representation |
-| **Cloud Adapter[]** | Adapt the prepared deployment for a specific cloud/platform |
-| **Cloud Engine** | Execute the deployment against the target environment |
-
-The Execution System does **not** need to understand how the prepared state was produced.
-
-Its responsibility is simply:
-
-> **Take the prepared state and transform/apply it.**
-
-### System model
-
-> **“Take the prepared state and safely deliver it.”**
+Future engines should not be forced into an existing engine simply because they happen to inspect the same Kubernetes fields.
 
 ---
 
-## 3. Optional Mutation System — Future
+# 🌐 11. Cross-Resource Intelligence
 
-**Status: FUTURE — NOT IMPLEMENTED**
+Current TRL analysis is resource-oriented.
+
+Conceptually:
 
 ```text
-AutoFix (opt-in)
+Deployment → analyzed independently
+Service    → analyzed independently
+Ingress    → analyzed independently
 ```
 
-AutoFix is intentionally separated from the normal Preparation and Execution systems.
+TRL does not currently infer relationships between these resources.
 
-### What it will do
-
-- Apply fixes suggested by Validator or Security.
-- Execute structured correction plans.
-- Perform corrections only when explicitly enabled.
-- Provide controlled mutation beyond the Optimizer's normal autonomous behavior.
-
-### System model
-
-> **“Apply explicit corrections only when the user opts in.”**
-
-AutoFix is therefore not part of the normal execution path.
-
----
-
-# 🔒 Core System Rule
-
-> **Only the Optimizer may autonomously mutate the deployment state during normal Preparation.**
-
-This is one of the fundamental behavioral rules of TRL.
-
-Everything else has a defined responsibility:
-
-- **Optimizer** → autonomous optimization
-- **Validator** → detection and validation
-- **Security** → security analysis
-- **Renderer** → representation transformation
-- **Cloud Adapter[]** → environment-specific adaptation
-- **Cloud Engine** → deployment execution
-- **AutoFix** → optional, explicit correction *(future)*
-
-This prevents autonomous mutations from leaking into modules that should only analyze, transform, or execute.
-
----
-
-# 🧠 Key Separation Principle
-
-TRL enforces strict boundaries between **preparation** and **execution**.
-
-| System | Role | Analogy |
-|---|---|---|
-| **Preparation System** | Understands and prepares the target state | Brain |
-| **Execution System** | Transforms and applies the target state | Hands |
-| **AutoFix System** *(Future)* | Performs explicit corrections | Reflex |
-
-The analogy is conceptual only. The actual architectural rule is **separation of responsibility and state ownership**.
-
----
-
-# 🔗 State Flow
-
-The most important architectural concept is the transition between systems:
+A future Relationship Engine may introduce:
 
 ```text
-                    INPUT DEPLOYMENT
-                           │
-                           ▼
-                 ┌───────────────────┐
-                 │ PREPARATION SYSTEM│
-                 │                   │
-                 │ Optimizer         │
-                 │      ↓            │
-                 │ Validator         │
-                 │      ↓            │
-                 │ Security          │
-                 └────────┬──────────┘
+Deployment
+      │
+      ├──── Service
+      │
+      └──── Ingress
+```
+
+This would allow TRL to reason about system-level relationships.
+
+---
+
+# 🤖 12. Future AutoFix
+
+AutoFix is a possible future correction capability.
+
+Conceptually:
+
+```text
+Validator / Security
+        │
+        ▼
+      Finding
+        │
+        ▼
+     AutoFix
+        │
+        ▼
+   Corrected State
+```
+
+The important distinction is:
+
+```text
+Detection ≠ Correction
+```
+
+Validator and Security identify problems.
+
+AutoFix, if implemented, would apply an explicit correction.
+
+This keeps the responsibilities understandable.
+
+---
+
+# ☁️ 13. Environment Awareness
+
+The TRL core should remain environment-agnostic.
+
+Conceptually:
+
+```text
+Core Intelligence
+       │
+       ▼
+Prepared State
+       │
+       ▼
+Environment-specific processing
+       │
+       ▼
+Execution
+```
+
+Cloud-specific behavior should not leak into the core Optimizer, Validator, or Security responsibilities.
+
+Environment-specific adapters are a future extension.
+
+---
+
+# 🧠 14. The Most Important Distinction
+
+There are four different concepts in TRL:
+
+```text
+RESPONSIBILITY
+      │
+      ▼
+What does the engine own?
+
+
+CAPABILITY
+      │
+      ▼
+What may it currently do?
+
+
+WORKFLOW
+      │
+      ▼
+When does it run?
+
+
+PHASE
+      │
+      ▼
+How do we conceptually group the work?
+```
+
+For example:
+
+```text
+Preparation
+    │
+    ├── Optimizer
+    ├── Validator
+    └── Security
+
+Workflow
+    │
+    ├── Optimizer
+    ├── Validator
+    └── Security
+
+But:
+
+Preparation ≠ Engine
+Workflow ≠ Engine Dependency
+```
+
+---
+
+# 🎯 15. TRL in One Diagram
+
+```text
+                         TRL
                           │
                           ▼
-                   PREPARED STATE
+                         IR
                           │
                           ▼
-                 ┌───────────────────┐
-                 │ EXECUTION SYSTEM  │
-                 │                   │
-                 │ Renderer          │
-                 │      ↓            │
-                 │ Cloud Adapter[]   │
-                 │      ↓            │
-                 │ Cloud Engine      │
-                 └────────┬──────────┘
-                          │
-                          ▼
-                  TARGET ENVIRONMENT
+              ┌───────────────────────┐
+              │   PREPARATION PHASE   │
+              │      (Conceptual)     │
+              │                       │
+              │  Optimizer            │
+              │      ↓                │
+              │  Validator            │
+              │      ↓                │
+              │  Security             │
+              └──────────┬────────────┘
+                         │
+                         ▼
+                    Prepared IR
+                         │
+                         ▼
+                     Renderer
+                         │
+                         ▼
+                       Output
+                         │
+                         ▼
+                Optional Execution
 ```
 
-The important boundary is:
-
-> **The Execution System receives a prepared state. It does not need to know how that state was reasoned about or optimized.**
-
-This is what allows the modules to remain plug-and-play and architecture-independent.
-
 ---
 
-# ⚙️ Why This Design Matters
+# 🚀 16. The TRL Mental Model
 
-Without this model:
-
-- Everything becomes “just a pipeline.”
-- Modules begin depending on each other's internal logic.
-- Mutations leak into unrelated responsibilities.
-- The Renderer can become coupled to optimization decisions.
-- Debugging becomes unpredictable.
-- Replacing one module can require changes throughout the system.
-
-With this model:
-
-- Each system has a clear identity.
-- Each module owns a clear responsibility.
-- Autonomous mutation has a defined owner.
-- Execution remains independent from decision-making.
-- Modules remain replaceable.
-- Behavior becomes predictable.
-- Contributors can understand architectural boundaries quickly.
-
----
-
-# 🚫 What TRL Is NOT
-
-TRL is **not**:
-
-- A deployment tool only.
-- A Kubernetes replacement.
-- A runtime orchestrator.
-- A runtime monitoring system.
-- A magic auto-fixer.
-
-> **AutoFix is a future, explicit, opt-in capability—not part of the current TRL implementation.**
-
----
-
-# 🎯 What TRL IS
-
-TRL is:
-
-> **A structured pre-deployment decision system that analyzes, optimizes, validates, and assesses Kubernetes deployments before execution.**
-
-Its architecture separates:
+When thinking about TRL, remember:
 
 ```text
-Preparation → Execution
+1. Engines own responsibilities.
+
+2. Rules belong to engines according to responsibility.
+
+3. Engines remain independently designed.
+
+4. Workflow determines execution order.
+
+5. Preparation is a conceptual phase.
+
+6. Current implementation determines capabilities.
+
+7. Future engines may introduce new responsibilities.
+
+8. Rendering and execution are separate from preparation.
 ```
 
-while preserving local responsibility inside each module.
-
----
-
-# 🧠 Final System Model
-
-When using TRL, always think:
-
-```text
-1. Prepare
-   └── Optimize → Validate → Assess Security
-
-2. Execute
-   └── Render → Adapt → Deploy
-
-3. Optionally Correct
-   └── AutoFix (Future / Opt-in)
-```
-
-Never think:
-
-```text
-1. Run everything as one undifferentiated pipeline.
-2. Mix detection and autonomous mutation.
-3. Make the Renderer responsible for optimization decisions.
-4. Make the Execution System responsible for preparation logic.
-5. Treat all modules as if they have the same responsibility.
-```
-
----
-
-# 🚀 Summary
-
-TRL is best understood as:
-
-> **A layered intelligence system for Kubernetes that separates preparation, execution, and future correction.**
-
-The architectural principle is simple:
-
-```text
-        PREPARATION
-             │
-             ▼
-      Prepared State
-             │
-             ▼
-         EXECUTION
-             │
-             ▼
-      Target Environment
-
-     FUTURE / OPT-IN
-             │
-             ▼
-          AutoFix
-```
-
-Each module performs its own responsibility locally.
-
-The system remains **modular, plug-and-play, and architecture-independent** because downstream modules do not need to understand the internal reasoning of upstream modules.
+> **TRL separates responsibility, capability, workflow, and execution so that the system can grow without making its behavior difficult to understand.**

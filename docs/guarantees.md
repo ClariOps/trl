@@ -33,11 +33,24 @@ TRL is deterministic, explicit, and free from hidden behavior.
 
 ---
 
-### 2. Explicit Mutations Only
+### 2. 🔒 IR Mutation Boundary
 
-* Only the **Optimizer Engine** is limited to modify IR
-* All mutations MUST be explicitly reported
-* No silent or implicit changes are allowed
+> **Within the current TRL architecture, IR mutation is limited to engine responsibilities that explicitly allow it.**
+
+Currently:
+
+```text
+Optimizer  → may mutate IR
+Validator  → must not mutate IR
+Security   → must not mutate IR
+Renderer   → must not perform preparation mutations
+```
+
+Any mutation performed by an Optimizer rule must be explicitly reported.
+
+These boundaries are currently maintained through the engine implementation, rule design, tests, and contributor conventions. They are **not enforced by a separate runtime contract-authority system**.
+
+If a future engine requires mutation, its responsibility and mutation behavior should be explicitly documented when that engine is introduced.  
 
 ---
 
@@ -67,15 +80,15 @@ TRL is deterministic, explicit, and free from hidden behavior.
 
 ### 5. Pipeline Integrity
 
-TRL follows a strict, one-directional pipeline:
+The current default workflow is:
 
-```text
-Input → IR → Optimizer → Validator → Security → Renderer → (Optional) Cloud Engine
-```
+Input → IR → Optimizer → Validator → Security → Renderer → (Optional) Cloud Execution
 
-* Each stage has a well-defined responsibility
-* Later stages consume results from earlier stages
-* No backward data flow is allowed
+The workflow is one-directional:
+
+- each stage consumes the state produced by the previous stage
+- no hidden backward data flow is permitted
+- workflow composition does not create implementation dependencies between engines
 
 ---
 
@@ -173,19 +186,26 @@ This preserves the core guarantee:
 
 ### 11. Environment-Aware Behavior (Future)
 
-TRL may support environment-specific behavior (e.g., AWS, Azure, GCP).
+TRL may support environment-specific behavior through an Adapter Layer.
 
-This is implemented via an **Adapter Layer** that provides context to the system.
+The Adapter Layer:
 
-* The Adapter Layer MUST NOT mutate IR
-* It only supplies environment-specific configuration
+- MUST provide environment context only
+- MUST NOT directly mutate IR
 
-All mutations:
+The Adapter Layer may influence decisions made by an engine,
+but mutation remains the responsibility of the engine that owns
+that mutation behavior.
 
-* MUST occur inside the Optimizer Engine
-* MUST follow the same reporting and transparency rules
+For the current architecture:
 
-👉 This ensures a single source of mutation while enabling environment-aware intelligence.
+Optimizer → may mutate IR
+Validator → read-only
+Security → read-only
+
+Future engines such as AutoFix may introduce additional mutation
+capabilities when their responsibility and behavior are explicitly
+defined.
 
 ### 12. CLI Simplicity
 
@@ -225,7 +245,7 @@ As TRL evolves, additional guarantees may include:
 
 ## 🧩 Future Extension: Auto-Fix Model
 
-TRL will introduce a separate **AutoFix Engine** to apply fixes safely.
+TRL may introduce a separate **AutoFix Engine** to apply fixes safely.
 
 ### Planned Flow:
 

@@ -1,129 +1,643 @@
 # 📚 TRL Documentation
 
-Welcome to the TRL documentation hub.
+Welcome to the TRL documentation.
 
-TRL is a **pre-deployment intelligence system for Kubernetes** that analyzes, optimizes, validates, and prepares manifests before deployment.
+TRL is a **pre-deployment decision system for Kubernetes**. It analyzes Kubernetes resources before they reach a target environment and helps users understand:
 
-This documentation explains how TRL is built, how it behaves, and how to use it.
+- what is wrong
+- what can be improved
+- what is risky
+- what TRL changed
+- what the resulting configuration looks like
 
----
-
-# 🧭 Documentation Hierarchy
-
-TRL documentation is organized into five core layers:
-
----
-
-## 🧱 Structure
-
-> How TRL is built
-
-- [architecture.md](architecture.md)
-
-Defines:
-- system design
-- pipeline flow
-- engine responsibilities
-- IR structure
-- execution order
-
-👉 This is the **technical blueprint**
+TRL is designed to keep these responsibilities separate while allowing its engines to evolve independently.
 
 ---
 
-## 🧠 Behavior
+# 🧭 Start Here
 
-> How TRL works conceptually
+If you are new to TRL, read the documentation in this order:
 
-- [system-model.md](system-model.md)
+```text
+                         ┌───────────────┐
+                         │   docs/README │
+                         │  Start Here   │
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │ System Model  │
+                         │ How to think  │
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │ Architecture  │
+                         │ How it's built│
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │  Guarantees   │
+                         │ What must hold│
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │ CONTRIBUTING  │
+                         │ How to extend │
+                         └───────────────┘
+```
 
-Defines:
-- decision vs execution separation
-- layered system design
-- mental execution flow
-- AutoFix (future) behavior model
+### Quick guide
 
-👉 This is the **thinking model of TRL**
-
----
-
-## 🔒 System Laws (Global Guarantees)
-
-> What cannot break
-
-- [guarantees.md](guarantees.md)
-
-Defines:
-- deterministic execution laws
-- mutation constraints
-- engine boundaries
-- system safety guarantees
-
-👉 This is the **trust contract of TRL**
-
----
-
-## 🚀 Usage
-
-> How to use TRL
-
-- [../README.md](../README.md)
-
-Defines:
-- CLI usage
-- examples
-- features overview
-- quick start guide
-
-👉 This is the **user entry point**
-
----
-
-## 🎯 Vision
-
-> Where TRL is going
-
-- [vision.md](vision.md)
-
-Defines:
-- product direction
-- roadmap
-- future layers (SaaS, adapters, intelligence)
-- long-term goals
-
-👉 This is the **future of TRL**
+| You want to understand... | Read |
+|---|---|
+| What TRL is | [system-model.md](./system-model.md) |
+| How to think about TRL | [system-model.md](./system-model.md) |
+| How engines and IR fit together | [architecture.md](./architecture.md) |
+| What behavior must remain stable | [guarantees.md](./guarantees.md) |
+| How to contribute | [CONTRIBUTING.md](../CONTRIBUTING.md) |
+| Project direction | [vision.md](./vision.md) |
 
 ---
 
-# 🧠 Design Philosophy
+# 🧠 The TRL Mental Model
 
-TRL documentation is designed to be:
+At the highest level:
 
-- 📖 easy to navigate
-- 🧩 clearly separated by responsibility
-- 🧠 layered from concept → implementation
-- 🔒 strict about system boundaries
+```text
+Kubernetes Input
+       │
+       ▼
+      IR
+       │
+       ▼
+┌─────────────────────────────┐
+│      PREPARATION PHASE      │
+│                             │
+│  Optimizer                 │
+│      ↓                      │
+│  Validator                 │
+│      ↓                      │
+│  Security                  │
+│                             │
+│  Conceptual grouping       │
+└──────────────┬──────────────┘
+               │
+               ▼
+          Prepared IR
+               │
+               ▼
+           Renderer
+               │
+               ▼
+             Output
+               │
+               ▼
+      Optional Execution
+```
+
+### Important
+
+**Preparation is a conceptual phase, not an engine.**
+
+There is no central "Preparation Engine".
+
+The Optimizer, Validator, and Security engines remain independent modules with their own responsibilities.
 
 ---
 
-# 🔁 How to Read TRL Docs
+# 🔌 Independent Engines, Composable Workflow
 
-If you're new:
+This distinction is important.
 
-1. Start with `README.md` (usage)
-2. Then `system-model.md` (behavior)
-3. Then `architecture.md` (structure)
-4. Then `guarantees.md` (rules)
-5. Finally `vision.md` (future)
+```text
+ENGINE INDEPENDENCE
+
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│  Optimizer  │   │  Validator  │   │  Security   │
+└─────────────┘   └─────────────┘   └─────────────┘
+      Independent modules
+             │
+             ▼
+      Composable workflow
+```
+
+The current default workflow is:
+
+```text
+Input
+  ↓
+IR
+  ↓
+Optimizer
+  ↓
+Validator
+  ↓
+Security
+  ↓
+Renderer
+  ↓
+Output
+  ↓
+Optional Execution
+```
+
+The order describes **workflow composition**.
+
+It does not mean:
+
+```text
+Validator depends on Optimizer implementation
+Security depends on Validator implementation
+```
+
+Instead:
+
+> **Engine independence defines ownership. Workflow defines order.**
+
+This distinction is central to TRL's architecture.
 
 ---
 
-# 🎯 Summary
+# 🧩 Engine Responsibilities
 
-TRL is not just a tool.
+TRL classifies engines by **responsibility**, not simply by the Kubernetes field they inspect.
 
-It is a **structured decision system for Kubernetes deployments**.
+```text
+                         RULE / ENGINE
+                              │
+                              ▼
+                     What is it responsible for?
+                              │
+              ┌───────────────┼────────────────┐
+              │               │                │
+              ▼               ▼                ▼
+       Change / improve   Detect config   Detect security /
+            state            problem        policy risk
+              │               │                │
+              ▼               ▼                ▼
+          Optimizer        Validator         Security
+```
 
-This documentation exists to ensure:
+## Optimizer
 
-> every contributor and user builds the same mental model of TRL
+Responsible for:
+
+> **Improving or preparing the deployment state.**
+
+Current behavior:
+
+```text
+State
+  ↓
+Optimizer
+  ↓
+Modified State
+```
+
+Optimizer rules may mutate IR.
+
+Mutations must be explicitly reported.
+
+---
+
+## Validator
+
+Responsible for:
+
+> **Detecting and reporting configuration problems.**
+
+```text
+State
+  ↓
+Validator
+  ↓
+Finding
+```
+
+Validator rules are read-only.
+
+They may recommend a fix, but they do not apply it.
+
+---
+
+## Security
+
+Responsible for:
+
+> **Detecting security and policy risks.**
+
+```text
+State
+  ↓
+Security
+  ↓
+Security Finding
+```
+
+Security rules are read-only.
+
+They may provide remediation guidance, but they do not apply the remediation.
+
+---
+
+## Renderer
+
+Responsible for:
+
+> **Turning the prepared state into the requested output representation.**
+
+```text
+Prepared IR
+     ↓
+ Renderer
+     ↓
+Output
+```
+
+Renderer does not decide whether something should be optimized, validated, or secured.
+
+---
+
+## Optional Execution
+
+Execution is separate from preparation.
+
+Conceptually:
+
+```text
+Prepared Output
+      ↓
+Optional Execution
+      ↓
+Target Environment
+```
+
+The execution component operates on the final prepared representation rather than deciding how the state should have been prepared.
+
+---
+
+# 🏷️ How Rules Are Classified
+
+A rule should **not** be classified simply because it examines a particular field.
+
+For example:
+
+```text
+CPU Request
+   │
+   ├── Optimizer
+   │      └── improve / establish configuration
+   │
+   └── Validator
+          └── detect an undesirable configuration
+```
+
+Both can be valid.
+
+The important question is:
+
+> **What responsibility does the rule own?**
+
+Use:
+
+```text
+CHANGE / IMPROVE STATE
+        ↓
+    Optimizer
+
+
+DETECT CONFIGURATION PROBLEM
+        ↓
+    Validator
+
+
+DETECT SECURITY / POLICY RISK
+        ↓
+     Security
+```
+
+This becomes especially important as TRL grows to hundreds or thousands of rules.
+
+---
+
+# 🔄 State Flow
+
+The default workflow passes the resulting IR forward:
+
+```text
+                    Shared IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Optimizer │
+                 └─────┬─────┘
+                       │
+                 Modified IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Validator │
+                 └─────┬─────┘
+                       │
+                    Same IR
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ Security  │
+                 └─────┬─────┘
+                       │
+                       ▼
+                  Prepared IR
+                       │
+                       ▼
+                   Renderer
+                       │
+                       ▼
+                     Output
+```
+
+The important distinction is:
+
+> The workflow passes state between engines; it does not make their implementations dependent on one another.
+
+---
+
+# 📊 Reporting and Output
+
+TRL can present results in different formats without changing engine responsibilities.
+
+Current reporting/output modes include:
+
+```text
+                 TRL Results
+                      │
+          ┌───────────┼───────────┐
+          │           │           │
+          ▼           ▼           ▼
+         CLI         JSON        YAML
+     Human view   Machine data  Manifest
+```
+
+### CLI
+
+Human-readable output for developers.
+
+### JSON
+
+Machine-readable output useful for automation and CI/CD.
+
+### YAML
+
+Manifest output representing the resulting deployment state.
+
+The output format does **not** determine which engine owns a rule.
+
+For example:
+
+```text
+Optimizer
+   │
+   ├── CLI report
+   ├── JSON report
+   └── YAML state
+```
+
+The engine responsibility remains the same.
+
+---
+
+# 🔒 Current Mutation Model
+
+The current architecture has a simple mutation boundary:
+
+```text
+Optimizer  → may mutate IR
+Validator  → read-only
+Security   → read-only
+Renderer   → no preparation mutations
+```
+
+This is a **current architectural behavior**.
+
+It should not be interpreted as a permanent rule that no future engine may ever mutate state.
+
+If a future engine introduces mutation, its responsibility and mutation behavior must be explicitly defined when that capability is implemented.
+
+---
+
+# 🧱 IR
+
+The Intermediate Representation (IR) provides the common structure used by TRL engines.
+
+Conceptually:
+
+```text
+Kubernetes Manifest
+        │
+        ▼
+      Input
+        │
+        ▼
+       IR
+        │
+        ▼
+     Engines
+        │
+        ▼
+   Prepared IR
+        │
+        ▼
+    Renderer
+```
+
+The IR helps separate:
+
+- input handling
+- Kubernetes resource representation
+- rule logic
+- output generation
+
+This allows engines to operate on a common representation without knowing how the original input was loaded.
+
+For implementation details, see [architecture.md](./architecture.md).
+
+---
+
+# 🧪 Predictable Behavior
+
+TRL is designed around:
+
+```text
+Same input
+    ↓
+Same decisions
+    ↓
+Predictable result
+```
+
+The system aims to maintain:
+
+- deterministic rule behavior
+- isolated rules
+- explicit mutations
+- clear engine responsibilities
+- predictable workflow composition
+- transparent reporting
+
+These are behavioral guarantees, not claims that every future engine must have exactly the same implementation.
+
+See [guarantees.md](./guarantees.md) for the formal behavioral guarantees.
+
+---
+
+# 🧩 Contribution Model
+
+TRL is designed to grow through independent contributions.
+
+The easiest contribution path today is:
+
+```text
+Idea
+  ↓
+Rule
+  ↓
+Test
+  ↓
+Report
+  ↓
+Pull Request
+```
+
+Contributors should classify rules by responsibility:
+
+```text
+Change state       → Optimizer
+Detect problem     → Validator
+Security / policy  → Security
+```
+
+Rules should remain:
+
+- isolated
+- deterministic
+- independently testable
+- free from hidden shared state
+- free from cross-rule dependencies
+
+Architecture changes are different from normal rule contributions.
+
+New engines, new mutation capabilities, IR changes, workflow changes, or future plugin mechanisms should be discussed before implementation.
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
+
+# 🔮 Future Capabilities
+
+TRL may eventually support additional capabilities such as:
+
+```text
+                    Future
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+        ▼             ▼             ▼
+     AutoFix    Relationship      AI
+                  Engine
+```
+
+Other possible extensions may include:
+
+```text
+Cloud Adapters
+Cost Intelligence
+Multi-orchestrator support
+Plugin / dynamic engine loading
+```
+
+These are **future architectural directions**, not claims that these capabilities currently exist.
+
+A future engine should define its own responsibility rather than being forced into an existing engine merely because it examines similar data.
+
+---
+
+# 📖 Documentation Map
+
+| Document | Purpose |
+|---|---|
+| [system-model.md](./system-model.md) | Mental model and system behavior |
+| [architecture.md](./architecture.md) | Technical architecture and module structure |
+| [guarantees.md](./guarantees.md) | Non-negotiable behavioral guarantees |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | How to contribute safely |
+| [vision.md](./vision.md) | Long-term project direction |
+
+---
+
+# 🎯 In One Picture
+
+```text
+                         TRL
+                          │
+                          ▼
+                    Kubernetes Input
+                          │
+                          ▼
+                         IR
+                          │
+                          ▼
+              ┌──────────────────────┐
+              │   PREPARATION PHASE  │
+              │                      │
+              │  Optimizer           │
+              │      ↓               │
+              │  Validator           │
+              │      ↓               │
+              │  Security            │
+              │                      │
+              │  Independent engines │
+              └──────────┬───────────┘
+                         │
+                         ▼
+                    Prepared IR
+                         │
+                         ▼
+                     Renderer
+                         │
+                         ▼
+                       Output
+                         │
+                         ▼
+                Optional Execution
+```
+
+## The Core Idea
+
+TRL separates four things:
+
+```text
+RESPONSIBILITY
+     ↓
+Who owns the decision?
+
+
+CAPABILITY
+     ↓
+What may the engine currently do?
+
+
+WORKFLOW
+     ↓
+When does the engine run?
+
+
+EXECUTION
+     ↓
+How is the prepared result delivered?
+```
+
+Keeping these concepts separate allows TRL to grow without making the system harder to understand.
+
+> **TRL makes deployment decisions visible, predictable, and understandable before they reach the target environment.**
