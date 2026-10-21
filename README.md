@@ -94,6 +94,20 @@ Before anything reaches your cluster.
 
 ---
 
+### 🔌 Modular Engine Design
+
+TRL is built from independent engines that can be composed into workflows.
+
+The default workflow is:
+
+Optimizer → Validator → Security → Renderer
+
+Engines own their responsibilities independently; the workflow determines how they are composed.
+
+See `docs/system-model.md` and `docs/architecture.md` for the full model.
+
+---
+
 ## 🔥 Quick Start
 
 ```bash

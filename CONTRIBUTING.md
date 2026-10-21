@@ -35,15 +35,16 @@ python -m trl optimize ./examples/demo/bad.yaml --dry-run
 │                 CONTRIBUTOR RULE                      │
 ├───────────────────────────────────────────────────────┤
 │                                                       │
-│  Do not classify a rule by the field it examines.     │
+│  Classify a rule by its RESPONSIBILITY,               │
+│  not by the field or condition it examines.           │
 │                                                       │
-│  Classify it by what the rule is responsible for:     │
+│  OPTIMIZE / IMPROVE STATE  ──► Optimizer              │
+│  DETECT CONFIGURATION      ──► Validator              │
+│  DETECT SECURITY / POLICY  ──► Security               │
+│  APPLY EXPLICIT CORRECTION ──► AutoFix (future)       │
 │                                                       │
-│  CHANGE STATE  ───────────────► Optimizer             │
-│  DETECT PROBLEM ──────────────► Validator             │
-│  DETECT SECURITY RISK ────────► Security              │
-│                                                       │
-│  Workflow order is separate from module ownership.    │
+│  Mutation is a capability of the engine contract.     │
+│  Workflow order is separate from engine ownership.    │
 │                                                       │
 └───────────────────────────────────────────────────────┘
 
