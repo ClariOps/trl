@@ -5,10 +5,9 @@ class NoAnchorDumper(yaml.SafeDumper):
         return True
 
 class YamlRenderer:
-    def __init__(self, manifests, verbose=False):
+    def __init__(self, manifests):
         self.manifests = manifests
-        self.verbose = verbose
 
 
     def render(self):
-        print(yaml.dump_all(self.manifests, Dumper=NoAnchorDumper, sort_keys=False))
+        return yaml.dump_all(self.manifests, Dumper=NoAnchorDumper, sort_keys=False)

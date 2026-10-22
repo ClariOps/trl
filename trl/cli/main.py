@@ -1,4 +1,5 @@
 import argparse, yaml, logging, glob, os
+import sys
 
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
@@ -151,14 +152,20 @@ def main():
         bus.run(ctx)
         if args.output == "json":
             renderer = JSONRenderer(ctx.report)
+            output = renderer.render()
+            print(output)
         elif args.output == "yaml":
-            renderer =  YamlRenderer(ctx.manifests, verbose=args.verbose)                       
+            renderer =  YamlRenderer(ctx.manifests)
+            output = renderer.render()
+            print(output, end="")
+            if args.verbose:
+                report = ReportsRenderer(ctx.report, verbose=True)
+                print(report.render(), file=sys.stderr)    
+
         else:
             renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
         
     
-
-        renderer.render()
 
 
     elif args.cmd == "optimize":
@@ -185,12 +192,21 @@ def main():
         bus.run(ctx)
         if args.output == "json":
             renderer = JSONRenderer(ctx.report)
+            output = renderer.render()
+            print(output)
         elif args.output == "yaml":
-            renderer =  YamlRenderer(ctx.manifests, verbose=args.verbose)                       
+            renderer =  YamlRenderer(ctx.manifests)
+            output = renderer.render()
+            print(output, end="")
+            if args.verbose:
+                report = ReportsRenderer(ctx.report, verbose=True)
+                print(report.render(), file=sys.stderr)    
+
         else:
             renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
         
         renderer.render()
+
         
 if __name__ == "__main__":
     main()

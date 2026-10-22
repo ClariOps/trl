@@ -19,10 +19,6 @@ class ServiceBus:
             async def run_parallel():
                 await asyncio.gather(*[m.process_async(ctx) for m in self.parallel_checks])
             asyncio.run(run_parallel())
-
-        if len(ctx.report.errors):
-            logger.error("❌ Safety Gatekeeper: High-severity errors detected. Halting pipeline. Deployment aborted.")
-            return
         
         for m in self.seq_after:
             m.process(ctx)

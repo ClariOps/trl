@@ -20,7 +20,7 @@ spec:
           ports:
             - containerPort: 5000
           securityContext:
-            privileged: False    # 🔴 privileged-container
+            privileged: true    # 🔴 privileged-container
           resources:
             requests:
               cpu: "50m"        # 🔴 under-provisioning

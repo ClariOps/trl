@@ -12,7 +12,11 @@ class CloudEngine(Module):
         if ctx.opts.get("dry_run"):
             logger.info("Dry-run enabled, skipping deployment")
             return
-
+        
+        if len(ctx.report.errors):
+            logger.info("Errors Found, skipping deployment")
+            return
+        
         target = ctx.opts.get("target")
         if not target:
             ctx.report.add_warning("No deployment target, exit 1")        

@@ -14,7 +14,7 @@ class JSONRenderer:
             "resources": grouped
         }
 
-        print(json.dumps(output, indent=2))
+        return json.dumps(output, indent=2)
 
     def _group_all(self, report):
         from collections import defaultdict
