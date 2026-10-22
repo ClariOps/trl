@@ -28,10 +28,9 @@ Deployment is optional — TRL can run purely as an analysis engine or integrate
 
 ## 📚 Documentation
 
-TRL documentation is structured across multiple layers (usage. architecture, system model, guarantees, vision).
+TRL documentation is structured across multiple layers ([CLI Reference](./usage.md), architecture, system model, guarantees, vision).
 
-👉 Start here: [Documentation Index](docs/README.md)
-               [CLI Refernece](docs/usage.md)
+👉 Start here: | [Documentation Index](docs/README.md)
        
 
 ---
