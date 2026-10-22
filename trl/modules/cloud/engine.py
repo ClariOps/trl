@@ -1,4 +1,5 @@
 
+import sys
 from pykube import HTTPClient, KubeConfig, Deployment, Service, Ingress, ConfigMap, Secret, PersistentVolumeClaim
 from trl.core.base import Module
 from trl.core.context import RunContext
@@ -14,9 +15,8 @@ class CloudEngine(Module):
             return
         
         if len(ctx.report.errors):
-            logger.info("Errors Found, skipping deployment")
+            logger.warning("Errors Found, skipping deployment")
             return
-        
         target = ctx.opts.get("target")
         if not target:
             ctx.report.add_warning("No deployment target, exit 1")        

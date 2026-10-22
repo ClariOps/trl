@@ -59,6 +59,7 @@ If you are new to TRL, read the documentation in this order:
 | What behavior must remain stable | [guarantees.md](./guarantees.md) |
 | How to contribute | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Project direction | [vision.md](./vision.md) |
+| CLI Reference | [usage.md](./usage.md) |
 
 ---
 
