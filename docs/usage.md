@@ -2,7 +2,7 @@
 
 > Pre-deployment analysis and optimization for Kubernetes manifests.
 
-TRL provides a small CLI surface for analyzing, optimizing, and executing Kubernetes workflows.
+TRL provides a small CLI surface for analyzing, optimizing, and running Kubernetes workflows.
 
 ## Synopsis
 
@@ -13,7 +13,7 @@ trl <command> [arguments] [options]
 Run:
 
 ```bash
-trl --help
+
 trl <command> --help
 ```
 
@@ -25,14 +25,16 @@ trl <command> --help
 |---|---|
 | `explain` | Analyze a manifest without optimization |
 | `optimize` | Optimize, validate, assess security, and produce the resulting state |
-| `run` | Run a TRL workflow from a workflow/DSL input |
+| `run` | Run a TRL workflow from a Python DSL input |
 | `deploy` | CLI-based deployment input |
+
+> `run` and `deploy` are currently on hold and may be reinitiated later.
 
 ---
 
 # `trl explain`
 
-Analyze a Kubernetes manifest without applying optimizer mutations.
+Analyze a Kubernetes manifest without applying Optimizer mutations.
 
 ## Usage
 
@@ -62,7 +64,7 @@ trl explain ./examples/demo/bad.yaml
 # JSON report
 trl explain ./examples/demo/bad.yaml --output=json
 
-# Render the resulting manifests as YAML
+# YAML manifest output
 trl explain ./examples/demo/bad.yaml --output=yaml
 
 # YAML output with a detailed report on stderr
@@ -123,7 +125,7 @@ trl optimize ./examples/demo/bad.yaml --output=yaml --verbose
 
 # `trl run`
 
-Run a TRL workflow from a workflow/DSL input.
+Run a TRL workflow from a Python DSL input.
 
 ## Usage
 
@@ -134,7 +136,7 @@ trl run <file> [options]
 ## Arguments
 
 ```text
-file    Path to the workflow input
+file    Path to the Python DSL application
 ```
 
 ## Options
@@ -150,9 +152,46 @@ file    Path to the workflow input
 
 ## Example
 
-```bash
-trl run ./workflow.yaml
+The repository includes a Python DSL example at:
+
+```text
+examples/
+└── dsl/
+    └── app.py
 ```
+
+The application defines Kubernetes resources with the TRL DSL:
+
+```python
+from trl.dsl import deployment, pvc
+
+
+api = deployment(
+   "nginxdsl-dep",
+   cpu="80m",
+   memory="9Mi",
+   image="nginx:latest",
+   replicas=2,
+   ports=[5000]
+)
+
+
+pvc(
+     name="mongo-dsl-pvc",
+     storage="5Gi",
+     storage_class="standard"
+ )
+```
+
+Run it with:
+
+```bash
+trl run ./examples/dsl/app.py
+```
+
+`app.py` is the Python DSL input; TRL loads the user-defined IR and runs the selected workflow.
+
+> `trl run` is currently on hold and may be reinitiated later.
 
 ---
 
@@ -184,15 +223,12 @@ trl deploy [options]
 ## Example
 
 ```bash
-trl deploy \
-  --name backend \
-  --cpu 500m \
-  --memory 512Mi \
-  --image nginx:1.27 \
-  --target local
+trl deploy   --name backend   --cpu 500m   --memory 512Mi   --image nginx:1.27   --target local
 ```
 
-> `deploy` is the explicit CLI deployment command. In architectural documentation, prefer the term **execution** when describing the broader execution system.
+> `trl deploy` is currently on hold and may be reinitiated later.
+
+In architectural documentation, use **execution** when referring to the broader execution system. `deploy` refers specifically to the CLI command.
 
 ---
 
@@ -237,15 +273,15 @@ This preserves YAML as machine-consumable output.
 
 # Standard Input and Piping
 
-TRL accepts a manifest path as the command input.
+TRL accepts a manifest path as command input.
 
-For rendered Kubernetes YAML, the intended Unix-style pattern is:
+For rendered Kubernetes YAML, a Unix-style pipeline can be used where the current input loader supports standard input:
 
 ```bash
 helm template ./chart | trl optimize -
 ```
 
-Support for `-` depends on the current input loader; check command help before relying on stdin in automation.
+Check the installed CLI help before relying on `-` in automation.
 
 ---
 
@@ -296,7 +332,6 @@ The manifest remains in `optimized.yaml`; the verbose report is emitted separate
 The CLI itself is the authoritative source for available flags:
 
 ```bash
-trl --help
 trl explain --help
 trl optimize --help
 trl run --help
