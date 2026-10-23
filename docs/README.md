@@ -53,7 +53,7 @@ If you are new to TRL, read the documentation in this order:
 
 | You want to understand... | Read |
 |---|---|
-| What TRL is | [system-model.md](./system-model.md) |
+| What TRL is | [README.md](./README.md) |
 | How to think about TRL | [system-model.md](./system-model.md) |
 | How engines and IR fit together | [architecture.md](./architecture.md) |
 | What behavior must remain stable | [guarantees.md](./guarantees.md) |

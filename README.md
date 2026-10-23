@@ -140,7 +140,7 @@ TRL provides different ways to use the same independent engines.
 | `trl explain` | `Validator → Security` | Analyze the input without running the Optimizer |
 | `trl optimize` | `Optimizer → Validator → Security` | Optimize the deployment state, then analyze the resulting state |
 | `trl run` | User-defined workflow | Execute TRL DSL workflows *(experimental)* |
-| `trl deploy` | Deployment workflow | Apply prepared output to a target *(optional)* |
+| `trl generate` | CLI-Defined workflow | Analyze the Input with CLI commands *(optional)* |
 
 ### 🔌 Engine Composition
 
@@ -207,7 +207,6 @@ Developer       → CLI
 CI/CD / Tools   → JSON
 Kubernetes      → YAML
 ```
-
 When using `--verbose`, the selected reporting mode controls how detailed information is presented. Keep the documentation aligned with the currently supported output modes rather than describing `--verbose` as a separate processing engine or workflow.
 ---
 

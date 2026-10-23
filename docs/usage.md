@@ -26,9 +26,9 @@ trl <command> --help
 | `explain` | Analyze a manifest without optimization |
 | `optimize` | Optimize, validate, assess security, and produce the resulting state |
 | `run` | Run a TRL workflow from a Python DSL input |
-| `deploy` | CLI-based deployment input |
+| `generate` | CLI-based Deployment input |
 
-> `run` and `deploy` are currently on hold and may be reinitiated later.
+> `run` and `generate` use  the Manifest Preparation Engine.Both commands are currently on hold and may be reintroduced later. 
 
 ---
 
@@ -195,14 +195,14 @@ trl run ./examples/dsl/app.py
 
 ---
 
-# `trl deploy`
+# `trl generate`
 
 Create a deployment from CLI-provided deployment parameters.
 
 ## Usage
 
 ```bash
-trl deploy [options]
+trl generate [options]
 ```
 
 ## Options
@@ -223,12 +223,11 @@ trl deploy [options]
 ## Example
 
 ```bash
-trl deploy   --name backend   --cpu 500m   --memory 512Mi   --image nginx:1.27   --target local
+trl generate   --name backend   --cpu 500m   --memory 512Mi   --image nginx:1.27  
 ```
 
-> `trl deploy` is currently on hold and may be reinitiated later.
+> `trl generate` is currently on hold and may be reinitiated later.
 
-In architectural documentation, use **execution** when referring to the broader execution system. `deploy` refers specifically to the CLI command.
 
 ---
 
@@ -335,7 +334,7 @@ The CLI itself is the authoritative source for available flags:
 trl explain --help
 trl optimize --help
 trl run --help
-trl deploy --help
+trl generate --help
 ```
 
 When this reference and the installed CLI differ, use the CLI help for the version you are running.
