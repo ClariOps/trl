@@ -3,6 +3,8 @@
 
 > Analyze • Optimize • Secure • Validate — before it hits your cluster
 
+TRL helps developers and small teams catch configuration problems, identify resource waste, and spot security risks in Kubernetes manifests before deployment.
+
 ## 🎬 Demo
 
 See TRL in action — analyzing a misconfigured Kubernetes manifest in seconds:

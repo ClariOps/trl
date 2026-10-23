@@ -5,7 +5,7 @@ from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
 
 from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR)
-from trl.modules.deployment.engine import DeploymentEngine
+from trl.modules.manifest_preparation.engine import ManifestPreparationEngine
 from trl.modules.optimizer.engine import OptimizerEngine
 from trl.modules.security.engine import SecurityEngine
 from trl.modules.cloud.engine import CloudEngine
@@ -26,7 +26,8 @@ def main():
     p = argparse.ArgumentParser("trl")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    d = sub.add_parser("deploy")
+    # on hold currently
+    d = sub.add_parser("generate")
     d.add_argument("--name")
     d.add_argument("--cpu")
     d.add_argument("--memory")
@@ -38,7 +39,9 @@ def main():
     d.add_argument("--dry-run", action="store_true")
     d.add_argument("--skip-rules", action="store_true")  
     d.add_argument("--allow-rules", action="store_true")  
-
+    d.add_argument("--output",choices=["json","yaml"])
+    
+    # on hold currently
     r = sub.add_parser("run")
     r.add_argument("file")
     r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
@@ -47,6 +50,7 @@ def main():
     r.add_argument("--dry-run", action="store_true")
     r.add_argument("--skip-rules", action="store_true")  
     r.add_argument("--allow-rules", action="store_true")  
+    r.add_argument("--output",choices=["json","yaml"])    
     
     o = sub.add_parser("optimize")
     o.add_argument("file")
@@ -75,8 +79,8 @@ def main():
         render_banner()
     logger = logging.getLogger(__name__)
 
-
-    if args.cmd == "deploy":
+    # on hold currently
+    if args.cmd == "generate":
         irs = []
         # if args.helm:
         #     irs.append(HelmIR(args.helm))
@@ -91,18 +95,19 @@ def main():
         logger.info(f"Enter main module: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
-                        DeploymentEngine(), 
+                        ManifestPreparationEngine(), 
                         OptimizerEngine()],
                         parallel_checks = [ValidatorEngine() ,SecurityEngine()],
-                        seq_after = [RendererEngine(),CloudEngine()]
+                        seq_after = [RendererEngine()] # cloudEngine() shows bugs due to ON HOLD & legacy report modules 
                         )
         logger.info("Bus Dict: {bus.__dict__}") 
         bus.run(ctx)
         logger.info(f"after run context is: {ctx.__dict__}")
-
+        #legacy report modules 
         render_report(ctx.report, args.verbose)    
-    # DSL based
     
+    # DSL based
+    # on hold currently
     elif args.cmd == "run":
         irs = load_user_irs(args.file)
         logger.info(f"dsl irs are:{irs}")
@@ -113,20 +118,20 @@ def main():
         logger.info(f"Artifacts: {ctx.artifacts}") 
         bus = ServiceBus(seq_before=[
                         #HTTPModuleClient("floyd", "http:/io.com"), 
-                        DeploymentEngine(), 
+                        ManifestPreparationEngine(), 
                         OptimizerEngine()],
                         parallel_checks = [
                         ValidatorEngine() 
                         ],
-                        seq_after = [RendererEngine(),CloudEngine()]
+                        seq_after = [RendererEngine()] # cloudEngine() shows bugs due to ON HOLD & legacy report modules 
                         )
         logger.info(f"Bus DIct: {bus.__dict__}") 
         bus.run(ctx)
         logger.info(f"After run context is: {ctx.__dict__}")
-
+        #legacy report module
         render_report(ctx.report, args.verbose)
 
-    # yaml based
+    # analysis CLI
     elif args.cmd == "explain":
         user_path = args.file 
         irs = load_yaml_irs(user_path, logger)
@@ -166,7 +171,7 @@ def main():
             renderer = ReportsRenderer(ctx.report, verbose=args.verbose) 
         
     
-
+        renderer.render()
 
     elif args.cmd == "optimize":
         

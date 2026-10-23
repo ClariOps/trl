@@ -32,8 +32,7 @@ class DeploymentIR(IR):
                 memory=memory,
                 replicas=replicas,
                 ports=ports,
-                labels=labels,
-                containers=containers
+                labels=labels
             )
 
             
