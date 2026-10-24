@@ -4,3 +4,4 @@ venv/
 **/__pycache__/
 
 clariops_trl.egg-info
+dist
