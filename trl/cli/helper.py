@@ -1,3 +1,4 @@
+import os, argparse
 from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR)
 
 
@@ -100,3 +101,9 @@ Analyze • Optimize • Validate • Secure
 
 """
     print(banner)
+
+
+def valid_file(path):
+    if not os.path.exists(path):
+        raise argparse.ArgumentTypeError(f"File not found: {path}")
+    return path

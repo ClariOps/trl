@@ -19,7 +19,9 @@ from trl.core.reporting.yamlRenderer import YamlRenderer
 
 from trl.core.reporting.deprecatedRenderer import render_report
 from trl.core.logconfig.config import setup_logging
-from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner
+from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner, valid_file
+
+
 
 
 def main():
@@ -43,7 +45,7 @@ def main():
     
     # on hold currently
     r = sub.add_parser("run")
-    r.add_argument("file")
+    r.add_argument("file",type=valid_file)
     r.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     r.add_argument("--verbose", help="Detailed Reporting")
     r.add_argument("--helm")
@@ -53,7 +55,7 @@ def main():
     r.add_argument("--output",choices=["json","yaml"])    
     
     o = sub.add_parser("optimize")
-    o.add_argument("file")
+    o.add_argument("file", type=valid_file)
     o.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
     o.add_argument("--context",help="Set Context to deploy")
     o.add_argument("--verbose", help="Detailed Reporting", action="store_true")
@@ -64,7 +66,7 @@ def main():
     o.add_argument("--output",choices=["json","yaml"])
 
     e = sub.add_parser("explain")
-    e.add_argument("file")
+    e.add_argument("file", type=valid_file)
     e.add_argument("--verbose", help="Detailed Reporting",action="store_true")
     e.add_argument("--output",choices=["json","yaml"])
 
@@ -134,6 +136,9 @@ def main():
     # analysis CLI
     elif args.cmd == "explain":
         user_path = args.file 
+        if not args.file:
+            print("file not found")
+            sys.exit(1)
         irs = load_yaml_irs(user_path, logger)
         opts = {}
         if args.output not in ["json", "yaml"]:
