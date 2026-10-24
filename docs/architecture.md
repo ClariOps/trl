@@ -323,7 +323,6 @@ It is separate from the preparation engines.
 
 The architectural term should remain **Cloud Engine**.
 
-The user-facing command `trl deploy` can be documented separately as the deployment operation.
 
 ---
 

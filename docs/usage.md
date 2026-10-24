@@ -28,7 +28,7 @@ trl <command> --help
 | `run` | Run a TRL workflow from a Python DSL input |
 | `generate` | CLI-based Deployment input |
 
-> `run` and `generate` use  the Manifest Preparation Engine.Both commands are currently on hold and may be reintroduced later. 
+> `run` and `generate` use the Manifest Preparation Engine. Both commands are currently on hold and may be reintroduced later. 
 
 ---
 

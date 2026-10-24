@@ -463,7 +463,24 @@ docs/architecture.md
 * CLI: ✅ Stable
 * Engines: ✅ Functional
 * Multi-resource support: ✅
-* Cloud deployment: ⚠️ In progress
+* Cloud deployment: 
+
+⚠️ The Cloud Engine is currently an experimental deployment implementation.
+
+It exists to demonstrate and test the execution path from prepared
+output to a Kubernetes target.
+
+It is not part of the core preparation-engine contract and should not
+be treated as the architectural model for future engines.
+
+In particular, the current implementation contains target-specific
+deployment behavior that is intentionally not representative of the
+core TRL engine model.
+
+The architectural model requires engine responsibilities and mutations
+to be explicit and composable. Environment-specific preparation or
+mutation should eventually be handled by a dedicated, explicitly
+defined engine/adapter before execution.
 
 ---
 

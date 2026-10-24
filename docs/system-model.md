@@ -274,9 +274,9 @@ Renderer does not decide whether something should be optimized, validated, or se
 
 ---
 
-## Cloud Execution
+## Cloud Engine
 
-The Cloud Execution Engine is responsible for:
+The Cloud Engine is responsible for:
 
 > **Executing the final result in a target environment.**
 
