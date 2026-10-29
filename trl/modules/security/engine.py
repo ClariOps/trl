@@ -21,6 +21,5 @@ class SecurityEngine(Module):
             if not rule.enabled(ctx):        
                 continue    
             for ir in ctx.irs:
-                rule.execute(ir, ctx)
-                
+                rule.execute(ir, ctx)       
         logger.info(f"Security check completed\n")

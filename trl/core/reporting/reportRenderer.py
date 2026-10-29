@@ -48,8 +48,11 @@ class ReportsRenderer:
    
 
     def _render_event(self, e, title):        
-        print(f"{self._icon(title)} {e.severity.upper()}: {e.rule}")
-
+        print(
+            f"{self._icon(title)} "
+            f"{e.severity.value.upper() if hasattr(e.severity, 'value') else e.severity.upper()}: "
+            f"{e.rule}"
+        )
         if self.verbose:     
             if e.level == "optimization":
                 print(f"\nChange: {e.message}")

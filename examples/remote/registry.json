@@ -1,0 +1,14 @@
+{
+    "X092@jjj": {
+        "name": "optimizer",
+        "endpoint": "http://127.0.0.1:9001/process"
+    },
+    "Y481@abc": {
+        "name": "validator",
+        "endpoint": "http://127.0.0.1:9002/process"
+    },
+    "Z481@abc": {
+        "name": "security",
+        "endpoint": "http://127.0.0.1:9003/process"
+    }
+}

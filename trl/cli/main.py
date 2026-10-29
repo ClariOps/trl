@@ -1,5 +1,6 @@
 import argparse, yaml, logging, glob, os
 import sys
+from importlib.metadata import version, PackageNotFoundError
 
 from trl.core.context import RunContext
 from trl.app_pipelines.loader import load_user_irs
@@ -19,7 +20,7 @@ from trl.core.reporting.yamlRenderer import YamlRenderer
 
 from trl.core.reporting.deprecatedRenderer import render_report
 from trl.core.logconfig.config import setup_logging
-from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner, valid_file
+from trl.cli.helper import IR_MAPPING, load_workflow, load_yaml_irs, build_opts, render_banner, valid_file
 
 
 
@@ -27,7 +28,18 @@ from trl.cli.helper import IR_MAPPING, load_yaml_irs, build_opts, render_banner,
 def main():
     p = argparse.ArgumentParser("trl")
     sub = p.add_subparsers(dest="cmd", required=True)
+    
+    try:
+        __version__ = version("clariops-trl")
+    except PackageNotFoundError:
+        __version__ = "unknown"
 
+    p.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
+    
     # on hold currently
     d = sub.add_parser("generate")
     d.add_argument("--name")
@@ -69,6 +81,18 @@ def main():
     e.add_argument("file", type=valid_file)
     e.add_argument("--verbose", help="Detailed Reporting",action="store_true")
     e.add_argument("--output",choices=["json","yaml"])
+
+    f = sub.add_parser("remote")
+    f.add_argument("file", type=valid_file)
+    f.add_argument("--exec", required=True, dest="workflow", type=valid_file, help="Workflow definition to execute")
+    f.add_argument("--target",choices=["local", "aks"], help="Deploy to Systems")
+    f.add_argument("--context",help="Set Context to deploy")
+    f.add_argument("--verbose", help="Detailed Reporting", action="store_true")
+    f.add_argument("--dry-run", action="store_true")  
+    f.add_argument("--skip-rules",action="store_true")  
+    f.add_argument("--allow-rules",action="store_true")  
+    f.add_argument("--output",choices=["json","yaml"])
+    
 
     args = p.parse_args()
 
@@ -196,7 +220,7 @@ def main():
                         #HTTPModuleClient("floyd", "http:/io.com"), 
                         OptimizerEngine()],
                         parallel_checks = 
-                        [ValidatorEngine() ,SecurityEngine()],
+                            [ValidatorEngine() ,SecurityEngine()],
                         seq_after = [RendererEngine(), CloudEngine()]
                         )
         bus.run(ctx)
@@ -217,6 +241,39 @@ def main():
         
         renderer.render()
 
+    elif args.cmd == "remote":
+
+        user_path = args.file
         
+        irs = load_yaml_irs(user_path, logger)
+        
+        opts = build_opts(args)
+        
+        if args.output not in ["json", "yaml"]:
+            print("🔍 Remote workflow:", os.path.basename(user_path),"\n")
+        
+        ctx = RunContext(irs=irs, opts=opts)
+        
+        workflow = load_workflow(args.workflow)
+        
+        bus = ServiceBus(
+            **workflow.workflow
+        )
+        
+        bus.run(ctx)
+        
+        if args.output == "json":
+            renderer = JSONRenderer(ctx.report)
+            print(renderer.render())
+        
+        elif args.output == "yaml":
+            renderer = YamlRenderer(ctx.manifests)
+            print(renderer.render(),end="",)
+
+        else:
+            renderer = ReportsRenderer(ctx.report, verbose=args.verbose)
+
+        renderer.render() 
+
 if __name__ == "__main__":
     main()

@@ -22,7 +22,7 @@ class ServiceIR(IR):
             
     def __repr__(self):
         return f"ServiceIR(name={self.name}, type={self.service_type}, ports={self.ports})"    
-
+    
     def _from_manifest(self, m: Dict[str, Any]) -> None:
         metadata = m.get("metadata", {})
         spec = m.get("spec", {})

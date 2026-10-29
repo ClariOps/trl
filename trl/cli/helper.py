@@ -1,6 +1,6 @@
 import os, argparse
 from trl.core.ir import (DeploymentIR, ServiceIR, HelmIR, IngressIR, ConfigMapIR, SecretIR, PVCIR)
-
+import importlib.util
 
 IR_MAPPING = {
     "Deployment": DeploymentIR,
@@ -10,6 +10,24 @@ IR_MAPPING = {
     "Secret": SecretIR,
     "PersistentVolumeClaim": PVCIR,
 }
+
+def load_workflow(path):
+
+    spec = importlib.util.spec_from_file_location(
+        "trl_user_workflow",
+        path,
+    )
+
+    if spec is None or spec.loader is None:
+        raise ValueError(
+            f"Unable to load workflow: {path}"
+        )
+
+    module = importlib.util.module_from_spec(spec)
+
+    spec.loader.exec_module(module)
+
+    return module
 
 
 def load_yaml_irs(user_path, logger):

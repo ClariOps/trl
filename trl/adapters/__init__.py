@@ -1,1 +1,0 @@
-# for defining path as a python regular package

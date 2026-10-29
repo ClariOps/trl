@@ -1,4 +1,5 @@
-import json
+import json 
+from enum import Enum
 
 class JSONRenderer:
     def __init__(self, report, verbose=False):
@@ -36,11 +37,22 @@ class JSONRenderer:
 
         return grouped   
     
+
+
+
     def _format_event(self, e):
         return {
             "rule": e.rule,
-            "severity": e.severity,
-            "category": e.category
+            "severity": (
+                e.severity.value
+                if isinstance(e.severity, Enum)
+                else e.severity
+            ),
+            "category": (
+                e.category.value
+                if isinstance(e.category, Enum)
+                else e.category
+            ),
         }
     
     def _build_summary(self, report):

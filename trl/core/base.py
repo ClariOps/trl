@@ -151,12 +151,74 @@ class ReportEvent:
         self.issue= issue
         self.impact= impact
         self.fix= fix
+    
+    def to_dict(self):
+        # Convert any Enum objects (like RuleCategory or RuleSeverity) to their raw string values
+        return {
+            "engine": self.engine,
+            "category": self.category.value if hasattr(self.category, "value") else self.category,
+            "severity": self.severity.value if hasattr(self.severity, "value") else self.severity,
+            "level": self.level,
+            "rule": self.rule,
+            "resource": self.resource,
+            "message": self.message,
+            "issue": self.issue,
+            "impact": self.impact,
+            "fix": self.fix,
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        # Resolve raw strings back to your Enums safely if necessary
+        category_val = data.get("category")
+        severity_val = data.get("severity")
+        
+        # If your Enums are used downstream, parse them like this:
+        try:
+            category = RuleCategory(category_val) if category_val else "generic"
+        except ValueError:
+            category = category_val
+
+        try:
+            severity = RuleSeverity(severity_val) if severity_val else "low"
+        except ValueError:
+            severity = severity_val
+
+        return cls(
+            engine=data.get("engine"),
+            category=category,
+            severity=severity,
+            level=data.get("level"),
+            rule=data.get("rule"),
+            resource=data.get("resource"),
+            message=data.get("message"),
+            issue=data.get("issue"),
+            impact=data.get("impact"),
+            fix=data.get("fix"),
+        )
     def __str__(self):
         return f"[{self.rule}] {self.resource}: {self.message}"
 
 class Report:
     def __init__(self):
         self.events = []
+
+    def to_dict(self):
+        return {
+            "events": [event.to_dict() for event in self.events],
+            "has_errors": self.has_errors()
+        }
+    @classmethod
+    def from_dict(cls, data):
+        report = cls()
+        if not data or "events" not in data:
+            return report
+            
+        for event_dict in data["events"]:
+            event_obj = ReportEvent.from_dict(event_dict)
+            report.events.append(event_obj)
+            
+        return report
 
     def _add(self, level, engine, category, severity, rule, resource, message, issue=None, impact=None, fix=None):
        # 🚨 Enforce consistency       
