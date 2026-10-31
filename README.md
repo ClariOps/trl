@@ -139,8 +139,9 @@ TRL provides different ways to use the same independent engines.
 | :--- | :--- | :--- |
 | `trl explain` | `Validator → Security` | Analyze the input without running the Optimizer |
 | `trl optimize` | `Optimizer → Validator → Security` | Optimize the deployment state, then analyze the resulting state |
-| `trl run` | User-defined workflow | Execute TRL DSL workflows *(experimental)* |
-| `trl generate` | CLI-Defined workflow | Analyze the Input with CLI commands *(optional)* |
+| `trl remote` | User-defined workflow | Execute a workflow that can invoke engines through remote HTTP clients |
+| `trl run` | User-defined workflow | Execute TRL DSL workflows *(currently on hold)* |
+| `trl generate` | CLI-defined input | Create a Deployment from CLI parameters *(currently on hold)* |
 
 ### 🔌 Engine Composition
 
@@ -171,6 +172,43 @@ Optimizer → Validator → Security
 This allows TRL to remain plug-and-play while still providing predictable default workflows.
 
 ---
+
+### 🌐 Remote Engine Composition
+
+TRL includes an experimental remote composition example that demonstrates
+how engines can run as separate processes and be invoked through HTTP.
+
+The example uses:
+
+- A remote Optimizer service
+- A remote Validator service
+- A remote Security service
+- A local Renderer
+- A workflow definition that determines their execution order
+
+The remote clients exchange serialized IR, options, and report data with
+the corresponding engine servers.
+
+Run the example from the repository root after starting the three engine
+servers:
+
+```bash
+trl remote ./examples/demo/bad.yaml \
+  --exec ./examples/remote/workflow.py
+
+```
+
+This is a demonstration of remote engine invocation and workflow
+composition. It does not currently provide dynamic service discovery,
+automatic engine registration, engine uploads, or a production-ready
+distributed execution platform.
+
+See Remote Engine Composition for the setup,
+execution flow, and current limitations.
+
+see [remote-engines.md](./remote-engines.md)
+
+---  
 
 ## 📊 Output Formats
 

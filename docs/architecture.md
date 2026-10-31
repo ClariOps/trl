@@ -323,7 +323,6 @@ It is separate from the preparation engines.
 
 The architectural term should remain **Cloud Engine**.
 
-
 ---
 
 # 🔒 11. Documented Engine Boundaries
@@ -667,3 +666,208 @@ OUTPUT
 > Responsibility defines ownership.  
 > Current implementation defines capability.  
 > Workflow defines composition.**
+
+---
+
+# 🌐 22. Remote Engine Composition
+
+TRL includes a remote adapter implementation that allows an engine
+running in a separate process to be invoked through HTTP.
+
+This introduces another way to compose existing engines into a workflow.
+It does not change the responsibility or internal implementation of
+those engines.
+
+## 22.1 Local and Remote Invocation
+
+An engine can be invoked locally as part of the workflow:
+
+```text
+Workflow
+    │
+    ▼
+Local Engine
+    │
+    ▼
+Shared RunContext
+```
+
+The remote example uses an HTTP client instead:
+
+```text
+Workflow Process
+       │
+       ▼
+HTTPModuleClient
+       │
+       │ HTTP POST
+       ▼
+Remote Engine Server
+       │
+       ▼
+Engine.process(ctx)
+       │
+       ▼
+HTTP Response
+       │
+       ▼
+Updated RunContext
+```
+
+The client is responsible for communicating with the remote endpoint.
+The remote server reconstructs a RunContext, invokes the engine, and
+returns the resulting IR and report
+
+## 22.2 Current Components
+
+The remote composition implementation uses the following components:
+
+| Component | Location | Responsibility |
+|---|---|---|
+| HTTP client | `trl/adapters/remote/client.py` | Serializes context data and invokes a remote endpoint |
+| HTTP server | `trl/adapters/remote/server.py` | Receives requests, reconstructs context, and invokes an engine |
+| Workflow definition | `examples/remote/workflow.py` | Defines the engine composition |
+| Registry example | `examples/remote/registry.json` | Maps example engine identifiers to HTTP endpoints |
+| CLI entry point | `trl/cli/main.py` | Loads and executes a workflow through `trl remote` |
+
+## 22.3 Remote Request and Response
+
+The HTTP client sends a JSON request containing three fields:
+
+```json
+{
+    "irs": [],
+    "opts": {},
+    "report": {}
+}
+```
+
+The `irs` field contains resource entries represented by their Kubernetes resource kind and manifest.
+
+The server uses the received data to reconstruct the IR objects and report, creates a `RunContext`, and invokes the configured engine through its existing processing interface:
+
+```python
+engine.process(ctx)
+```
+
+The response contains the resulting IR manifests and report:
+
+```json
+{
+    "irs": [],
+    "report": {}
+}
+```
+
+The client deserializes the response and updates the current context. Subsequent workflow stages therefore receive the state and report returned by the remote engine.
+
+## 22.4 Workflow Ownership
+
+The workflow definition determines where and in what order engines execute.
+
+The current example uses this sequence:
+
+```text
+Input Manifest
+      |
+      v
+      IR
+      |
+      v
+Remote Optimizer
+      |
+      v
+Remote Validator
+      |
+      v
+Remote Security
+      |
+      v
+Local Renderer
+      |
+      v
+    Output
+```
+
+The Optimizer, Validator, and Security engines are invoked through `HTTPModuleClient`. The Renderer runs locally.
+
+The workflow does not transfer engine responsibilities to the HTTP client or to another engine. Each engine retains its own processing logic.
+
+The example also defines a `parallel_checks` stage, but its list is currently empty. Therefore, the demonstrated workflow is sequential.
+
+## 22.5 Supported IR Resources
+
+The current remote serialization and deserialization mapping supports:
+
+| Kubernetes Resource | IR Type |
+|---|---|
+| Deployment | `DeploymentIR` |
+| Service | `ServiceIR` |
+| Ingress | `IngressIR` |
+| ConfigMap | `ConfigMapIR` |
+| Secret | `SecretIR` |
+| PersistentVolumeClaim | `PVCIR` |
+
+Additional resource types require corresponding serialization and deserialization support before they can be used through the current remote adapter.
+
+## 22.6 Current Implementation Scope
+
+The implementation demonstrates:
+
+- HTTP invocation of an engine hosted in another process.
+- Serialization and deserialization of supported IR resources.
+- Transfer of options and report data.
+- Remote engine execution through the existing `process(ctx)` interface.
+- Sequential composition of remote and local engines.
+- Workflow execution through the `trl remote` CLI command.
+
+These capabilities demonstrate that engines can be invoked remotely without moving their internal processing logic into the workflow or communication layer.
+
+## 22.7 Implementation Boundaries
+
+The current example is an implementation demonstration, not a production-ready distributed engine platform.
+
+It does not currently provide:
+
+- Dynamic service discovery.
+- Automatic engine registration.
+- Engine upload or installation.
+- Distributed approval of engine sequences.
+- Authentication or authorization between clients and servers.
+- TLS configuration.
+- Production-grade service lifecycle management.
+- A demonstrated parallel remote execution workflow.
+
+The example uses a static JSON registry and local HTTP endpoints. The HTTP server uses Python's standard-library `HTTPServer`, while the client uses a 30-second request timeout and raises an error for unsuccessful HTTP responses.
+
+The example does not demonstrate deployment to a Kubernetes cluster.
+
+## 22.8 Architectural Principle
+
+Remote invocation changes the location and communication mechanism of an engine, not its responsibility.
+
+```text
+ENGINE RESPONSIBILITY
+        |
+        v
+ Remains independent
+        |
+        v
+INVOCATION MECHANISM
+        |
+        +---- Local engine instance
+        |
+        +---- Remote HTTP client
+        |
+        v
+WORKFLOW
+        |
+        v
+Execution order
+```
+
+The remote adapter provides an invocation boundary between a workflow and an engine hosted in another process.
+
+It is not a new preparation engine, a central authority, or a replacement for the workflow system.
+
+For a runnable example, see [Remote Engine Composition](./remote-engines.md).

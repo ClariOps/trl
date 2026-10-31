@@ -25,6 +25,7 @@ trl <command> --help
 |---|---|
 | `explain` | Analyze a manifest without optimization |
 | `optimize` | Optimize, validate, assess security, and produce the resulting state |
+| `remote` | Execute a user-defined workflow that can invoke remote engines |
 | `run` | Run a TRL workflow from a Python DSL input |
 | `generate` | CLI-based Deployment input |
 
@@ -120,6 +121,78 @@ trl optimize ./examples/demo/bad.yaml --output=yaml
 # YAML manifests plus detailed report
 trl optimize ./examples/demo/bad.yaml --output=yaml --verbose
 ```
+
+---
+
+# `trl remote`
+
+Execute a workflow defined in a Python file.
+
+The workflow can combine local engines and remote engines invoked
+through HTTP clients.
+
+## Usage
+
+```bash
+trl remote <file> --exec <workflow> [options]
+```
+
+## Arguments
+
+```text
+file    Path to the input manifest
+```
+## Required Options
+
+```text
+--exec WORKFLOW    Path to the Python workflow definition
+```
+## Options
+
+```text
+--target {local,aks}
+--context CONTEXT
+--verbose
+--dry-run
+--skip-rules
+--allow-rules
+--output {json,yaml}
+```
+## Example
+
+Start the three engine servers in separate terminals from the
+repository root:
+
+```bash
+python examples/remote/optimizer_server.py
+
+python examples/remote/validator_server.py
+
+python examples/remote/security_server.py
+
+```
+Then execute the workflow from another terminal:
+
+```bash
+trl remote ./examples/demo/bad.yaml \
+  --exec ./examples/remote/workflow.py
+```
+
+JSON report:
+```bash
+trl remote ./examples/demo/bad.yaml \
+  --exec ./examples/remote/workflow.py \
+  --output=json
+```
+
+YAML report:
+```bash
+trl remote ./examples/demo/bad.yaml \
+  --exec ./examples/remote/workflow.py \
+  --output=yaml
+```
+
+
 
 ---
 
@@ -333,6 +406,7 @@ The CLI itself is the authoritative source for available flags:
 ```bash
 trl explain --help
 trl optimize --help
+trl remote --help
 trl run --help
 trl generate --help
 ```

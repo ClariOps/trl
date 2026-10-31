@@ -61,6 +61,8 @@ If you are new to TRL, read the documentation in this order:
 | Project direction | [vision.md](./vision.md) |
 | CLI Reference | [usage.md](./usage.md) |
 
+| How remote engines are invoked and composed | [remote-engines.md](./remote-engines.md) |
+
 ---
 
 # 🧠 The TRL Mental Model
@@ -159,6 +161,45 @@ Instead:
 > **Engine independence defines ownership. Workflow defines order.**
 
 This distinction is central to TRL's architecture.
+
+---
+
+# 🌐 Remote Engine Composition
+
+TRL includes an experimental example of composing engines that run in
+separate processes.
+
+The current example uses HTTP clients to invoke remote Optimizer,
+Validator, and Security engines. A local workflow definition determines
+the sequence, and a local Renderer handles the final output.
+
+```text
+Input Manifest
+      │
+      ▼
+     IR
+      │
+      ▼
+Remote Optimizer
+      │
+      ▼
+Remote Validator
+      │
+      ▼
+Remote Security
+      │
+      ▼
+Local Renderer
+      │
+      ▼
+    Output
+
+This demonstrates that workflow composition does not require every
+engine to execute inside the same process.
+
+The current implementation uses a static JSON registry and HTTP
+endpoints. It does not yet provide automatic discovery, dynamic
+registration, engine uploads, or production-grade remote execution.
 
 ---
 
@@ -574,7 +615,7 @@ A future engine should define its own responsibility rather than being forced in
 | [guarantees.md](./guarantees.md) | Non-negotiable behavioral guarantees |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | How to contribute safely |
 | [vision.md](./vision.md) | Long-term project direction |
-
+| [remote-engines.md](./remote-engines.md) | Remote engine invocation and workflow composition example |
 ---
 
 # 🎯 In One Picture

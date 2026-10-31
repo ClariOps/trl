@@ -345,7 +345,190 @@ The modules themselves remain independently defined.
 
 ---
 
-# 🔒 9. Current Mutation Boundary
+
+---
+
+# 9. Remote Engine Composition
+
+TRL includes an experimental remote invocation mechanism that allows engines to run in separate processes and be invoked through HTTP as part of a workflow.
+
+The purpose is to demonstrate that engine execution does not have to be limited to a single process.
+
+For example:
+
+```text
+Contributor A
+     |
+     v
+Optimizer Engine
+     |
+     v
+Optimizer HTTP Server
+
+
+Contributor B
+     |
+     v
+Validator Engine
+     |
+     v
+Validator HTTP Server
+
+
+          Workflow
+              |
+              v
+      Remote Optimizer
+              |
+              v
+      Remote Validator
+              |
+              v
+       Remote Security
+              |
+              v
+       Local Renderer
+```
+
+The workflow composes engine instances. Each engine retains responsibility for its own processing logic.
+
+
+## 9.1 What the Current Implementation Demonstrates
+
+The current example, located in `examples/remote/`, demonstrates:
+
+- Running an engine in a separate Python process.
+- Exposing an engine through an HTTP endpoint.
+- Invoking that endpoint through `HTTPModuleClient`.
+- Serializing and deserializing IR and report data.
+- Reconstructing a `RunContext` on the remote server.
+- Combining remote and local engines in one workflow.
+- Executing remote engines sequentially.
+
+The example uses three remote engines:
+
+- Optimizer
+- Validator
+- Security
+
+The Renderer runs locally as the final workflow component.
+
+See [Remote Engine Composition](docs/remote-engines.md) for setup instructions and implementation details.
+
+## 9.2 Responsibilities and Boundaries
+
+Remote invocation changes where an engine runs and how it is invoked. It does not change the responsibility of that engine.
+
+Contributors should preserve the following principles:
+
+- An engine owns its own processing logic.
+- An engine should not depend on another engine's internal implementation.
+- An engine should use the supported processing interface.
+- Communication components should handle transport and serialization, not engine-specific business logic.
+- Workflow definitions determine the composition and execution order of engines.
+
+The HTTP client and server are communication components. They do not replace the engines or become owners of their responsibilities.
+
+## 9.3 Shared Interfaces and Coordination
+
+Remote execution depends on shared data structures and communication formats.
+
+Changes to these areas can affect multiple engines and contributors:
+
+- Shared IR structures.
+- IR serialization and deserialization.
+- Report serialization and deserialization.
+- Remote request and response formats.
+- HTTP client and server interfaces.
+- Workflow composition behavior.
+- Registry configuration and loading.
+
+Coordinate changes to these shared boundaries before modifying them.
+
+When introducing a new Kubernetes resource type to remote execution, ensure that the corresponding serialization and deserialization support is implemented and tested.
+
+## 9.4 Current Implementation Limitations
+
+The current remote example is an experimental demonstration, not a stable public plugin API or production-ready distributed execution platform.
+
+It does not currently provide:
+
+- Automatic engine registration.
+- Dynamic service discovery.
+- Engine upload or installation.
+- Distributed sequence approval.
+- Authentication or authorization between remote clients and servers.
+- TLS configuration.
+- Production-grade service lifecycle management.
+- A demonstrated parallel remote execution workflow.
+
+The example uses a static JSON registry and local HTTP endpoints.
+
+Contributors should not assume that engines can currently be uploaded, registered, discovered, or approved automatically.
+
+Future capabilities should be documented only when they are implemented and supported by the code.
+
+---
+
+# 10. Current Mutation Boundary
+
+TRL's current mutation behavior is associated with the responsibilities of its individual engines.
+
+When changing or introducing mutation behavior:
+
+- Keep mutations explicit.
+- Preserve the distinction between analysis and state transformation.
+- Avoid introducing hidden changes to Kubernetes manifests.
+- Ensure that reports accurately describe the resulting state and detected issues.
+- Do not document an authority or approval mechanism unless it is implemented.
+
+The intended architecture should guide future development, but documentation must describe the actual implementation.
+
+---
+
+# 11. Documentation Principles
+
+Documentation is part of the project's contributor interface.
+
+When changing documentation:
+
+- Prefer implementation-backed descriptions.
+- Distinguish implemented capabilities from architectural direction.
+- Avoid presenting planned functionality as available functionality.
+- Keep command references consistent with the CLI.
+- Include runnable examples where possible.
+- Update related documentation when changing a shared interface or workflow.
+
+The documentation should help contributors understand what exists, why it exists, and where their work belongs.
+
+---
+
+# 12. Contribution Workflow
+
+Before submitting a contribution:
+
+1. Understand the responsibility of the module being changed.
+2. Review the relevant architecture and implementation documentation.
+3. Check whether the change affects shared interfaces or other engines.
+4. Add or update tests for the changed behavior.
+5. Update documentation when behavior or supported interfaces change.
+6. Keep the contribution focused and explain its architectural impact.
+
+A contribution should improve the project without introducing unnecessary coupling between independent components.
+
+---
+
+# 13. Final Principle
+
+TRL aims to keep engine responsibilities independent and workflows composable.
+
+Contributors should be able to understand, improve, and extend individual parts of the system without needing to own the entire implementation.
+
+**Preserve responsibility boundaries. Keep interfaces explicit. Document what is implemented.**
+
+---
+
+# 🔒 10. Current Mutation Boundary
 
 Current behavior:
 
@@ -371,7 +554,7 @@ If a future engine requires mutation, its responsibility and mutation behavior m
 
 ---
 
-# 🧱 10. Rules Should Be Independent
+# 🧱 11. Rules Should Be Independent
 
 A rule should not:
 
@@ -406,7 +589,7 @@ Rule composition belongs to the workflow, not hidden inside individual rules.
 
 ---
 
-# 🧪 11. Rule Checklist
+# 🧪 12. Rule Checklist
 
 Before submitting a rule:
 
@@ -432,7 +615,7 @@ Before submitting a rule:
 
 ---
 
-# 🏗 12. Changes to Engines or Architecture
+# 🏗 13. Changes to Engines or Architecture
 
 Adding a normal rule is different from changing the architecture.
 
@@ -480,7 +663,7 @@ It means they should be designed deliberately before implementation.
 
 ---
 
-# 🔮 13. Future Extension Points
+# 🔮 14. Future Extension Points
 
 TRL may eventually support capabilities such as:
 
@@ -498,7 +681,7 @@ When they become implemented extension points, their contribution rules should b
 
 ---
 
-# 📋 14. What Should I Contribute?
+# 📋 15. What Should I Contribute?
 
 If you are new to TRL:
 
@@ -533,7 +716,7 @@ Implement
 
 ---
 
-# 🎯 15. The Main Principle
+# 🎯 16. The Main Principle
 
 TRL should remain easy to extend without becoming difficult to understand.
 
