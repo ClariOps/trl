@@ -1,6 +1,6 @@
-# 🚀 TRL (Truck Overload) — Example Scenarios
+# 🚀 trload (Truck Overload) — Example Scenarios
 
-This directory contains curated Kubernetes manifests designed to demonstrate the capabilities of **TRL**.
+This directory contains curated Kubernetes manifests designed to demonstrate the capabilities of **trload**.
 
 These examples are intentionally crafted to simulate real-world DevOps scenarios across **validation, security, and optimization**.
 
@@ -10,7 +10,7 @@ These examples are intentionally crafted to simulate real-world DevOps scenarios
 
 ### 🔴 `bad.yaml` — Misconfigured Deployment (Full Issues)
 
-A deliberately flawed setup that triggers multiple TRL rules.
+A deliberately flawed setup that triggers multiple trload rules.
 
 **Covers:**
 
@@ -19,11 +19,11 @@ A deliberately flawed setup that triggers multiple TRL rules.
 * Poor resource configuration
 * Unsafe service exposure (NodePort)
 
-👉 Use this to see TRL’s **full detection capability**
+👉 Use this to see trload’s **full detection capability**
 
 ```bash
-trl explain examples/demo/bad.yaml
-trl optimize examples/demo/bad.yaml
+trload explain examples/demo/bad.yaml
+trload optimize examples/demo/bad.yaml
 ```
 
 ---
@@ -39,13 +39,13 @@ A clean and well-configured deployment following Kubernetes best practices.
 * Balanced resource allocation
 * Safe service exposure (ClusterIP)
 
-👉 Use this to verify that TRL:
+👉 Use this to verify that trload:
 
 * does **not produce noise**
 * respects good configurations
 
 ```bash
-trl explain examples/demo/good.yaml
+trload explain examples/demo/good.yaml
 ```
 
 ---
@@ -63,7 +63,7 @@ A minimal setup designed to highlight **security misconfigurations**.
 👉 Use this to isolate and test **Security Engine behavior**
 
 ```bash
-trl explain examples/demo/security.yaml
+trload explain examples/demo/security.yaml
 ```
 
 ---
@@ -81,14 +81,14 @@ Focuses on inefficient CPU and memory configurations.
 👉 Use this to evaluate **Optimization Engine recommendations**
 
 ```bash
-trl optimize examples/demo/perf.yaml
+trload optimize examples/demo/perf.yaml
 ```
 
 ---
 
 ## 🧠 What These Examples Demonstrate
 
-These scenarios highlight TRL’s core capabilities:
+These scenarios highlight trload’s core capabilities:
 
 | Capability          | Demonstrated In         |
 | ------------------- | ----------------------- |
@@ -101,12 +101,12 @@ These scenarios highlight TRL’s core capabilities:
 
 ## 🔍 Explain vs Optimize
 
-TRL provides two main analysis modes:
+trload provides two main analysis modes:
 
 ### 🔎 Explain Mode
 
 ```bash
-trl explain <file>
+trload explain <file>
 ```
 
 * Read-only analysis
@@ -118,7 +118,7 @@ trl explain <file>
 ### ⚙️ Optimize Mode
 
 ```bash
-trl optimize <file>
+trload optimize <file>
 ```
 
 * Includes all explain features
@@ -141,9 +141,9 @@ These examples simulate real-world DevOps challenges:
 ## 🚀 Recommended Demo Flow
 
 ```bash
-trl explain examples/demo/bad.yaml
-trl optimize examples/demo/bad.yaml
-trl explain examples/demo/good.yaml
+trload explain examples/demo/bad.yaml
+trload optimize examples/demo/bad.yaml
+trload explain examples/demo/good.yaml
 ```
 
 This demonstrates:
@@ -156,7 +156,7 @@ This demonstrates:
 
 ## 🧩 Philosophy
 
-TRL focuses on:
+trload focuses on:
 
 * **Clarity over automation**
 * **Suggestions over implicit changes**

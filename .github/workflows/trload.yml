@@ -1,0 +1,47 @@
+name: trload Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  trload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install trload
+        run: pip install -r requirements.txt
+
+      - name: Run trload
+        run: |
+          python -m trload optimize ./examples/demo/good.yaml --dry-run --output=json > report.json
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+    
+      - name: Show JSON file
+        run: cat report.json | jq '.'
+
+      - name: Fail on errors
+        run: |
+         ERRORS=$(jq -r '.summary.errors' report.json)
+         WARNINGS=$(jq -r '.summary.warnings' report.json)
+
+         if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ trload detected errors"
+            exit 1
+         elif [ "$WARNINGS" -gt 5 ]; then
+            echo "⚠️ Too many warnings"
+            exit 1
+         else
+            echo "✅ trload passed"
+         fi

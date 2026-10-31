@@ -1,0 +1,18 @@
+
+from trload.core.base import Module
+from trload.core.context import RunContext
+import logging
+logger = logging.getLogger(__name__)
+
+class RendererEngine(Module):
+    name = "renderer-engine"
+
+    def process(self, ctx: RunContext) -> None:
+        logger.info("Initializing Renderer ...")
+        ctx.manifests = [ir.to_manifest() for ir in ctx.irs]
+        #logger.debug(f"Manifest in renderer {ctx.manifests}")       
+        logger.info("Renderer completed\n")
+        
+
+
+

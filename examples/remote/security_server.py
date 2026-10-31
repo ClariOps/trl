@@ -1,5 +1,5 @@
-from trl.modules.security.engine import SecurityEngine
-from trl.adapters.remote.server import serve
+from trload.modules.security.engine import SecurityEngine
+from trload.adapters.remote.server import serve
 
 
 if __name__ == "__main__":

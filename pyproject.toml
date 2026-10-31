@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clariops-trl"
+name = "clariops-trload"
 version = "0.1.3"
 description = "..."
 readme = "README.md"
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.scripts]
-trl = "trl.cli.main:main"
+trl = "trload.cli.main:main"
 
 [tool.setuptools.packages.find]
-include = ["trl*"]
+include = ["trload*"]

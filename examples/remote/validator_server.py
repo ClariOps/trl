@@ -1,5 +1,5 @@
-from trl.modules.validator.engine import ValidatorEngine
-from trl.adapters.remote.server import serve
+from trload.modules.validator.engine import ValidatorEngine
+from trload.adapters.remote.server import serve
 
 
 if __name__ == "__main__":
